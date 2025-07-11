@@ -129,9 +129,9 @@ CATKIN_IGNORE
 **/*.tmp
 **/*.DS_Store
 **/Thumbs.db
-**/.idea/
-**/.vscode/
-**/*.code-workspace
+# **/.idea/
+# **/.vscode/
+# **/*.code-workspace
 
 # # === Miscellaneous ===
 # tags

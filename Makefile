@@ -481,7 +481,7 @@ kill_all:
 
 #ensta3012*
 
-PATH_PFE=~/pfe_2025-main/Simulation_Gazebo
+PATH_TELLO_WS=~/pfe_2025-main/Simulation_Gazebo/tell_ros_ws
 
 setup_pfe_simulation_gazebo:
 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -493,7 +493,7 @@ setup_pfe_simulation_gazebo:
 		cd $(FAME_AGRI) && source install/setup.bash && \
 		cd $(FAME_ENGINE) && source install/setup.bash && \
 		cd $(FAME_SIMU) && source install/setup.bash && \
-		cd $(PATH_PFE) && \
+		cd $(PATH_TELLO_WS) && \
 		colcon build
 
 
@@ -508,7 +508,7 @@ launch_pfe_simulation_gazebo:
 		cd $(FAME_AGRI) && source install/setup.bash && \
 		cd $(FAME_ENGINE) && source install/setup.bash && \
 		cd $(FAME_SIMU) && source install/setup.bash && \
-		cd $(PATH_PFE) && source install/setup.bash && \
+		cd $(PATH_TELLO_WS) && source install/setup.bash && \
 		ros2 launch tello_gazebo someaze.py
 
 
