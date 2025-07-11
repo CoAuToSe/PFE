@@ -21,9 +21,30 @@ DELAY ?= 20
 all: install_all
 
 # Aggregate install target ----------------------------------------------------
-install_all: sudo_upgrate install_terminator install_cmake install_discord-snap install_vscode correct_vscode install_ros2 install_gazebo install_python install_FaMe_modeler install_all2
+install_all: \
+	sudo_upgrate \
+	install_terminator \
+	install_cmake \
+	install_discord-snap \
+	install_vscode \
+	correct_vscode \
+	install_ros2 \
+	install_gazebo \
+	install_python \
+	install_FaMe_modeler \
+	install_all2
 
-install_all2: install_deps clone_build_ros2_shared clone_build_tello_msgs install_examples build_fame_agri setup_gazebo install_FaMe_engine setup_fame_simulation install_github_desktop
+install_all2: \
+	install_deps \
+	clone_build_ros2_shared \
+	clone_build_tello_msgs \
+	install_examples \
+	build_fame_agri \
+	setup_gazebo \
+	install_FaMe_engine \
+	setup_fame_simulation \
+	install_github_desktop \
+	setup_bashrc
 
 update: sudo_upgrate
 
@@ -165,6 +186,15 @@ install_ros2: install_cmake
 		echo "" >> $$HOME/.bashrc \
 	)
 	sudo apt install ros-foxy-nav2-bringup -y
+
+setup_bashrc:
+# Add some custom information into ~/.bashrc
+	grep -qxF "# Custom commands" $$HOME/.bashrc || ( \
+		echo "# Custom commands" >> $$HOME/.bashrc && \
+		echo "alias ros-build="colcon build && source install/setup.bash"" >> $$HOME/.bashrc && \
+		echo "alias ros-build-sym="colcon build --symlink-install && source install/setup.bash"" >> $$HOME/.bashrc && \
+		echo "" >> $$HOME/.bashrc \
+	)
 
 # 4 — Gazebo 11 (classic) ------------------------------------------------------
 install_gazebo:
