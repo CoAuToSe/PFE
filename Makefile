@@ -528,6 +528,8 @@ install_github_desktop:
 	sudo gdebi GitHubDesktop-linux-2.9.6-linux1.deb
 	sudo dpkg -i GitHubDesktop-linux-2.9.6-linux1.deb
 	sudo apt-get install -f
+	sudo apt-mark hold github-desktop
+
 
 
 
