@@ -569,13 +569,6 @@ install_github_desktop:
 
 
 
-test_github_desktop:
-	@if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
-		echo "lol"; \
-	fi
-
-
-
 # -----------------------------------------------------------------------------
 # Helper target: display installed versions -----------------------------------
 
