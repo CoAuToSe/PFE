@@ -1,0 +1,23 @@
+scan 2
+battery_check 20
+correct_ip
+1=0TQZJB1ED01XNQ
+2=0TQZHC7ED0149K
+3=0TQZHCDED015XM
+4=0TQZHCDED015W4
+*>takeoff
+sync 5
+*>up 100
+sync 5
+*>forward 300
+sync 5
+*>back 300
+sync 1
+*>flip f 
+*>flip b
+
+*> curve 0 0 50 50 30 -100 50
+*> curve 0 0 50 50 30 100 50
+sync 5
+*>land
+sync 5

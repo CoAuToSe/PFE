@@ -1,0 +1,561 @@
+#!/bin/bash
+
+# Vérifie que le script est exécuté avec sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Veuillez exécuter ce script avec sudo : sudo $0"
+  exit 1
+fi
+
+# Mise à jour des paquets
+echo "Mise à jour des paquets..."
+apt update
+
+# Installation de make
+echo "Installation de make si nécessaire..."
+apt install -y make
+
+# Création d'un Makefile
+echo "Création du Makefile..."
+cat << 'EOF' > Makefile
+# Makefile — Automated setup for development environment @04Jun2025
+# ----------------------------------------------------
+# Usage examples:
+#   make              # install everything (default)
+#   make install_vscode
+#   make test-ros2
+#   make versions
+# ----------------------------------------------------
+
+SHELL := /bin/bash
+
+.PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2 install_gazebo install_python \
+        test-ros2 test-gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
+		install_discord-snap install_deps clone_build_ros2_shared clone_build_tello_msgs install_examples \
+		build_fame_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_fame_simulation
+
+DELAY ?= 20
+
+# Default target --------------------------------------------------------------
+all: install_all
+
+# Aggregate install target ----------------------------------------------------
+install_all: update_system install_terminator install_cmake install_discord-snap install_vscode correct_vscode install_ros2 install_gazebo install_python install_FaMe_modeler install_all2
+
+install_all2: install_deps clone_build_ros2_shared clone_build_tello_msgs install_examples build_fame_agri setup_gazebo install_FaMe_engine setup_fame_simulation
+
+update: update_system
+
+# 0-Update System
+update_system:
+	sudo apt update
+	sudo apt upgrade -y
+
+update_source:
+	source ~/.bashrc
+
+refresh-env:
+	@echo "Sourcing .bashrc..."
+	source ~/.bashrc 
+	@echo "Environment refreshed"
+
+# install_FaMe: 
+# 	git clone https://github.com/SaraPettinari/fame-modeler.git -q
+# 	cd fame-modeler/
+# 	pwd
+# 	npm install
+# 	@npm run start
+
+install_snap:
+	sudo apt update
+	sudo apt install snapd
+
+install_cmake: install_snap
+	sudo snap install cmake --classic
+
+install_FaMe_modeler: update_source install_node update_source
+	@if [ ! -d "fame-modeler" ]; then \
+		git clone https://github.com/SaraPettinari/fame-modeler.git; \
+	else \
+		echo "Directory 'fame-modeler' already exists. Skipping clone."; \
+	fi
+	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm install
+
+run-FaMe: install_FaMe_modeler update_source
+	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
+
+
+install_nvm: update_source
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+	@echo "NVM installation complete."
+
+NPM_VERSION := 16
+
+install_node: install_nvm update_source
+#TODO change install depending on version to have only lst versions of npm
+	@echo "Setting up Node.js version ${NPM_VERSION}..."
+	@export NVM_DIR="$$HOME/.nvm" && \
+	. $$NVM_DIR/nvm.sh && \
+	nvm install --lts=gallium && \
+	nvm use ${NPM_VERSION} && \
+	nvm alias default ${NPM_VERSION}
+	@echo "Node.js version ${NPM_VERSION} is now active."
+
+
+# install_node: install_nvmtest
+# 	nvm install 18
+# 	nvm use 18
+# 	nvm alias default 18
+
+# install_nvm:
+# 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+# 	export NVM_DIR="$$HOME/.nvm"
+# 	[ -s "$$NVM_DIR/nvm.sh" ] && \. "$$NVM_DIR/nvm.sh"  # This loads nvm
+# 	[ -s "$$NVM_DIR/bash_completion" ] && \. "$$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+	
+install_nvmtest: install_nvm refresh-env
+#command -v nvm
+	source ~/.bashrc && nvm -v
+
+
+# 1 — Terminator --------------------------------------------------------------
+install_terminator:
+	sudo add-apt-repository -y ppa:mattrose/terminator
+	sudo apt update
+	sudo apt install -y terminator
+
+# 2 — Visual Studio Code -------------------------------------------------------
+install_vscode:
+	sudo apt-get update
+	sudo apt-get install -y wget gpg apt-transport-https
+	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+	sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+	echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+	rm -f packages.microsoft.gpg
+	sudo apt update
+	sudo apt install -y code  # or code-insiders
+
+correct_vscode:
+	sudo rm -f /etc/apt/sources.list.d/vscode.list
+	sudo rm -f /etc/apt/sources.list.d/vscode.sources
+	sudo rm -f /usr/share/keyrings/microsoft.gpg
+	sudo rm -f /etc/apt/keyrings/packages.microsoft.gpg
+	
+	sudo mkdir -p /etc/apt/keyrings
+	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg > /dev/null
+
+	echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
+	sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+
+	sudo apt update
+	sudo apt install code -y
+
+
+	# sudo apt install wget gpg
+	# wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+	# sudo install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/
+	# sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+	# sudo apt update
+
+
+# 3 — ROS 2 Foxy --------------------------------------------------------------
+install_ros2: install_cmake
+	@echo "Bienvenu dans l'installation de ROS2 Foxy"
+	locale || true                               # check current locale (non‑fatal)
+	sudo apt update
+	sudo apt install -y locales
+	sudo locale-gen en_US en_US.UTF-8
+	sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+	export LANG=en_US.UTF-8
+	locale || true                               # verify settings
+	sudo apt install -y software-properties-common curl
+	sudo add-apt-repository -y universe
+	sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $$(. /etc/os-release && echo $$UBUNTU_CODENAME) main" | \
+		sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+	sudo apt update
+	sudo apt upgrade -y
+	sudo apt install -y ros-foxy-desktop python3-argcomplete ros-dev-tools
+	# Add ROS 2 environment setup to bashrc only once
+	grep -qxF "source /opt/ros/foxy/setup.bash" $$HOME/.bashrc || ( \
+		echo "" >> $$HOME/.bashrc && \
+		echo "# ROS 2 Foxy" >> $$HOME/.bashrc && \
+		echo "source /opt/ros/foxy/setup.bash" >> $$HOME/.bashrc && \
+		echo "" >> $$HOME/.bashrc \
+	)
+	sudo apt install ros-foxy-nav2-bringup -y
+
+# 4 — Gazebo 11 (classic) ------------------------------------------------------
+install_gazebo:
+	sudo apt update
+	sudo apt install -y ros-foxy-gazebo-ros-pkgs
+# deps Gazebo
+	sudo apt install libasio-dev
+
+# 5 — Python 3.10 & pip --------------------------------------------------------
+install_python:
+	sudo apt update
+	sudo apt install -y software-properties-common
+	sudo add-apt-repository -y ppa:deadsnakes/ppa
+	sudo apt update
+	sudo apt install -y python3.10 python3.10-venv python3.10-dev
+	curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+	python3.10 -m pip --version
+
+
+install_discord-snap: install_snap
+	@echo "Installation de Discord via Snap..."
+	@sudo snap install discord
+	@echo "Discord installé avec Snap."
+
+# -----------------------------------------------------------------------------
+# Test targets (run manually; they only print the commands to execute) ---------
+
+# ROS 2 minimal pub/sub demo
+# Open **two** terminals and run the printed commands.
+
+test-ros2:
+	@echo "Terminal 1 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_cpp talker"
+	@echo "Terminal 2 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_py listener"
+
+# Gazebo + Twist publisher demo
+
+test-gazebo:
+	@echo "Terminal 1 ➜ gazebo --verbose /opt/ros/foxy/share/gazebo_plugins/worlds/gazebo_ros_diff_drive_demo.world"
+	@echo "Terminal 2 ➜ ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{linear: {x: 1.0}}' -1"
+
+# ------------------------------Session-2--------------------------------------
+
+
+# Variables
+HOME_DIR := $(HOME)
+ROS2_SHARED := $(HOME_DIR)/ros2_shared
+TELLO_MSGS := $(HOME_DIR)/tello_msgs
+FAME := $(HOME_DIR)/fame
+FAME_AGRI := $(FAME)/fame_agricultural
+FAME_ENGINE := $(FAME)/fame_engine
+FAME_SIMU := $(FAME)/fame_simulation
+GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models
+MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
+
+install_deps:
+# sudo apt update
+	sudo apt install python3-pip -y
+	python3 -m pip install transformations djitellopy
+
+clone_build_ros2_shared:
+	@if [ ! -d "$(ROS2_SHARED)" ]; then \
+		git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); \
+	fi
+	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
+
+clone_build_tello_msgs:
+	@if [ ! -d "$(TELLO_MSGS)" ]; then \
+		git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); \
+	fi
+
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(TELLO_MSGS) && nvm install --lts=gallium && nvm use 16 && \
+		cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
+
+install_examples:
+	@if [ ! -d "$(FAME)" ]; then \
+		git clone https://bitbucket.org/proslabteam/fame.git $(FAME); \
+	fi
+
+build_fame_agri: clone_build_tello_msgs install_examples install_node
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_AGRI) && nvm install --lts=gallium && nvm use 16 && \
+		cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		cd $(FAME_AGRI) && colcon build
+	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
+	mkdir -p $(GZ_MODEL_DIR)
+	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
+
+launch_gazebo:
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		# RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+		ros2 launch fame_agricultural multi_launch.py \
+			# --ros-args -r gazebo_ros_force:=blade_force
+
+install_FaMe_engine:
+	# sudo apt update
+	# sudo apt install ros-foxy-rmw-cyclonedds-cpp -y
+	sudo mkdir -p $(MBROS_DIR)
+	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
+	# @export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+	# 	cd $(FAME_ENGINE) && nvm install 12 && nvm use 12
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16
+	cd $(FAME_ENGINE) && rm -rf node_modules package-lock.json
+
+	# @export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+	# 	cd $(FAME_ENGINE) && nvm install 12 && nvm use 12 && \
+	# 	cd $(FAME_ENGINE) && npm install
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16 && \
+		cd $(FAME_ENGINE) && npm install
+
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+		cd $(FAME_ENGINE) && colcon build
+	
+
+	cd $(FAME_ENGINE) && rm -rf node_modules package-lock.json
+
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+		cd $(FAME_ENGINE) && npm pkg set "dependencies.rclnodejs=^0.21.0"
+
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+		cd $(FAME_ENGINE) && npm install
+
+	cd $(FAME_ENGINE)/install/fame_engine/share/fame_engine && rm -rf node_modules/rclnodejs
+	cd $(FAME_ENGINE)/install/fame_engine/share/fame_engine && npm install rclnodejs@^0.21.0  
+
+	# @export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+	# 	cd $(FAME_ENGINE) && npm i rclnodejs@^0.21.0  
+
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+		cd $(FAME_ENGINE) && colcon build
+
+	# export NODE_OPTIONS="--unhandled-rejections=strict"
+	# ros2 launch fame_engine agri_engine.launch.py
+
+MBROS_DIR      := /home/ubuntu/mbros/fame_engine
+NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
+NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
+
+.PHONY: install_FaMe_engine
+install_FaMe_engine_not_opti_GPT:
+	# 1. Lien symbolique une seule fois
+	sudo install -d $(MBROS_DIR)
+	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
+
+	# 2. Tout le reste dans un shell bash unique
+	@bash -ec '\
+		. $(NVM_SCRIPT); nvm install --lts=gallium; nvm use $(NODE_VERSION); \
+		cd $(FAME_ENGINE); \
+		# Dépendances Node : install propre + version exacte de rclnodejs
+		npm pkg set dependencies.rclnodejs="0.27.1"; \
+		npm ci --prefer-offline; \
+		# Génération des messages JS (oblige rclnodejs >=0.20)      
+		npx rclnodejs-cli generate-ros-messages; \
+		# Build ROS 2 : symlink-install pour éviter les copies redondantes
+		colcon build --packages-select fame_engine; \
+	'
+
+
+# ros2-source:
+# 	cd $(ROS2_SHARED) && source install/setup.bash
+# 	cd $(TELLO_MSGS) && source install/setup.bash
+# 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
+#deprecated
+launch_comportement:
+	@echo "be sure to have use 'make install_FaMe_engine' before using this command"
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		ros2 launch fame_engine agri_engine.launch.py
+
+
+.ONESHELL: launch_comportement_agri
+launch_comportement_agri:
+	make -i kill_all
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		ros2 launch fame_agricultural multi_launch.py &
+	PID_SIM=$$!
+	sleep $(DELAY)
+
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		ros2 launch fame_engine agri_engine.launch.py
+	PID_ENG=$$!
+	wait $$PID_SIM $$PID_ENG
+	@echo "======= agri and engine done ======="
+
+setup_fame_simulation:
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && colcon build
+
+
+launch_example_alone:
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		ros2 launch fame_engine example.launch.py 
+	
+
+.ONESHELL: launch_example
+launch_example:
+	make -i kill_all
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		ros2 launch fame_simulation multi_launch.py &
+	PID_SIM=$$!
+	sleep $(DELAY)
+
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		ros2 launch fame_engine example.launch.py
+	PID_ENG=$$!
+	wait $$PID_SIM $$PID_ENG
+	@echo "======= simu and engine done ======="
+
+# garantit qu’un seul shell est utilisé pour toute la recette
+.ONESHELL: launch_example_GPT
+launch_example_GPT:
+# Prépare env. ROS + Node une seule fois
+	source /usr/share/gazebo/setup.bash
+	export NVM_DIR="$$HOME/.nvm"; . "$$NVM_DIR/nvm.sh"; nvm use 16 >/dev/null
+	export NODE_OPTIONS="--unhandled-rejections=strict"
+
+	for ws in "$(ROS2_SHARED)" "$(TELLO_MSGS)" "$(FAME_AGRI)" "$(FAME_ENGINE)"; do \
+	  [ -f "$$ws/install/setup.bash" ] && source "$$ws/install/setup.bash"; \
+	done
+
+# Lance la simulation en arrière-plan, capture son PID
+	@echo "▶️  Launch simulation"
+	ros2 launch fame_simulation multi_launch.py & \
+	PID_SIM=$$!
+
+	# Délai paramétrable sans bloquer la simulation
+	@echo "⏳ Waiting $$DELAY s…"; sleep $(DELAY)
+
+	# Lance le moteur de comportement, capture son PID
+	@echo "▶️  Launch engine"
+	ros2 launch fame_engine example.launch.py & \
+	PID_ENG=$$!
+
+	# Attend proprement la fin des deux processus
+	wait $$PID_SIM $$PID_ENG
+	@echo "✅  Both launches exited."
+
+launch_fame_modeler:
+	cd ./fame-modeler && npm start
+
+# cd /home/dell/ros2_shared && source install/setup.bash && \
+# 	cd /home/dell/tello_msgs && source install/setup.bash && \
+# 	source /usr/share/gazebo/setup.bash && \
+# 	export NVM_DIR="$HOME/.nvm" && . $NVM_DIR/nvm.sh && \
+# 	cd /home/dell/fame/fame_engine && nvm install --lts=hydrogen && nvm use 18 && \
+# 	export NODE_OPTIONS="--unhandled-rejections=strict" && \
+# 	cd /home/dell/fame/fame_agricultural && source install/setup.bash && \
+# 	cd /home/dell/fame/fame_engine && source install/setup.bash && \
+# 	ros2 launch fame_engine agri_engine.launch.py
+
+kill_all:
+	killall -9 gzserver
+	killall -9 gzclient
+
+#ensta3012*
+
+PATH_PFE=~/pfe_2025-main/Simulation_Gazebo
+
+setup_pfe_simulation_gazebo:
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		cd $(PATH_PFE) && \
+		colcon build
+
+
+launch_pfe_simulation_gazebo:
+	make -i kill_all
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		cd $(PATH_PFE) && source install/setup.bash && \
+		ros2 launch fame_engine example.launch.py
+	PID_SIM=$$!
+	sleep $(DELAY)
+
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && source install/setup.bash && \
+		cd $(PATH_PFE) && source install/setup.bash && \
+		ros2 launch fame_engine example.launch.py
+	PID_ENG=$$!
+	wait $$PID_SIM $$PID_ENG
+	@echo "======= simu and engine done ======="
+
+
+# -----------------------------------------------------------------------------
+# Helper target: display installed versions -----------------------------------
+
+versions:
+	python3 --version || true
+	python3.10 --version || true
+	node -v # Bonus
+EOF
+
+# Exécution du make
+echo "Exécution de make..."
+make
+

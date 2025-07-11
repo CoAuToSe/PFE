@@ -1,0 +1,560 @@
+header:
+  stamp:
+    sec: 1724773601
+    nanosec: 693108461
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:78;tof:10;h:0;bat:80;baro:112.98...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 78
+tof: 10
+h: 0
+bat: 80
+baro: 112.9800033569336
+time: 66
+agx: -3.0
+agy: 3.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773601
+    nanosec: 793005712
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:78;tof:10;h:0;bat:80;baro:113.04...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 78
+tof: 10
+h: 0
+bat: 80
+baro: 113.04000091552734
+time: 66
+agx: -2.0
+agy: 3.0
+agz: -1001.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773601
+    nanosec: 894400167
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:78;tof:10;h:0;bat:80;baro:112.99...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 78
+tof: 10
+h: 0
+bat: 80
+baro: 112.98999786376953
+time: 66
+agx: -5.0
+agy: 4.0
+agz: -1001.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773601
+    nanosec: 996311536
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.99...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.98999786376953
+time: 66
+agx: -3.0
+agy: 2.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 98416930
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.00...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.0
+time: 66
+agx: -4.0
+agy: 4.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 200436753
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.99...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.98999786376953
+time: 66
+agx: -5.0
+agy: 5.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 302353804
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.98...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.9800033569336
+time: 66
+agx: -5.0
+agy: 2.0
+agz: -998.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 404280107
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.97...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.97000122070312
+time: 66
+agx: -5.0
+agy: 4.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 506863571
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.05...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.05000305175781
+time: 66
+agx: -3.0
+agy: 4.0
+agz: -998.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 608563658
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.03...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.02999877929688
+time: 66
+agx: -3.0
+agy: 2.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 710883482
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.04...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.04000091552734
+time: 66
+agx: -5.0
+agy: 3.0
+agz: -1000.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 812331591
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.03...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.02999877929688
+time: 66
+agx: -4.0
+agy: 4.0
+agz: -998.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773602
+    nanosec: 914359530
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.05...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.05000305175781
+time: 66
+agx: -5.0
+agy: 3.0
+agz: -1000.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 129376921
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.97...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.97000122070312
+time: 66
+agx: -4.0
+agy: 3.0
+agz: -1002.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 129697852
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.02...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.0199966430664
+time: 66
+agx: -5.0
+agy: 4.0
+agz: -1002.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 311170142
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.00...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.0
+time: 66
+agx: -5.0
+agy: 3.0
+agz: -996.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 427756710
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.99...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.98999786376953
+time: 66
+agx: -3.0
+agy: 3.0
+agz: -997.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 583204784
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.96...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.95999908447266
+time: 66
+agx: -4.0
+agy: 3.0
+agz: -1000.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 921011351
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:113.00...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 113.0
+time: 66
+agx: -6.0
+agy: 4.0
+agz: -999.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---
+header:
+  stamp:
+    sec: 1724773603
+    nanosec: 922448496
+  frame_id: ''
+raw: mid:-1;x:-100;y:-100;z:-100;mpry:-1,-1,-1;pitch:0;roll:0;yaw:3;vgx:0;vgy:0;vgz:0;templ:77;temph:79;tof:10;h:0;bat:80;baro:112.99...
+sdk: 2
+pitch: 0
+roll: 0
+yaw: 3
+vgx: 0
+vgy: 0
+vgz: 0
+templ: 77
+temph: 79
+tof: 10
+h: 0
+bat: 80
+baro: 112.98999786376953
+time: 66
+agx: -4.0
+agy: 4.0
+agz: -1000.0
+mid: -1
+x: -100
+y: -100
+z: -100
+---

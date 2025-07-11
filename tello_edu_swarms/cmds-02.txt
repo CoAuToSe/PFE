@@ -1,0 +1,11 @@
+scan 1
+battery_check 20
+correct_ip
+1=0TQZHCDED015XM
+*>takeoff
+sync 5
+*>up 10
+sync 1
+*>forward 300
+sync 5
+*>land

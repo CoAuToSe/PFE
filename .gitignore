@@ -1,3 +1,4 @@
+# default ROS gitignore
 devel/
 logs/
 build/
@@ -21,9 +22,9 @@ devel_isolated/
 /cfg/cpp/
 /cfg/*.py
 
-# Ignore generated docs
-*.dox
-*.wikidoc
+# # Ignore generated docs
+# *.dox
+# *.wikidoc
 
 # eclipse stuff
 .project
@@ -49,3 +50,92 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+
+# === Node.js ===
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/package-lock.json
+**/.pnpm-debug.log*
+**/dist/
+**/build/
+**/.env
+**/.env.*
+
+# === Python ===
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/*.pyc
+**/*.pkl
+**/*.egg-info/
+**/*.egg
+**/.eggs/
+**/.Python
+**/.env/
+**/.venv/
+**/venv/
+**/ENV/
+**/env/
+**/pip-log.txt
+**/pip-delete-this-directory.txt
+**/.ipynb_checkpoints
+**/.mypy_cache/
+**/.pytest_cache/
+**/.pyre/
+**/.coverage
+**/.tox/
+**/*.log
+
+# === C/C++ ===
+**/*.o
+**/*.obj
+**/*.so
+**/*.a
+**/*.exe
+**/*.out
+**/*.dll
+**/*.dylib
+**/*.d
+**/*.gcno
+**/*.gcda
+**/*.gcov
+**/*.gch
+**/build/
+**/cmake-build-*/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/Makefile
+**/CTestTestfile.cmake
+**/install_manifest.txt
+
+# === ROS / colcon ===
+**/build/
+**/install/
+**/log/
+**/.colcon/
+**/.colcon_install_layout
+**/*.launch.pyc
+**/*.launch.xmlc
+**/*.pyc
+
+# === General/IDE-specific ===
+**/*.swp
+**/*~
+**/*.bak
+**/*.tmp
+**/*.DS_Store
+**/Thumbs.db
+**/.idea/
+**/.vscode/
+**/*.code-workspace
+
+# # === Miscellaneous ===
+# tags
+# TAGS
+
+# Exceptions
+!Makefile
