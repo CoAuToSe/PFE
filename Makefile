@@ -13,12 +13,16 @@ SHELL := /bin/bash
         test-ros2 test-gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_build_ros2_shared clone_build_tello_msgs install_examples \
 		build_fame_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_fame_simulation \
-		install_github_desktop
+		install_github_desktop min_install
 
 DELAY ?= 20
 
 # Default target --------------------------------------------------------------
-all: install_all
+all: min_install
+
+min_install: \
+	sudo_upgrade \
+	install_github_desktop
 
 # Aggregate install target ----------------------------------------------------
 install_all: \
@@ -32,10 +36,10 @@ install_all: \
 	install_gazebo \
 	install_python \
 	install_FaMe_modeler \
+	install_deps \
 	install_all2
 
 install_all2: \
-	install_deps \
 	clone_build_ros2_shared \
 	clone_build_tello_msgs \
 	install_examples \
@@ -240,7 +244,7 @@ test-gazebo:
 
 
 # Variables
-HOME_DIR := $(HOME)
+HOME_DIR := $(PWD)
 ROS2_SHARED := $(HOME_DIR)/ros2_shared
 TELLO_MSGS := $(HOME_DIR)/tello_msgs
 FAME := $(HOME_DIR)/fame
@@ -552,16 +556,23 @@ install_github_desktop:
 # 	sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/shiftkey-packages.gpg] https://apt.packages.shiftkey.dev/ubuntu/ any main" > /etc/apt/sources.list.d/shiftkey-packages.list'
 # ## Install Github Desktop for Ubuntu
 # 	sudo apt update && sudo apt install github-desktop
-	wget https://github.com/shiftkey/desktop/releases/download/release-2.9.6-linux1/GitHubDesktop-linux-2.9.6-linux1.deb
+
+	if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
+		wget https://github.com/shiftkey/desktop/releases/download/release-2.9.6-linux1/GitHubDesktop-linux-2.9.6-linux1.deb;
+	fi
 	sudo apt-get update
-	sudo apt-get install gdebi-core
-	sudo gdebi GitHubDesktop-linux-2.9.6-linux1.deb
-	sudo dpkg -i GitHubDesktop-linux-2.9.6-linux1.deb
-	sudo apt-get install -f
+	sudo apt-get install gdebi-core -y
+	sudo gdebi GitHubDesktop-linux-2.9.6-linux1.deb -y
+	sudo dpkg -i GitHubDesktop-linux-2.9.6-linux1.deb 
+	sudo apt-get install -f -y
 	sudo apt-mark hold github-desktop
 
 
 
+test_github_desktop:
+	@if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
+		echo "lol"; \
+	fi
 
 
 
