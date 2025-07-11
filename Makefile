@@ -481,7 +481,7 @@ kill_all:
 
 #ensta3012*
 
-PATH_TELLO_WS=~/pfe_2025-main/Simulation_Gazebo/tell_ros_ws
+PATH_TELLO_WS=$(PWD)/Simulation_Gazebo/tello_ros_ws
 
 setup_pfe_simulation_gazebo:
 	cd $(ROS2_SHARED) && source install/setup.bash && \
