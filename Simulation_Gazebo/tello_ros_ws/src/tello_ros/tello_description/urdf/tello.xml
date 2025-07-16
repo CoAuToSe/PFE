@@ -102,7 +102,7 @@
 
     <!-- Tello plugin for Gazebo -->
     <gazebo>
-        <plugin name="TelloPlugin" filename="libTelloPlugin.so">
+        <plugin name="TelloPluginGazebo" filename="libTelloPluginGazebo.so">
             <namespace>${topic_ns}</namespace>
             <parameter name="use_sim_time" type="bool">1</parameter>
             <link_name>base_link${suffix}</link_name>
@@ -110,7 +110,7 @@
         </plugin>
         
         <!-- Plugin de synchronisation de position -->
-	<plugin name="TelloPositionSyncPlugin" filename="libTelloPositionSyncPlugin.so">
+	<plugin name="TelloPositionSyncPluginGazebo" filename="libTelloPositionSyncPluginGazebo.so">
 	    <robot_namespace>${topic_ns}</robot_namespace>
 	    <link_name>base_link${suffix}</link_name>
 	    <odometry_topic>odom</odometry_topic>

@@ -4,7 +4,7 @@
 #include <tello_msgs/msg/tello_position.hpp>
 
 namespace tello_gazebo {
-    class TelloPositionSyncPlugin : public gazebo::ModelPlugin {
+    class TelloPositionSyncPluginGazebo : public gazebo::ModelPlugin {
         // GazeboROS node
         gazebo_ros::Node::SharedPtr node_;
 
@@ -21,8 +21,8 @@ namespace tello_gazebo {
         tello_msgs::msg::TelloPosition::SharedPtr last_position_;
 
     public:
-        TelloPositionSyncPlugin() {}
-        ~TelloPositionSyncPlugin() {}
+        TelloPositionSyncPluginGazebo() {}
+        ~TelloPositionSyncPluginGazebo() {}
 
         void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
             GZ_ASSERT(model != nullptr, "Model is null");
@@ -47,6 +47,24 @@ namespace tello_gazebo {
             std::cout << "-----------------------------------------" << std::endl;
             std::cout << std::endl;
 
+            // RCLCPP_INFO(node_->get_logger(), "Node name: %s", node_->get_name());
+            // RCLCPP_INFO(node_->get_logger(), "Node namespace: %s", node_->get_namespace());
+            // RCLCPP_INFO(node_->get_logger(), "Fully resolved topic: %s",
+            //             node_->resolve_topic_name(topic_name_).c_str());
+
+            auto node_name =  node_->get_name();
+            auto node_namespace = node_->get_namespace();
+            // std::cout << std::fixed;
+            // std::setprecision(2);
+            std::cout << std::endl;
+            std::cout << "MY INFO" << std::endl;
+            std::cout << "-----------------------------------------" << std::endl;
+            std::cout << "Node name: " << node_name << std::endl;
+            std::cout << "Node namespace: " << node_namespace << std::endl;
+            // std::cout << "Fully resolved topic: " << node_->resolve_topic_name(topic_name_).c_str() << std::endl;
+            std::cout << "-----------------------------------------" << std::endl;
+            std::cout << std::endl;
+
             // ROS node
             node_ = gazebo_ros::Node::Get(sdf);
 
@@ -61,14 +79,14 @@ namespace tello_gazebo {
                 "tello_position",
                 10,
                 std::bind(
-                    &TelloPositionSyncPlugin::OnPositionUpdate,
+                    &TelloPositionSyncPluginGazebo::OnPositionUpdate,
                     this,
                     std::placeholders::_1
             ));
 
             update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
                 std::bind(
-                    &TelloPositionSyncPlugin::OnUpdate,
+                    &TelloPositionSyncPluginGazebo::OnUpdate,
                     this
             ));
         }
@@ -91,5 +109,5 @@ namespace tello_gazebo {
         gazebo::event::ConnectionPtr update_connection_;
     };
 
-    GZ_REGISTER_MODEL_PLUGIN(TelloPositionSyncPlugin)
+    GZ_REGISTER_MODEL_PLUGIN(TelloPositionSyncPluginGazebo)
 } // namespace tello_gazebo

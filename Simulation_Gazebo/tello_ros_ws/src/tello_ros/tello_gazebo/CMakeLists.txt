@@ -48,17 +48,17 @@ include_directories(
 #=============
 
 add_library(
-  TelloPlugin SHARED
-  src/tello_plugin.cpp
+  TelloPluginGazebo SHARED
+  src/tello_plugin_gazebo.cpp
 )
 
 add_library(
-  TelloPositionSyncPlugin SHARED
-  src/tello_synchronization_plugin.cpp
+  TelloPositionSyncPluginGazebo SHARED
+  src/tello_synchronization_plugin_gazebo.cpp
 )
 
 ament_target_dependencies(
-  TelloPlugin
+  TelloPluginGazebo
   gazebo_dev
   gazebo_ros
   geometry_msgs
@@ -69,7 +69,7 @@ ament_target_dependencies(
 )
 
 ament_target_dependencies(
-  TelloPositionSyncPlugin
+  TelloPositionSyncPluginGazebo
   gazebo_dev
   gazebo_ros
   geometry_msgs
@@ -85,7 +85,7 @@ ament_target_dependencies(
 
 # Install targets
 install(
-  TARGETS TelloPlugin TelloPositionSyncPlugin
+  TARGETS TelloPluginGazebo TelloPositionSyncPluginGazebo
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

@@ -14,14 +14,14 @@
 using namespace std::chrono_literals;
 
 //===============================================================================================
-// TelloPlugin features:
+// TelloPluginGazebo features:
 // -- generates trivial flight data at 10Hz
 // -- video is managed by a gazebo_ros_pkgs plugin, see tello_description/urdf/tello.xml
 // -- responds to "takeoff" and "land" commands
 // -- responds to cmd_vel and "rc x y z yaw" commands
 // -- battery state
 //
-// Tello flight dynamics are sophisticated and difficult to model. TelloPlugin keeps it simple:
+// Tello flight dynamics are sophisticated and difficult to model. TelloPluginGazebo keeps it simple:
 // -- x, y, z and yaw velocities are controlled by a P controller
 // -- roll and pitch are always 0
 //
@@ -52,7 +52,7 @@ namespace tello_gazebo {
         return v > max ? max : (v < -max ? -max : v);
     }
 
-    class TelloPlugin : public gazebo::ModelPlugin {
+    class TelloPluginGazebo : public gazebo::ModelPlugin {
         enum class FlightState {
             landed,
             taking_off,
@@ -105,7 +105,7 @@ namespace tello_gazebo {
         pid::Controller yaw_controller_{false, 2, 0, 0};
 
 public:
-        TelloPlugin() {
+        TelloPluginGazebo() {
             (void) update_connection_;
             (void) command_srv_;
             (void) cmd_vel_sub_;
@@ -113,7 +113,7 @@ public:
             transition(FlightState::landed);
         }
 
-        ~TelloPlugin() {}
+        ~TelloPluginGazebo() {}
 
         void set_target_velocities(double x, double y, double z, double yaw) {
             x_controller_.set_target(x);
@@ -231,7 +231,7 @@ public:
             // ROS service
             command_srv_ = node_->create_service<tello_msgs::srv::TelloAction>(
                 "tello_action",
-                std::bind(&TelloPlugin::command_callback,
+                std::bind(&TelloPluginGazebo::command_callback,
                     this,
                     std::placeholders::_1,
                     std::placeholders::_2,
@@ -242,14 +242,14 @@ public:
             cmd_vel_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
                 "cmd_vel",
                 10,
-                std::bind(&TelloPlugin::cmd_vel_callback,
+                std::bind(&TelloPluginGazebo::cmd_vel_callback,
                     this,
                     std::placeholders::_1
             ));
 
             // Listen for the Gazebo update event. This event is broadcast every simulation iteration.
             update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-                boost::bind(&TelloPlugin::OnUpdate, this, _1)
+                boost::bind(&TelloPluginGazebo::OnUpdate, this, _1)
             );
         }
 
@@ -393,5 +393,5 @@ private:
         std::string namespace_{"Shouldn't be there"};  // valeur par défaut
     };
 
-    GZ_REGISTER_MODEL_PLUGIN(TelloPlugin)
+    GZ_REGISTER_MODEL_PLUGIN(TelloPluginGazebo)
 } // namespace tello_gazebo
