@@ -20,37 +20,55 @@ DELAY ?= 20
 # Default target --------------------------------------------------------------
 all: min_install
 
-min_install: \
-	sudo_upgrade \
+clean: 							\
+	clear_ros2_shared 			\
+	clear_tello_msgs 			\
+	clear_fame_agri				\
+	clear_FaMe_engine			\
+	clear_pfe_simulation_gazebo	\
+
+min_install: 				\
+	sudo_upgrade 			\
 	install_github_desktop
 
 # Aggregate install target ----------------------------------------------------
-install_all: \
-	sudo_upgrate \
-	install_terminator \
-	install_cmake \
-	install_discord-snap \
-	install_vscode \
-	correct_vscode \
-	install_ros2 \
-	install_gazebo \
-	install_python \
-	install_FaMe_modeler \
-	install_deps \
+install_all: 				\
+	sudo_upgrate 			\
+	install_terminator 		\
+	install_cmake 			\
+	install_discord-snap 	\
+	install_vscode 			\
+	correct_vscode 			\
+	install_ros2 			\
+	install_gazebo 			\
+	install_python 			\
+	install_FaMe_modeler 	\
+	install_deps 			\
 	install_all2
 
-install_all2: \
+install_all2: 				\
 	clone_build_ros2_shared \
-	clone_build_tello_msgs \
-	install_examples \
-	build_fame_agri \
-	setup_gazebo \
-	install_FaMe_engine \
-	setup_fame_simulation \
-	install_github_desktop \
-	setup_bashrc
+	clone_build_tello_msgs 	\
+	install_examples 		\
+	build_fame_agri 		\
+	setup_gazebo 			\
+	install_FaMe_engine 	\
+	setup_fame_simulation 	\
+	install_github_desktop 	\
+	setup_bashrc 			\
+	setup_pfe_simulation_gazebo
 
 update: sudo_upgrate
+
+
+define _clear_ros
+	if [ -d "build" ] && [ -d "install" ] && [ -d "log" ]; then 					\
+		echo "Tous les dossiers sont présents. Suppression..."; 					\
+		rm -rf "build" "install" "log"; 											\
+	else 																			\
+		echo "Un ou plusieurs dossiers sont manquants. Aucun dossier supprimé."; 	\
+	fi;	
+endef
 
 # 0-Update System
 sudo_upgrate:
@@ -265,6 +283,9 @@ clone_build_ros2_shared:
 	fi
 	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
 
+clear_ros2_shared:
+	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
+
 clone_build_tello_msgs:
 	@if [ ! -d "$(TELLO_MSGS)" ]; then \
 		git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); \
@@ -274,6 +295,9 @@ clone_build_tello_msgs:
 		cd $(TELLO_MSGS) && nvm install --lts=gallium && nvm use 16 && \
 		cd $(ROS2_SHARED) && source install/setup.bash && \
 		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
+
+clear_tello_msgs:
+	@cd $(TELLO_MSGS) && echo -n "[$(TELLO_MSGS)] " && $(call _clear_ros)
 
 install_examples:
 	@if [ ! -d "$(FAME)" ]; then \
@@ -289,6 +313,9 @@ build_fame_agri: clone_build_tello_msgs install_examples install_node
 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
 	mkdir -p $(GZ_MODEL_DIR)
 	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
+
+clear_fame_agri:
+	@cd $(FAME_AGRI) && echo -n "[$(FAME_AGRI)] " && $(call _clear_ros)
 
 launch_gazebo:
 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -340,6 +367,12 @@ install_FaMe_engine:
 
 	# export NODE_OPTIONS="--unhandled-rejections=strict"
 	# ros2 launch fame_engine agri_engine.launch.py
+
+
+clear_FaMe_engine:
+	@cd $(FAME_ENGINE) && echo -n "[$(FAME_ENGINE)] " && $(call _clear_ros)
+
+	
 
 MBROS_DIR      := /home/ubuntu/mbros/fame_engine
 NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
@@ -529,6 +562,9 @@ setup_pfe_simulation_gazebo:
 		cd $(FAME_SIMU) && source install/setup.bash && \
 		cd $(PATH_TELLO_WS) && \
 		colcon build
+
+clear_pfe_simulation_gazebo:
+	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
 
 
 launch_pfe_simulation_gazebo:
