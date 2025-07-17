@@ -195,6 +195,7 @@ rclnodejs.init().then(() => {
     services: {
       get: bent('json'),
       set,
+      console
     },
     moddleOptions: {
       camunda: require('camunda-bpmn-moddle/resources/camunda'),
