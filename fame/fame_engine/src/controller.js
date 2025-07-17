@@ -88,7 +88,7 @@ rclnodejs.init().then(() => {
   var process_name = node.namespace().replace('/', '');
   source = (fs.readFileSync(process_path + process_name + '.bpmn', 'utf8'));
   mergeCallActivity();
-  //fs.writeFileSync(process_path+'res.bpmn', source);
+  fs.writeFileSync(process_path+'res.bpmn', source);
 
   var tstart = 0;
   var tfinish = 0;
@@ -146,6 +146,8 @@ rclnodejs.init().then(() => {
    * Management of signal throwing
    */
   engine.broker.subscribeTmp('event', 'activity.signal', (routingKey, msg) => { // routingKey = activity.signal
+    console.log('throwing', msg, " | someaze", msg.content, " | s", msg.content.inbound);
+    console.log(" | zaezr", topic_dict);
     let topic_name = msg.content.name
     let message_type;
     let message_payload;
@@ -176,6 +178,7 @@ rclnodejs.init().then(() => {
         break;
       }
     }
+    console.log(" | zaezr2", topic_dict, check);
     // Publish ros topic
     if (check) {
       engine.execution.signal(msg.content.message, { ignoreSameDefinition: true });
@@ -236,7 +239,7 @@ rclnodejs.init().then(() => {
           // added '/' to avoid remap of topics
           node.createSubscription(msg_type, '/' + ref_topic, (msg) => { //create ROS subscription
             console.log(`Received message: `, msg);
-            //activity.environment.assignVariables();
+            //activity.environment.assignVariables(); //maybe that
             Object.keys(msg).forEach(element => {
               // assing to global varibles the payload of the signal
               const find = Object.keys(activity.environment.variables).find(v => v.startsWith(element));
