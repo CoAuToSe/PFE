@@ -19,8 +19,10 @@ DELAY ?= 20
 
 # Default target --------------------------------------------------------------
 all: min_install
+clean:
+	make -i try_clean
 
-clean: 							\
+try_clean: 						\
 	clear_ros2_shared 			\
 	clear_tello_msgs 			\
 	clear_fame_agri				\
