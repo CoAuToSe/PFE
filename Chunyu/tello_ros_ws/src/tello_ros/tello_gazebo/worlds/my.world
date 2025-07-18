@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<sdf version="1.6">
+  <world name="default">
+
+    <physics name="normal" type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+    </physics>
+    
+    <!-- A simple ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- A simple sun -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- Define a box with the specified dimensions -->
+    <model name="tall_box">
+      <pose>0 10 5.5 0 0 0</pose> <!-- The center of the box is at 0,0,5.5 so the base is at 0,0,0 -->
+      <static>true</static> <!-- This line makes the model static -->
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>22 1 11</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>22 1 11</size>
+            </box>
+          </geometry>
+        </collision>
+        <gravity>false</gravity> <!-- This line makes the link unaffected by gravity -->
+      </link>
+    </model>
+
+  </world>
+</sdf>
