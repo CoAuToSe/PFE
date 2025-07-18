@@ -24,7 +24,11 @@
     <bpmn:scriptTask id="Activity_0zdm893" name="Stop" scriptFormat="JavaScript">
       <bpmn:incoming>Flow_reached</bpmn:incoming>
       <bpmn:outgoing>Flow_0k4zm40</bpmn:outgoing>
-      <bpmn:script>var node = this.environment.variables.ros_node;
+      <bpmn:script>
+var node = this.environment.variables.ros_node;
+var variables = this.environment.variables;
+this.environment.services.console.info("goto");
+this.environment.services.console.info(variables);
 const publisher = node.createPublisher("geometry_msgs/msg/Twist", "cmd_vel");
 publisher.publish({
 linear: {x: 0.0, y: 0.0, z: 0.0},

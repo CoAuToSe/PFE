@@ -46,7 +46,11 @@
       <bpmn:dataOutputAssociation id="DataOutputAssociation_1bj3wv3">
         <bpmn:targetRef>DataObjectReference_0lgii7y</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
-      <bpmn:script>var variables = this.environment.variables;
+      <bpmn:script>
+var variables = this.environment.variables;
+this.environment.services.console.info("explore");
+this.environment.services.console.info(variables);
+
 var points = variables.map_points;
 var destination = points.shift();
 this.environment.variables.x_destination = destination.x;
@@ -78,7 +82,8 @@ next();</bpmn:script>
         <bpmn:sourceRef>DataObjectReference_08n0h1d</bpmn:sourceRef>
         <bpmn:targetRef>Property_0kwd6af</bpmn:targetRef>
       </bpmn:dataInputAssociation>
-      <bpmn:script>var variables = this.environment.variables;
+      <bpmn:script>
+var variables = this.environment.variables;
 var x_low = parseFloat(variables.x_lower_boundary);
 var y_low = parseFloat(variables.y_lower_boundary);
 var x_up = parseFloat(variables.x_upper_boundary);
@@ -121,7 +126,12 @@ next();</bpmn:script>
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_05oreus" sourceRef="Activity_goto" targetRef="Gateway_0pccefu" />
     <bpmn:sequenceFlow id="Flow_no" name="no" sourceRef="Gateway_1knonq6" targetRef="Activity_goto">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JavaScript">next(null,this.environment.variables.map_points.length &gt; 0);</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JavaScript">
+var variables = this.environment.variables;
+this.environment.services.console.info("explore condition yes");
+this.environment.services.console.info(variables);
+next(null,this.environment.variables.map_points.length &gt; 0);
+      </bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="Gateway_0pccefu">
       <bpmn:incoming>Flow_05oreus</bpmn:incoming>

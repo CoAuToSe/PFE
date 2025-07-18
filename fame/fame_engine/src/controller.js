@@ -241,13 +241,18 @@ rclnodejs.init().then(() => {
             console.log(`Received message: `, msg);
             //activity.environment.assignVariables(); //maybe that
             Object.keys(msg).forEach(element => {
-              // assing to global varibles the payload of the signal
+              // assign to global variables the payload of the signal
               const find = Object.keys(activity.environment.variables).find(v => v.startsWith(element));
               if (find) { // check if there is a matching variable
                 var value = msg[element];
                 activity.environment.variables[find] = value;
+                console.log("correctly set :", element, " with ", value);
               }
+              console.log("value of ", element, " is ", activity.environment.variables[find]);
             });
+            // console.log("activitu:", activity);
+            // console.log("activitu.environment:", activity.environment);
+            // console.log("activitu.environment.variables:", activity.environment.variables);
             activity.getApi().sendApiMessage('signal'); // forces signal catching
           });
         }
