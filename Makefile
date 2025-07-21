@@ -615,3 +615,6 @@ versions:
 	python3.10 --version || true
 	node -v # Bonus
 
+setup_gazebo_models:
+	@echo "for the moment unable to find where does the coke can belongs from"
+	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
