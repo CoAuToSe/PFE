@@ -3,16 +3,16 @@
 # Usage examples:
 #   make              # install everything (default)
 #   make install_vscode
-#   make test-ros2
+#   make test_ros2
 #   make versions
 # ----------------------------------------------------
 
 SHELL := /bin/bash
 
 .PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2 install_gazebo install_python \
-        test-ros2 test-gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
-		install_discord-snap install_deps clone_build_ros2_shared clone_build_tello_msgs install_examples \
-		build_fame_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_fame_simulation \
+        test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
+		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
+		setup_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
 		install_github_desktop min_install
 
 DELAY ?= 20
@@ -26,7 +26,7 @@ try_clean: 						\
 	clear_ros2_shared 			\
 	clear_tello_msgs 			\
 	clear_fame_agri				\
-	clear_FaMe_engine			\
+	clear_ros2_FaMe_engine			\
 	clear_pfe_simulation_gazebo	\
 
 min_install: 				\
@@ -49,13 +49,15 @@ install_all: 				\
 	install_all2
 
 install_all2: 				\
-	clone_build_ros2_shared \
-	clone_build_tello_msgs 	\
+	clone_ros2_shared 		\
+	setup_ros2_shared		\
+	clone_tello_msgs 		\
+	setup_tello_msgs		\
 	install_examples 		\
-	build_fame_agri 		\
+	setup_FaMe_agri 		\
 	setup_gazebo 			\
 	install_FaMe_engine 	\
-	setup_fame_simulation 	\
+	setup_FaMe_simulation 	\
 	install_github_desktop 	\
 	setup_bashrc 			\
 	setup_pfe_simulation_gazebo
@@ -250,13 +252,13 @@ install_discord-snap: install_snap
 # ROS 2 minimal pub/sub demo
 # Open **two** terminals and run the printed commands.
 
-test-ros2:
+test_ros2:
 	@echo "Terminal 1 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_cpp talker"
 	@echo "Terminal 2 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_py listener"
 
 # Gazebo + Twist publisher demo
 
-test-gazebo:
+test_gazebo:
 	@echo "Terminal 1 ➜ gazebo --verbose /opt/ros/foxy/share/gazebo_plugins/worlds/gazebo_ros_diff_drive_demo.world"
 	@echo "Terminal 2 ➜ ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{linear: {x: 1.0}}' -1"
 
@@ -271,7 +273,7 @@ FAME := $(HOME_DIR)/fame
 FAME_AGRI := $(FAME)/fame_agricultural
 FAME_ENGINE := $(FAME)/fame_engine
 FAME_SIMU := $(FAME)/fame_simulation
-GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models
+GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
 MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
 
 install_deps:
@@ -279,20 +281,23 @@ install_deps:
 	sudo apt install python3-pip -y
 	python3 -m pip install transformations djitellopy
 
-clone_build_ros2_shared:
+clone_ros2_shared:
 	@if [ ! -d "$(ROS2_SHARED)" ]; then \
 		git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); \
 	fi
+
+setup_ros2_shared:
 	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
 
 clear_ros2_shared:
 	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
 
-clone_build_tello_msgs:
+clone_tello_msgs:
 	@if [ ! -d "$(TELLO_MSGS)" ]; then \
 		git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); \
 	fi
 
+setup_tello_msgs: setup_ros2_shared
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
 		cd $(TELLO_MSGS) && nvm install --lts=gallium && nvm use 16 && \
 		cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -306,7 +311,7 @@ install_examples:
 		git clone https://bitbucket.org/proslabteam/fame.git $(FAME); \
 	fi
 
-build_fame_agri: clone_build_tello_msgs install_examples install_node
+setup_FaMe_agri: setup_tello_msgs install_examples install_node
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
 		cd $(FAME_AGRI) && nvm install --lts=gallium && nvm use 16 && \
 		cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -370,8 +375,11 @@ install_FaMe_engine:
 	# export NODE_OPTIONS="--unhandled-rejections=strict"
 	# ros2 launch fame_engine agri_engine.launch.py
 
+setup_FaMe_engine:
+	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+		cd $(FAME_ENGINE) && colcon build
 
-clear_FaMe_engine:
+clear_ros2_FaMe_engine:
 	@cd $(FAME_ENGINE) && echo -n "[$(FAME_ENGINE)] " && $(call _clear_ros)
 
 	
@@ -381,23 +389,23 @@ NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
 NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
 
 .PHONY: install_FaMe_engine
-install_FaMe_engine_not_opti_GPT:
-	# 1. Lien symbolique une seule fois
-	sudo install -d $(MBROS_DIR)
-	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
+# install_FaMe_engine_not_opti_GPT:
+# 	# 1. Lien symbolique une seule fois
+# 	sudo install -d $(MBROS_DIR)
+# 	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
 
-	# 2. Tout le reste dans un shell bash unique
-	@bash -ec '\
-		. $(NVM_SCRIPT); nvm install --lts=gallium; nvm use $(NODE_VERSION); \
-		cd $(FAME_ENGINE); \
-		# Dépendances Node : install propre + version exacte de rclnodejs
-		npm pkg set dependencies.rclnodejs="0.27.1"; \
-		npm ci --prefer-offline; \
-		# Génération des messages JS (oblige rclnodejs >=0.20)      
-		npx rclnodejs-cli generate-ros-messages; \
-		# Build ROS 2 : symlink-install pour éviter les copies redondantes
-		colcon build --packages-select fame_engine; \
-	'
+# 	# 2. Tout le reste dans un shell bash unique
+# 	@bash -ec '\
+# 		. $(NVM_SCRIPT); nvm install --lts=gallium; nvm use $(NODE_VERSION); \
+# 		cd $(FAME_ENGINE); \
+# 		# Dépendances Node : install propre + version exacte de rclnodejs
+# 		npm pkg set dependencies.rclnodejs="0.27.1"; \
+# 		npm ci --prefer-offline; \
+# 		# Génération des messages JS (oblige rclnodejs >=0.20)      
+# 		npx rclnodejs-cli generate-ros-messages; \
+# 		# Build ROS 2 : symlink-install pour éviter les copies redondantes
+# 		colcon build --packages-select fame_engine; \
+# 	'
 
 
 # ros2-source:
@@ -448,7 +456,7 @@ launch_comportement_agri:
 	wait $$PID_SIM $$PID_ENG
 	@echo "======= agri and engine done ======="
 
-setup_fame_simulation:
+setup_FaMe_simulation:
 	cd $(ROS2_SHARED) && source install/setup.bash && \
 		cd $(TELLO_MSGS) && source install/setup.bash && \
 		source /usr/share/gazebo/setup.bash && \
@@ -471,6 +479,8 @@ launch_example_alone:
 		cd $(FAME_ENGINE) && source install/setup.bash && \
 		ros2 launch fame_engine example.launch.py 
 	
+setup_example: setup_tello_msgs setup_FaMe_engine setup_FaMe_simulation setup_FaMe_agri
+
 
 .ONESHELL: launch_example
 launch_example:
@@ -502,34 +512,34 @@ launch_example:
 	wait $$PID_SIM $$PID_ENG
 	@echo "======= simu and engine done ======="
 
-# garantit qu’un seul shell est utilisé pour toute la recette
-.ONESHELL: launch_example_GPT
-launch_example_GPT:
-# Prépare env. ROS + Node une seule fois
-	source /usr/share/gazebo/setup.bash
-	export NVM_DIR="$$HOME/.nvm"; . "$$NVM_DIR/nvm.sh"; nvm use 16 >/dev/null
-	export NODE_OPTIONS="--unhandled-rejections=strict"
+# # garantit qu’un seul shell est utilisé pour toute la recette
+# .ONESHELL: launch_example_GPT
+# launch_example_GPT:
+# # Prépare env. ROS + Node une seule fois
+# 	source /usr/share/gazebo/setup.bash
+# 	export NVM_DIR="$$HOME/.nvm"; . "$$NVM_DIR/nvm.sh"; nvm use 16 >/dev/null
+# 	export NODE_OPTIONS="--unhandled-rejections=strict"
 
-	for ws in "$(ROS2_SHARED)" "$(TELLO_MSGS)" "$(FAME_AGRI)" "$(FAME_ENGINE)"; do \
-	  [ -f "$$ws/install/setup.bash" ] && source "$$ws/install/setup.bash"; \
-	done
+# 	for ws in "$(ROS2_SHARED)" "$(TELLO_MSGS)" "$(FAME_AGRI)" "$(FAME_ENGINE)"; do \
+# 	  [ -f "$$ws/install/setup.bash" ] && source "$$ws/install/setup.bash"; \
+# 	done
 
-# Lance la simulation en arrière-plan, capture son PID
-	@echo "▶️  Launch simulation"
-	ros2 launch fame_simulation multi_launch.py & \
-	PID_SIM=$$!
+# # Lance la simulation en arrière-plan, capture son PID
+# 	@echo "▶️  Launch simulation"
+# 	ros2 launch fame_simulation multi_launch.py & \
+# 	PID_SIM=$$!
 
-	# Délai paramétrable sans bloquer la simulation
-	@echo "⏳ Waiting $$DELAY s…"; sleep $(DELAY)
+# 	# Délai paramétrable sans bloquer la simulation
+# 	@echo "⏳ Waiting $$DELAY s…"; sleep $(DELAY)
 
-	# Lance le moteur de comportement, capture son PID
-	@echo "▶️  Launch engine"
-	ros2 launch fame_engine example.launch.py & \
-	PID_ENG=$$!
+# 	# Lance le moteur de comportement, capture son PID
+# 	@echo "▶️  Launch engine"
+# 	ros2 launch fame_engine example.launch.py & \
+# 	PID_ENG=$$!
 
-	# Attend proprement la fin des deux processus
-	wait $$PID_SIM $$PID_ENG
-	@echo "✅  Both launches exited."
+# 	# Attend proprement la fin des deux processus
+# 	wait $$PID_SIM $$PID_ENG
+# 	@echo "✅  Both launches exited."
 
 launch_fame_modeler:
 	cd ./fame-modeler && npm start
