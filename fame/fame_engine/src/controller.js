@@ -20,7 +20,16 @@ var process_dict = {};
 function writeProcess(source_process) {
   var conversion = convert.xml2json(source_process, { compact: true, spaces: 4 });
   conversion = conversion.replace(/'/g, '"');
-  var conversion_obj = JSON.parse(conversion);
+  
+  // var conversion_obj = JSON.parse(conversion);
+  let conversion_obj;
+  try {
+    conversion_obj = JSON.parse(conversion);
+  } catch (err) {
+    console.error("Failed to parse JSON:", err.message);
+    return;
+  }
+
   var processObj = conversion_obj['bpmn:definitions']['bpmn:process'];
   var caObjs = processObj['bpmn:callActivity'];
   if (caObjs) {
@@ -28,13 +37,25 @@ function writeProcess(source_process) {
       for (let i = 0; i < caObjs.length; i++) {
         var called_act = caObjs[i]._attributes.calledElement;
         var ca_file = process_path + called_act + '.bpmn';
+
+        if (!fs.existsSync(ca_file)) {
+          console.error(`Missing BPMN file: ${ca_file}`);
+          return;
+        }
         var ca_source = fs.readFileSync(ca_file, 'utf8');
+
         process_dict[called_act] = [ca_source, false];
       }
     } else {
       var called_act = caObjs._attributes.calledElement;
       var ca_file = process_path + called_act + '.bpmn';
+
+      if (!fs.existsSync(ca_file)) {
+        console.error(`Missing BPMN file: ${ca_file}`);
+        return;
+      }
       var ca_source = fs.readFileSync(ca_file, 'utf8');
+
       process_dict[called_act] = [ca_source, false];
     }
   }
@@ -51,10 +72,19 @@ function mergeCallActivity() {
   var xml = source;
   var conversion = convert.xml2json(xml, { compact: true, spaces: 4 });
   conversion = conversion.replace(/'/g, '"');
-  var conversion_obj = JSON.parse(conversion);
+  
+  // var conversion_obj = JSON.parse(conversion);
+  let conversion_obj;
+  try {
+    conversion_obj = JSON.parse(conversion);
+  } catch (err) {
+    console.error("Failed to parse JSON:", err.message);
+    return;
+  }
+
   var processObj = conversion_obj['bpmn:definitions']['bpmn:process'];
   //  var caObjs = processObj['bpmn:callActivity'];
-  var spObjs = processObj['bpmn:subProcess'];
+  const spObjs = processObj?.['bpmn:subProcess'] || [];
   if (spObjs) { //the param triggeredByEvent = true blocks the execution of the subprocess
     if (spObjs.length) {
       for (let i = 0; i < caObjs.length; i++) {
@@ -132,7 +162,8 @@ rclnodejs.init().then(() => {
   function addVars(var_activity) {
     Object.keys(var_activity).forEach(element => {
       if (element != 'ros_node' && element != 'fields' && element != 'content' && element != 'properties') {
-        if (!(element in Object.keys(engine.environment.variables))) {
+        // if (!(element in Object.keys(engine.environment.variables))) {
+        if (!(element in engine.environment.variables)) {
           var vs = new Object();
           vs[element] = var_activity[element];
           engine.environment.assignVariables(vs)
@@ -156,7 +187,8 @@ rclnodejs.init().then(() => {
     const regexpr = /\${(.*?)\}/g; // all variables are identified through ${...}
 
     for (let key in topic_dict) {
-      if (key === topic_name) {
+      // if (key === topic_name) {
+      if (key === topic_name && Array.isArray(topic_dict[key]) && topic_dict[key].length >= 2) {
         message_type = topic_dict[key][0];
         message_payload = topic_dict[key][1];
         var tempvar = message_payload.match(regexpr);
@@ -183,9 +215,23 @@ rclnodejs.init().then(() => {
     if (check) {
       engine.execution.signal(msg.content.message, { ignoreSameDefinition: true });
       console.log(`Publishing message on ${topic_name}: ` + message_payload);
+
+      if (!message_type || typeof message_type !== 'function') {
+        console.error("Invalid message type for topic", topic_name);
+        return;
+      }
+      let message_obj;
+      try {
+        message_obj = JSON.parse(message_payload);
+      } catch (err) {
+        console.error("Failed to parse message payload:", err.message);
+        return;
+      }
+      console.log("Creating publisher for:", topic_name, "with type:", message_type);
       const publisher = node.createPublisher(message_type, '/' + topic_name);
       var message_obj = JSON.parse(message_payload); // conversion from string to obj
       publisher.publish(message_obj);
+
     }
   }, { noAck: true });
 
@@ -235,8 +281,13 @@ rclnodejs.init().then(() => {
           msg_payload = prop[1].value;
           topic_dict[ref_topic] = [msg_type, msg_payload]         // save properties parameters in the topic dictionary
         } else { // it is a catch
-          console.log('Subscribed to: ', ref_topic);
+          // console.log('Subscribed to: ', ref_topic);
           // added '/' to avoid remap of topics
+          console.log("Creating subscriber for:", ref_topic, "with type:", msg_type);
+          if (!msg_type || typeof msg_type !== 'function') {
+            console.error("Invalid message type for topic:", ref_topic);
+            return;
+          }
           node.createSubscription(msg_type, '/' + ref_topic, (msg) => { //create ROS subscription
             console.log(`Received message: `, msg);
             //activity.environment.assignVariables(); //maybe that
@@ -295,7 +346,12 @@ rclnodejs.init().then(() => {
     if (!activity.owner.behaviour.dataInputAssociations) {
       var act_obj = activity.owner.behaviour.dataOutputAssociations[0].behaviour.targetRef.id;
     } else
-      var act_obj = activity.owner.behaviour.dataInputAssociations[0].behaviour.sourceRef.id;
+      if (!activity.owner.behaviour.dataInputAssociations || 
+        !activity.owner.behaviour.dataInputAssociations[0]?.behaviour?.sourceRef) {
+        console.warn("No valid data input association found for activity:", activity.id);
+        return;
+      }
+      // var act_obj = activity.owner.behaviour.dataInputAssociations[0].behaviour.sourceRef.id;
     for (let da in dataObjs) {
       var obj = dataObjs[da]
       var obj_id = obj._attributes.id;
@@ -333,7 +389,14 @@ rclnodejs.init().then(() => {
       }
     }
   }
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err.stack || err);
+    process.exit(1); // optional
+  });
 
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Promise Rejection:', reason);
+  });
   rclnodejs.spin(node);
 });
 
