@@ -12,7 +12,7 @@ SHELL := /bin/bash
 .PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2 install_gazebo install_python \
         test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
-		setup_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
+		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
 		install_github_desktop min_install
 
 DELAY ?= 20
@@ -26,7 +26,7 @@ try_clean: 						\
 	clear_ros2_shared 			\
 	clear_tello_msgs 			\
 	clear_fame_agri				\
-	clear_ros2_FaMe_engine			\
+	clear_ros2_FaMe_engine		\
 	clear_pfe_simulation_gazebo	\
 
 min_install: 				\
@@ -55,6 +55,7 @@ install_all2: 				\
 	setup_tello_msgs		\
 	install_examples 		\
 	setup_FaMe_agri 		\
+	copy_models_FaMe_agri	\
 	setup_gazebo 			\
 	install_FaMe_engine 	\
 	setup_FaMe_simulation 	\
@@ -318,6 +319,8 @@ setup_FaMe_agri: setup_tello_msgs install_examples install_node
 		cd $(TELLO_MSGS) && source install/setup.bash && \
 		cd $(FAME_AGRI) && colcon build
 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
+
+copy_models_FaMe_agri:
 	mkdir -p $(GZ_MODEL_DIR)
 	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
 
