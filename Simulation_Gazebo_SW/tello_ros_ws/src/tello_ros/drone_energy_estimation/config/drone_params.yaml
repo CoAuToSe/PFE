@@ -1,0 +1,29 @@
+battery_state:
+  ros__parameters:
+    # namespace: 'drone1'
+    drone:
+      mass: 0.08
+      Ix: 0.679e-2
+      Iy: 0.679e-2
+      Iz: 1.313e-2
+      kx: 3.365e-2
+      ky: 3.365e-2
+      kz: 3.365e-2
+      d: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      rho: 0.566e-5
+      L: 0.06
+      gamma: 0.762e-7
+    battery:
+      V0: 3.8
+      alpha: 0
+      Q: 3960
+      R: 0.02
+    motor:
+      L: 0.1
+      R: 0.07
+      K_e: 1.05e-3
+      K_T: 6.8e-3
+      K_d: 0.762e-7
+      J: 4.1904e-5
+      f: 0
+    imu_callback_frequency: 10.0  # IMU callback frequency in

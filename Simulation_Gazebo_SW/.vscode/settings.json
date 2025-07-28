@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "memory_resource": "cpp"
+    },
+    "cmake.sourceDirectory": "/home/dell/Simulation_Gazebo/tello_ros_ws/src/tello_ros/tello_state_record"
+}
