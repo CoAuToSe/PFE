@@ -118,8 +118,8 @@ def generate_launch_description():
     world_path = os.path.join(get_package_share_directory('tello_gazebo'), 'worlds', 'simple.world')
 
     drones = [
-        {'ns': 'drone_1', 'ip': '192.168.50.103', 'command_port':38065, 'data_port':8890, 'video_port':11111, 'x': 0., 'y': 1., 'z': 1., 'urdf': 1},
-        {'ns': 'drone_2', 'ip': '192.168.50.33', 'command_port':38065, 'data_port':8890, 'video_port':11111,  'x': 1., 'y': 0., 'z': 1., 'urdf': 2},
+        {'ns': 'drone_1', 'ip': '192.168.50.103', 'command_port':38065, 'data_port':8890, 'video_port':11111, 'x': 0., 'y': 1., 'z': 0., 'urdf': 1},
+        {'ns': 'drone_2', 'ip': '192.168.50.33', 'command_port':38065, 'data_port':8890, 'video_port':11111,  'x': 1., 'y': 0., 'z': 0., 'urdf': 2},
         # Ajouter plus de drones ici si besoin
     ]
 

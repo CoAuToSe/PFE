@@ -25,6 +25,9 @@ g: 0.0,
 b: 0.0,
 a: 0.0
 });
+var variables = this.environment.variables;
+this.environment.services.console.info("dingo");
+this.environment.services.console.info(variables);
 next();</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:endEvent id="Event_done" name="done">

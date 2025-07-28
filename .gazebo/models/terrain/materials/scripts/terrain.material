@@ -1,0 +1,19 @@
+material terrain/img
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.75 0.75 0.75 1.0
+			diffuse 0.85 0.85 0.85 1.0
+			specular 0.2 0.2 0.2 1.0 12.5
+
+			texture_unit
+			{
+				texture terrain2.jpg
+				filtering anistropic
+				max_anisotropy 16
+			}
+		}
+	}
+}

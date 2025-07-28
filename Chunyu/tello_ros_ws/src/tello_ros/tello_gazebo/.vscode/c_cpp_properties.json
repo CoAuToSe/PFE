@@ -1,0 +1,29 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/chunyu/tello_ros_ws/install/tello_msgs/include/**",
+        "/home/chunyu/tello_ros_ws/install/ros2_shared/include/**",
+        "/home/chunyu/tello_ros_ws/install/energy_report/include/**",
+        "/home/chunyu/ros2_foxy/ros2-linux/include/**",
+        "/opt/ros/foxy/include/**",
+        "/home/chunyu/tello_ros_ws/src/ros2_shared/include/**",
+        "/home/chunyu/tello_ros_ws/src/tello_ros/energy_report/include/**",
+        "/home/chunyu/tello_ros_ws/src/tello_ros/tello_driver/include/**",
+        "/home/chunyu/tello_ros_ws/src/tello_ros/tello_gazebo/include/**",
+        "/home/chunyu/tello_ros_ws/src/tello_ros/tello_state_record/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
