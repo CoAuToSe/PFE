@@ -10,6 +10,17 @@ def launch_drone_gazebo(namesp, ip, command_port, data_port, video_port, x, y, z
     urdf_path = os.path.join(get_package_share_directory('tello_description'), 'urdf', 'tello' + suffix + '.urdf')
     drone_config = os.path.join(get_package_share_directory('drone_energy_estimation'), 'config', 'drone_params.yaml')
 
+    entity_name = 'drone' + suffix
+
+    robot_description_topic_name = "/" + entity_name + "/robot_description"
+    robot_state_publisher_name= entity_name + "_robot_state_publisher"
+
+    robot_name = entity_name
+
+    # robot_description_topic_name = "/" + robot_name + "_robot_description"
+    joint_state_topic_name = "/" + robot_name + "/joint_states"
+    # robot_state_publisher_name = robot_name +  "_robot_state_publisher"
+
     return [
 
 
@@ -20,8 +31,28 @@ def launch_drone_gazebo(namesp, ip, command_port, data_port, video_port, x, y, z
             package='robot_state_publisher',
             executable='robot_state_publisher',
             arguments=[urdf_path],
-            output='screen'
+            name=robot_state_publisher_name,
+            output='screen',
+            emulate_tty=True,
+            remappings=[
+                ("/robot_description", robot_description_topic_name),
+                ("/joint_states", joint_state_topic_name)
+            ],
         ), # namespace good
+
+    # robot_state_publisher_node = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     name=robot_state_publisher_name,
+    #     emulate_tty=True,
+    #     parameters=[{'use_sim_time': True, 'robot_description': xml}],
+    #     remappings=[("/robot_description", robot_description_topic_name),
+    #                 ("/joint_states", joint_state_topic_name)
+    #                 ],
+    #     output="screen"
+    # )
+
+
         # Estimation position
         Node(
             namespace = namesp,
@@ -29,6 +60,7 @@ def launch_drone_gazebo(namesp, ip, command_port, data_port, video_port, x, y, z
             package='tello_position',
             executable='tello_position_cal_CATS',
             output='screen',
+            emulate_tty=True,
             parameters=[{
                 'initial_x': x,
                 'initial_y': y,
@@ -52,18 +84,37 @@ def launch_drone_gazebo(namesp, ip, command_port, data_port, video_port, x, y, z
             # namespace = 'drone'+suffix,
             package='gazebo_ros',
             executable='spawn_entity.py',
+            emulate_tty=True,
             # name='spawn_' + ns,
             arguments=[
                 '-file', urdf_path,
-                '-entity', 'drone'+suffix,
+                # '-topic', robot_description_topic_name,
+                '-entity', namesp,
                 '-robot_namespace', namesp, # added
                 '-x', str(x),
                 '-y', str(y),
                 '-z', str(z),
             ],
-            output='screen'
+            output='screen',
+            remappings=[("/robot_state_publisher", robot_state_publisher_name)]
         ), # namespace good
     ]
+
+    # spawn_robot = Node(
+    #     package='gazebo_ros',
+    #     executable='spawn_entity.py',
+    #     name='robot_spawn_entity',
+    #     output='screen',
+    #     emulate_tty=True,
+    #     arguments=['-entity',entity_name,
+    #                '-x', str(x_spawn), '-y', str(y_spawn), '-z', str(z_spawn),
+    #                '-R', str(roll_spawn), '-P', str(pitch_spawn), '-Y', str(yaw_spawn),
+    #                '-topic', robot_description_topic_name
+    #                ],
+    #     remappings=[("/robot_state_publisher", robot_state_publisher_name)
+    #                 ]
+    # )
+
 
 def tello_driver_drone(namesp, ip, command_port, data_port, video_port, x, y, z, idx):
     suffix = '_' + str(idx)
