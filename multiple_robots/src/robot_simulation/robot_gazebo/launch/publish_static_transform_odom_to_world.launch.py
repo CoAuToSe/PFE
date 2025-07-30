@@ -13,8 +13,4 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'world', 'odom']
     )
 
-    return LaunchDescription(
-        [
-            st_pub
-        ]
-    )
+    return LaunchDescription([st_pub])
