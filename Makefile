@@ -9,7 +9,7 @@
 
 SHELL := /bin/bash
 
-.PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2_foxy install_gazebo install_python \
+.PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2_foxy install_gazebo install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
 		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
@@ -38,8 +38,13 @@ min_install_2004: 				\
 min_install_2404: 				\
 	sudo_upgrade				\
 	install_github_desktop_2404	\
+	install_deps_2404			\
 	install_software
 
+install_deps_2404:		\
+	install_git			
+
+# Install targets -------------------------------------------------------------
 install_software:			\
 	sudo_upgrade			\
 	install_terminator		\
@@ -47,12 +52,12 @@ install_software:			\
 	install_discord-snap	\
 	install_vscode			\
 	correct_vscode			\
-	install_gazebo			\
-	install_python			\
+	install_python_3_10		\
 	install_FaMe_modeler	\
 	install_deps
 
 install_software_2004:	\
+	install_gazebo		\
 	install_ros2_foxy		
 
 # Aggregate install target ----------------------------------------------------
@@ -86,6 +91,10 @@ define _clear_ros
 		echo "Un ou plusieurs dossiers sont manquants. Aucun dossier supprimé."; 	\
 	fi;	
 endef
+
+# missing dependencies
+install_git:
+	sudo apt install -y git
 
 # 0-Update System
 sudo_upgrade:
@@ -243,15 +252,15 @@ install_gazebo:
 	sudo apt install libasio-dev
 
 # 5 — Python 3.10 & pip --------------------------------------------------------
-install_python:
+install_python_3_10:
 	sudo apt update
 	sudo apt install -y software-properties-common
 	sudo add-apt-repository -y ppa:deadsnakes/ppa
 	sudo apt update
 	sudo apt install -y python3.10 python3.10-venv python3.10-dev
 	curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
-	python3.10 -m pip --version
-	python3.10 -m pip install pyparrot djitellopy
+	$(pip) --version
+	$(pip) install pyparrot djitellopy
 
 
 install_discord-snap: install_snap
@@ -289,10 +298,14 @@ FAME_SIMU := $(FAME)/fame_simulation
 GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
 MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
 
+define pip 
+	python3.10 -m pip 
+endef
+
 install_deps:
 # sudo apt update
 	sudo apt install python3-pip -y
-	python3 -m pip install transformations djitellopy
+	$(pip) install transformations djitellopy
 
 clone_ros2_shared:
 	@if [ ! -d "$(ROS2_SHARED)" ]; then \
