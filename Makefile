@@ -30,22 +30,26 @@ try_clean: 						\
 	clear_pfe_simulation_gazebo	\
 
 min_install: 				\
-	sudo_upgrade 			\
-	install_github_desktop
+	sudo_upgrade			\
+	install_github_desktop	\
+	install_sofware
+
+install_sofware: 			\
+	sudo_upgrade			\
+	install_terminator		\
+	install_cmake			\
+	install_discord-snap	\
+	install_vscode			\
+	correct_vscode			\
+	install_ros2			\
+	install_gazebo			\
+	install_python			\
+	install_FaMe_modeler	\
+	install_deps
 
 # Aggregate install target ----------------------------------------------------
 install_all: 				\
-	sudo_upgrate 			\
-	install_terminator 		\
-	install_cmake 			\
-	install_discord-snap 	\
-	install_vscode 			\
-	correct_vscode 			\
-	install_ros2 			\
-	install_gazebo 			\
-	install_python 			\
-	install_FaMe_modeler 	\
-	install_deps 			\
+	install_sofware			\
 	install_all2
 
 install_all2: 				\
@@ -63,7 +67,7 @@ install_all2: 				\
 	setup_bashrc 			\
 	setup_pfe_simulation_gazebo
 
-update: sudo_upgrate
+update: sudo_upgrade
 
 
 define _clear_ros
@@ -76,7 +80,7 @@ define _clear_ros
 endef
 
 # 0-Update System
-sudo_upgrate:
+sudo_upgrade:
 	sudo apt update
 	sudo apt upgrade -y
 
