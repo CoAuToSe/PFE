@@ -13,7 +13,7 @@ SHELL := /bin/bash
         test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
 		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
-		install_github_desktop_2004 min_install_2004
+		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
 DELAY ?= 20
 
@@ -32,24 +32,32 @@ try_clean: 						\
 min_install_2004: 				\
 	sudo_upgrade				\
 	install_github_desktop_2004	\
-	install_sofware
+	install_software			\
+	install_software_2004
 
-install_sofware: 			\
+min_install_2404: 				\
+	sudo_upgrade				\
+	install_github_desktop_2404	\
+	install_software
+
+install_software:			\
 	sudo_upgrade			\
 	install_terminator		\
 	install_cmake			\
 	install_discord-snap	\
 	install_vscode			\
 	correct_vscode			\
-	install_ros2_foxy		\
 	install_gazebo			\
 	install_python			\
 	install_FaMe_modeler	\
 	install_deps
 
+install_software_2004:	\
+	install_ros2_foxy		
+
 # Aggregate install target ----------------------------------------------------
-install_all: 				\
-	install_sofware			\
+install_all: 			\
+	install_software	\
 	install_all2
 
 install_all2: 					\
@@ -622,6 +630,27 @@ install_github_desktop_2004:
 	sudo apt-get install -f -y
 	sudo apt-mark hold github-desktop
 
+
+install_github_desktop_2404:
+# # UPDATE (2024-01-24)
+
+# ## Direct copy-paste from official instrubtions
+# ## Github Desktop for Ubuntu
+# ## Get the @shiftkey package feed
+# 	wget -qO - https://apt.packages.shiftkey.dev/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/shiftkey-packages.gpg > /dev/null
+# 	sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/shiftkey-packages.gpg] https://apt.packages.shiftkey.dev/ubuntu/ any main" > /etc/apt/sources.list.d/shiftkey-packages.list'
+# ## Install Github Desktop for Ubuntu
+# 	sudo apt update && sudo apt install github-desktop
+
+	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
+		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
+	fi
+	sudo apt-get update
+	sudo apt-get install gdebi-core -y
+	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
+	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
+	sudo apt-get install -f -y
+# 	sudo apt-mark hold github-desktop
 
 
 # -----------------------------------------------------------------------------
