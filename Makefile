@@ -9,16 +9,16 @@
 
 SHELL := /bin/bash
 
-.PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2 install_gazebo install_python \
+.PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2_foxy install_gazebo install_python \
         test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
 		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
-		install_github_desktop min_install
+		install_github_desktop_2004 min_install_2004
 
 DELAY ?= 20
 
 # Default target --------------------------------------------------------------
-all: min_install
+all: min_install_2004
 clean:
 	make -i try_clean
 
@@ -29,9 +29,9 @@ try_clean: 						\
 	clear_ros2_FaMe_engine		\
 	clear_pfe_simulation_gazebo	\
 
-min_install: 				\
-	sudo_upgrade			\
-	install_github_desktop	\
+min_install_2004: 				\
+	sudo_upgrade				\
+	install_github_desktop_2004	\
 	install_sofware
 
 install_sofware: 			\
@@ -41,7 +41,7 @@ install_sofware: 			\
 	install_discord-snap	\
 	install_vscode			\
 	correct_vscode			\
-	install_ros2			\
+	install_ros2_foxy		\
 	install_gazebo			\
 	install_python			\
 	install_FaMe_modeler	\
@@ -52,19 +52,19 @@ install_all: 				\
 	install_sofware			\
 	install_all2
 
-install_all2: 				\
-	clone_ros2_shared 		\
-	setup_ros2_shared		\
-	clone_tello_msgs 		\
-	setup_tello_msgs		\
-	install_examples 		\
-	setup_FaMe_agri 		\
-	copy_models_FaMe_agri	\
-	setup_gazebo 			\
-	install_FaMe_engine 	\
-	setup_FaMe_simulation 	\
-	install_github_desktop 	\
-	setup_bashrc 			\
+install_all2: 					\
+	clone_ros2_shared 			\
+	setup_ros2_shared			\
+	clone_tello_msgs 			\
+	setup_tello_msgs			\
+	install_examples 			\
+	setup_FaMe_agri 			\
+	copy_models_FaMe_agri		\
+	setup_gazebo 				\
+	install_FaMe_engine 		\
+	setup_FaMe_simulation 		\
+	install_github_desktop_2004 \
+	setup_bashrc 				\
 	setup_pfe_simulation_gazebo
 
 update: sudo_upgrade
@@ -192,7 +192,7 @@ correct_vscode:
 
 
 # 3 — ROS 2 Foxy --------------------------------------------------------------
-install_ros2: install_cmake
+install_ros2_foxy: install_cmake
 	@echo "Bienvenu dans l'installation de ROS2 Foxy"
 	locale || true                               # check current locale (non‑fatal)
 	sudo apt update
@@ -601,7 +601,7 @@ launch_pfe_simulation_gazebo:
 		ros2 launch tello_gazebo someaze.py
 
 
-install_github_desktop:
+install_github_desktop_2004:
 # # UPDATE (2024-01-24)
 
 # ## Direct copy-paste from official instrubtions
