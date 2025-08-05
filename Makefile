@@ -606,6 +606,14 @@ setup_pfe_simulation_gazebo:
 clear_pfe_simulation_gazebo:
 	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
 
+PATH_TELLO_WS=$(PWD)/Simulation_Gazebo_old/tello_ros_ws
+clear_pfe_simulation_gazebo_old:
+	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
+
+PATH_TELLO_WS=$(PWD)/Simulation_Gazebo_SW/tello_ros_ws
+clear_pfe_simulation_gazebo_SW:
+	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
+
 
 launch_pfe_simulation_gazebo:
 	make -i kill_all
