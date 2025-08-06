@@ -239,9 +239,11 @@ install_ros2_foxy: install_cmake
 setup_bashrc:
 # Add some custom information into ~/.bashrc
 	grep -qxF "# Custom commands" $$HOME/.bashrc || ( \
+		echo "" >> $$HOME/.bashrc && \
 		echo "# Custom commands" >> $$HOME/.bashrc && \
 		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && \
+		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "" >> $$HOME/.bashrc \
 	)
 
