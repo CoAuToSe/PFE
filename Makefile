@@ -35,6 +35,7 @@ min_install_2004: 				\
 	install_python_3_10			\
 	install_software			\
 	install_software_2004
+	@echo "After clonning you need to execute 'make copy_from_github'"
 
 min_install_2404: 				\
 	sudo_upgrade				\
@@ -687,27 +688,44 @@ setup_gazebo_models:
 	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
 
 # /====================================\
-# |        Github integration          |
+# |         Github integration         |
 # \====================================/
 
-copy_from_github:					\
-	copy_simu_gazebo_from_Github	\
-	copy_makefile_from_Github
+check_with_user_first_time:
+	@echo ""
+	@echo "You are REALLY going to ERASE EVERYTHING of the local version"
+	@echo "So are you really sure you want to do it ?"
+	@read -p ""
+
+check_with_user:
+	@echo "You are going to erase the local version"
+	@read -p "Press enter to continue"
+	@read -p "Just to be sure press enter again to continue"
+	@read -p "Jk do it again"
+
 
 copy_to_github:						\
 	copy_simu_gazebo_from_Github	\
 	copy_makefile_from_Github
 
+copy_from_github:					\
+	check_with_user					\
+	check_with_user_first_time		\
+	copy_simu_gazebo_from_Github	\
+	copy_makefile_from_Github
 
-copy_simu_gazebo_to_Github:
+
+copy_simu_gazebo_to_Github: 
 	cp -r ~/Simulation_Gazebo/tello_ros_ws/ ~/PFE/Simulation_Gazebo_new/
 
-copy_simu_gazebo_from_Github:
+copy_simu_gazebo_from_Github: check_with_user
 	cp -r ~/PFE/Simulation_Gazebo_new/ ~/Simulation_Gazebo/tello_ros_ws/ 
 
 
 copy_makefile_to_Github:
 	cp  ~/Makefile ~/PFE/Makefile
 
-copy_makefile_from_Github:
+copy_makefile_from_Github: check_with_user
 	cp  ~/PFE/Makefile ~/Makefile
+
+#TODO: copy gazebo models
