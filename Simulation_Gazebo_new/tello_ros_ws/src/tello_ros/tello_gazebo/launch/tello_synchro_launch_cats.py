@@ -20,30 +20,21 @@ def generate_launch_description():
     ]
     for namespace in namespaces:
         urdf_path = os.path.join(get_package_share_directory('tello_description'), 'urdf', namespace + '.urdf')
-        to_return.append(
+        to_return.extend([
             # Publish static transforms
             Node(package='robot_state_publisher', executable='robot_state_publisher', output='screen', namespace=namespace,
-                arguments=[urdf_path])
-        )
-        to_return.append(
+                arguments=[urdf_path]),
+             
             # Joystick driver, generates /namespace/joy messages
-            Node(package='joy', executable='joy_node', output='screen', namespace=namespace)
-        )
+            Node(package='joy', executable='joy_node', output='screen', namespace=namespace),        
         
-        to_return.append(
             # Joystick controller, generates /namespace/cmd_vel messages
-            Node(package='tello_driver', executable='tello_joy_main', output='screen', namespace=namespace)
-        )
+            Node(package='tello_driver', executable='tello_joy_main', output='screen', namespace=namespace),        
         
-        to_return.append(
-            Node(package='tello_driver', executable='tello_driver_main', output='screen', namespace=namespace)
-        )
+            Node(package='tello_driver', executable='tello_driver_main', output='screen', namespace=namespace),        
         
-        to_return.append(
-            Node(package='tello_position', executable='tello_position_cal_CATS', output='screen', namespace=namespace)
-        )
+            Node(package='tello_position', executable='tello_position_cal_CATS', output='screen', namespace=namespace),        
         
-        to_return.append(
             # Spawn tello_1.urdf
             Node(package='gazebo_ros', executable='spawn_entity.py', output='screen', namespace=namespace,
                 arguments=[
@@ -52,5 +43,5 @@ def generate_launch_description():
                     '-robot_namespace', namespace
                 ]
             ),
-        )
+        ])
     return LaunchDescription(to_return)
