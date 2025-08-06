@@ -131,7 +131,10 @@ def get_topics_and_types():
         topics = []
         print("found those topics: ")
         for e in output:
-            print(e)
+            if e.split(' ')[0] in FILTERED_TOPICS:
+                print(f"ignoring : {e}")
+            else:
+                print(e)
         print("sleeping 10 sec for UX")
         time.sleep(10)
 
@@ -158,7 +161,13 @@ def import_message_type(type_str):
         print(f"Impossible d'importer le type {type_str}: {e}")
         return None
 
-FILTERED_TOPICS = ["/rosout"]
+FILTERED_TOPICS = [
+    "/rosout",
+    "/tf_static",
+    "/tello_7/joy",
+    "/tello_7/cmd_vel",
+    "/tello_7/imu_plugin_7/out"
+]
 
 
 class DynamicSubscriberNode(Node):
@@ -171,6 +180,7 @@ class DynamicSubscriberNode(Node):
 
         for topic_name, type_str in topics:
             if topic_name in FILTERED_TOPICS:
+                self.get_logger().info(f"ignoring : {topic_name} [{type_str}]")
                 continue
 
             msg_type = import_message_type(type_str)
