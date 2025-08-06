@@ -685,3 +685,6 @@ versions:
 setup_gazebo_models:
 	@echo "for the moment unable to find where does the coke can belongs from"
 	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
+
+copy_simu_gazebo:
+	cp -r ~Simulation_Gazebo/tello_ros_ws/ ~/PFE/Simulation_Gazebo_new/
