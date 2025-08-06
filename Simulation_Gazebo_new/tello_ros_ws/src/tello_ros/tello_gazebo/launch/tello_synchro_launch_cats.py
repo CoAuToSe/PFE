@@ -6,7 +6,7 @@ from launch.actions import ExecuteProcess
 
 
 def generate_launch_description():
-    namespaces = ['tello_7', 'tello_5']
+    namespaces = {'tello_7': [], 'tello_5': []}
     world_path = os.path.join(get_package_share_directory('tello_gazebo'), 'worlds', 'simple.world')
     to_return = [
         # Launch Gazebo, loading simple.world
@@ -18,7 +18,7 @@ def generate_launch_description():
             world_path
         ], output='screen'),
     ]
-    for namespace in namespaces:
+    for namespace, data in namespaces.items():
         urdf_path = os.path.join(get_package_share_directory('tello_description'), 'urdf', namespace + '.urdf')
         to_return.extend([
             # Publish static transforms
