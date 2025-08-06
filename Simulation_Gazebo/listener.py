@@ -3,12 +3,12 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 class ListenerNode(Node):
-    def __init__(self):
-        super().__init__('listener_node')
-        # On s'abonne au topic '$2'
+    def __init__(self, topic_name):
+        super().__init__("listener_node" + topic_name.replace("/","_"))
+        self.get_logger().info(f"subscribing to: {topic_name}")
         self.subscription = self.create_subscription(
             String,
-            '/cmd_vel',
+            topic_name,
             self.listener_callback,
             10  # taille de la queue
         )
@@ -19,7 +19,7 @@ class ListenerNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ListenerNode()
+    node = ListenerNode('/chatter')
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
