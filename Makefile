@@ -32,6 +32,7 @@ try_clean: 						\
 min_install_2004: 				\
 	sudo_upgrade				\
 	install_github_desktop_2004	\
+	install_python_3_10			\
 	install_software			\
 	install_software_2004
 
@@ -41,7 +42,7 @@ min_install_2404: 				\
 	install_deps_2404			\
 	install_software
 
-install_deps_2404:		\
+install_deps_2404:	\
 	install_git			
 
 # Install targets -------------------------------------------------------------
@@ -52,7 +53,6 @@ install_software:			\
 	install_discord-snap	\
 	install_vscode			\
 	correct_vscode			\
-	install_python_3_10		\
 	install_FaMe_modeler	\
 	install_deps
 
