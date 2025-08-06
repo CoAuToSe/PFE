@@ -728,4 +728,4 @@ copy_makefile_to_Github:
 copy_makefile_from_Github: check_with_user
 	cp  ~/PFE/Makefile ~/Makefile
 
-#TODO: copy gazebo models
+#TODO: copy gazebo models ; refer to 'setup_gazebo_models'
