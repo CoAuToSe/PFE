@@ -686,5 +686,28 @@ setup_gazebo_models:
 	@echo "for the moment unable to find where does the coke can belongs from"
 	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
 
-copy_simu_gazebo:
-	cp -r ~Simulation_Gazebo/tello_ros_ws/ ~/PFE/Simulation_Gazebo_new/
+# /====================================\
+# |        Github integration          |
+# \====================================/
+
+copy_from_github:					\
+	copy_simu_gazebo_from_Github	\
+	copy_makefile_from_Github
+
+copy_to_github:						\
+	copy_simu_gazebo_from_Github	\
+	copy_makefile_from_Github
+
+
+copy_simu_gazebo_to_Github:
+	cp -r ~/Simulation_Gazebo/tello_ros_ws/ ~/PFE/Simulation_Gazebo_new/
+
+copy_simu_gazebo_from_Github:
+	cp -r ~/PFE/Simulation_Gazebo_new/ ~/Simulation_Gazebo/tello_ros_ws/ 
+
+
+copy_makefile_to_Github:
+	cp  ~/Makefile ~/PFE/Makefile
+
+copy_makefile_from_Github:
+	cp  ~/PFE/Makefile ~/Makefile
