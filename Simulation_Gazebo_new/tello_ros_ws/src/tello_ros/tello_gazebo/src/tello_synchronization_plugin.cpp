@@ -81,7 +81,7 @@ namespace tello_gazebo
             }
 
             position_sub_ = node_->create_subscription<tello_msgs::msg::TelloPosition>(
-                    "/tello_position", 10,
+                    "tello_position", 10,
                     std::bind(&TelloPositionSyncPlugin::OnPositionUpdate, this, std::placeholders::_1));
 
             update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
