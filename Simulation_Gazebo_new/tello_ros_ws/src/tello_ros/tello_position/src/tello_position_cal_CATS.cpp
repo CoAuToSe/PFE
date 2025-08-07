@@ -54,8 +54,8 @@ class TelloPosition : public rclcpp::Node {
     }
 
    private:
-    void flight_data_callback(
-        const tello_msgs::msg::FlightData::SharedPtr msg) {
+    void flight_data_callback(const tello_msgs::msg::FlightData::SharedPtr msg) {
+        // std::cout << "got something" << std::endl;
         auto current_time = this->now();
         double dt = (current_time - last_time_).seconds();
         last_time_ = current_time;
@@ -116,6 +116,12 @@ class TelloPosition : public rclcpp::Node {
         y_ += vy_natural / 100.0 * dt + 0.5 * ay_natural * dt * dt / 100.0;
         z_ += vz_natural / 100.0 * dt + 0.5 * az_natural * dt * dt / 100.0;
 
+        // std::cout << "x_" << x_ << std::endl;
+        // std::cout << "y_" << y_ << std::endl;
+        // std::cout << "z_" << z_ << std::endl;
+        // std::cout << "vx_" << vx_ << std::endl;
+        // std::cout << "vy_" << vy_ << std::endl;
+        // std::cout << "vz_" << vz_ << std::endl;
         double height_tof =
             (msg->tof / 100.0) * std::cos(pitch) * std::cos(roll);
         if (msg->tof == 6553) {
