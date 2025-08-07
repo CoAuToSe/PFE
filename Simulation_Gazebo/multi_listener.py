@@ -162,11 +162,16 @@ def import_message_type(type_str):
         return None
 
 FILTERED_TOPICS = [
+    "/clock",
     "/rosout",
+    "/performance_metrics",
     "/tf_static",
     "/tello_7/joy",
     "/tello_7/cmd_vel",
-    "/tello_7/imu_plugin_7/out"
+    "/tello_7/imu_plugin_7/out",
+    "/tello_7/imu/data_raw",
+    "/tello_7/tello_7/image_raw",
+    "/tello_7/tello_7/camera_info"
 ]
 
 
