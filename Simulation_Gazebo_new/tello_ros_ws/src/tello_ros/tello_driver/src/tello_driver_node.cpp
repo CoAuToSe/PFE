@@ -43,11 +43,13 @@ namespace tello_driver
   TelloDriverNode::TelloDriverNode(const rclcpp::NodeOptions &options) :
     Node("tello_driver", options)
   {
-    // ROS publishers // what why it isn't used ???? not even fucking stored
-    // image_pub_ = create_publisher<sensor_msgs::msg::Image>("image_raw", 1);
-    // camera_info_pub_ = create_publisher<sensor_msgs::msg::CameraInfo>("camera_info", rclcpp::SensorDataQoS());
-    // flight_data_pub_ = create_publisher<tello_msgs::msg::FlightData>("flight_data", 1); 
-    // tello_response_pub_ = create_publisher<tello_msgs::msg::TelloResponse>("tello_response", 1); // why it's useless
+    // ROS publishers 
+    // what why it isn't used ???? not even fucking stored
+    // ok for godsake the persone who made this code originaly is a criminal
+    image_pub_ = create_publisher<sensor_msgs::msg::Image>("image_raw", 1);
+    camera_info_pub_ = create_publisher<sensor_msgs::msg::CameraInfo>("camera_info", rclcpp::SensorDataQoS());
+    flight_data_pub_ = create_publisher<tello_msgs::msg::FlightData>("flight_data", 1); 
+    tello_response_pub_ = create_publisher<tello_msgs::msg::TelloResponse>("tello_response", 1);
 
     // ROS service
     command_srv_ = create_service<tello_msgs::srv::TelloAction>(
