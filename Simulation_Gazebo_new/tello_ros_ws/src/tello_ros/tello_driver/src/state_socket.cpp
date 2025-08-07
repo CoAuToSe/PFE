@@ -16,6 +16,8 @@ namespace tello_driver {
 
 // Process a state packet from the drone, runs at 10Hz
     void StateSocket::process_packet(size_t r) {
+
+        // RCLCPP_INFO(driver_->get_logger(), "state packet received");
         std::lock_guard<std::mutex> lock(mtx_);
 
         static std::map<uint8_t, std::string> enum_names{
@@ -24,12 +26,15 @@ namespace tello_driver {
             {tello_msgs::msg::FlightData::SDK_2_0,         "v2.0"}
         };
 
+        // RCLCPP_INFO(driver_->get_logger(), "step 1");
         receive_time_ = driver_->now();
 
         if (receiving_ && driver_->count_subscribers(driver_->flight_data_pub_->get_topic_name()) == 0) {
             // Nothing to do
             return;
         }
+
+        // RCLCPP_INFO(driver_->get_logger(), "step 2");
 
         // Split on ";" and ":" and generate a key:value map
         std::map<std::string, std::string> fields;
@@ -40,8 +45,13 @@ namespace tello_driver {
             fields[match[1]] = match[2];
         }
 
+
+
+        // RCLCPP_INFO(driver_->get_logger(), "step 3");
         // First message?
         if (!receiving_) {
+
+            // RCLCPP_INFO(driver_->get_logger(), "step 3.1");
             receiving_ = true;
 
             // Hack to figure out the SDK version
@@ -53,6 +63,8 @@ namespace tello_driver {
             RCLCPP_INFO(driver_->get_logger(), "Receiving state, SDK version %s", enum_names[sdk_].c_str());
         }
 
+
+        // RCLCPP_INFO(driver_->get_logger(), "step 4");
         // Only send ROS messages if there are subscribers // not wanted behavior for the moment, as a test
         // if (driver_->count_subscribers(driver_->flight_data_pub_->get_topic_name()) > 0) {
             tello_msgs::msg::FlightData msg;
@@ -93,5 +105,7 @@ namespace tello_driver {
 
             driver_->flight_data_pub_->publish(msg);
         // }
+
+        // RCLCPP_INFO(driver_->get_logger(), "step 5");
     }
 } // namespace tello_driver
