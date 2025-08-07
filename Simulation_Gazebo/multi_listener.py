@@ -4,6 +4,7 @@ import subprocess
 import importlib
 from rclpy.qos import QoSProfile
 import time
+import tello_msgs.msg
 
 # # # from pprint import pformat
 # # # from rclpy.serialization import serialize_message
@@ -170,6 +171,7 @@ FILTERED_TOPICS = [
     "/tello_7/cmd_vel",
     "/tello_7/imu_plugin_7/out",
     "/tello_7/imu/data_raw",
+    "/tello_7/image_raw",
     "/tello_7/tello_7/image_raw",
     "/tello_7/tello_7/camera_info"
 ]
