@@ -8,10 +8,10 @@
 class FlightDataSubscriber : public rclcpp::Node
 {
 public:
-  FlightDataSubscriber() : Node("flight_data_subscriber")
+  FlightDataSubscriber(const rclcpp::NodeOptions& options) : Node("flight_data_subscriber", options)
   {
     subscription_ = this->create_subscription<tello_msgs::msg::FlightData>(
-      "/flight_data", 10, std::bind(&FlightDataSubscriber::topic_callback, this, std::placeholders::_1));
+      "flight_data", 10, std::bind(&FlightDataSubscriber::topic_callback, this, std::placeholders::_1));
 
     data_file_.open("flight_data.txt", std::ios::out | std::ios::trunc);
     if (!data_file_.is_open())
@@ -75,7 +75,8 @@ private:
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<FlightDataSubscriber>();
+    rclcpp::NodeOptions options;
+  auto node = std::make_shared<FlightDataSubscriber>(options);
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
