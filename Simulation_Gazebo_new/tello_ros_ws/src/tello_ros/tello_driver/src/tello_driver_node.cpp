@@ -7,7 +7,7 @@ using asio::ip::udp;
 namespace tello_driver {
 
 #define TELLO_DRIVER_ALL_PARAMS                                                                                     \
-    CXT_MACRO_MEMBER(drone_ip, std::string, std::string("192.168.10.1")) /* Send commands to this IP address */     \
+    CXT_MACRO_MEMBER(drone_ip, std::string, std::string("192.168.50.103")) /* Send commands to this IP address */     \
     CXT_MACRO_MEMBER(drone_port, int, 8889)                              /* Send commands to this port */           \
     CXT_MACRO_MEMBER(command_port, int, 38065)                           /* Send commands from this port */         \
     CXT_MACRO_MEMBER(data_port, int, 8890)                               /* Flight data will arrive at this port */ \
@@ -32,7 +32,7 @@ namespace tello_driver {
     {
         // ROS publishers 
         // what why it isn't used ???? not even fucking stored
-        // ok for godsake the persone who made this code originaly is a criminal, he is using some degenerate namspace rule
+        // ok for godsake the persone who made this code originaly is a criminal, he is using some degenerate namespace rule
         image_pub_ = create_publisher<sensor_msgs::msg::Image>("image_raw", 1);
         camera_info_pub_ = create_publisher<sensor_msgs::msg::CameraInfo>("camera_info", rclcpp::SensorDataQoS());
         flight_data_pub_ = create_publisher<tello_msgs::msg::FlightData>("flight_data", 1); 
