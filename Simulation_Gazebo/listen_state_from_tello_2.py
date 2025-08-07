@@ -23,18 +23,18 @@ except socket.timeout:
 ## On a dit que le tello est en command
 
 # Adresse et port du drone
-tello_address = ('192.168.50.103', 8889)
+tello_address2 = ('192.168.50.103', 8889)
 
 # Créer un socket d’envoi de commandes
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(('', 9001))  # Port local arbitraire
+sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock2.bind(('', 9001))  # Port local arbitraire
 
 # Envoyer "command" pour activer le mode SDK
-sock.sendto(b'command', tello_address)
+sock2.sendto(b'command', tello_address2)
 
 # Attendre une réponse
 try:
-    response, _ = sock.recvfrom(1024)
+    response, _ = sock2.recvfrom(1024)
     print("Réponse du Tello :", response.decode('utf-8'))
 except socket.timeout:
     print("Pas de réponse (timeout).")
