@@ -7,7 +7,7 @@ using asio::ip::udp;
 namespace tello_driver
 {
 
-#define TELLO_DRIVER_ALL_PARAMS \
+#define TELLO_DRIVER_ALL_PARAMS                                                                                     \
     CXT_MACRO_MEMBER(drone_ip, std::string, std::string("192.168.10.1")) /* Send commands to this IP address */     \
     CXT_MACRO_MEMBER(drone_port, int, 8889)                              /* Send commands to this port */           \
     CXT_MACRO_MEMBER(command_port, int, 38065)                           /* Send commands from this port */         \
@@ -17,8 +17,7 @@ namespace tello_driver
         "install/tello_driver/share/tello_driver/cfg/camera_info.yaml")  /* Camera calibration path */              \
     /* End of list */
 
-    struct TelloDriverContext
-    {
+    struct TelloDriverContext {
 #undef CXT_MACRO_MEMBER
 #define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_DEFINE_MEMBER(n, t, d)
         CXT_MACRO_DEFINE_MEMBERS(TELLO_DRIVER_ALL_PARAMS)
@@ -54,11 +53,10 @@ namespace tello_driver
         spin_timer_ = create_wall_timer(1s, std::bind(&TelloDriverNode::timer_callback, this));
 
         // Parameters - Allocate the parameter context as a local variable because it is not used outside this routine
-        TelloDriverContext cxt{};
+        TelloDriverContext cxt {};
 #undef CXT_MACRO_MEMBER
 #define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_LOAD_PARAMETER((*this), cxt, n, t, d)
-        CXT_MACRO_INIT_PARAMETERS(TELLO_DRIVER_ALL_PARAMS, [this]()
-        {})
+        CXT_MACRO_INIT_PARAMETERS(TELLO_DRIVER_ALL_PARAMS, [this]() {})
 
         // NOTE: This is not setup to dynamically update parameters after ths node is running.
 
@@ -73,15 +71,13 @@ namespace tello_driver
         video_socket_ = std::make_unique<VideoSocket>(this, cxt.video_port_, cxt.camera_info_path_);
     }
 
-    TelloDriverNode::~TelloDriverNode()
-    {
-    }
+    TelloDriverNode::~TelloDriverNode() {}
 
     void TelloDriverNode::command_callback(
         const std::shared_ptr<rmw_request_id_t> request_header,
         const std::shared_ptr<tello_msgs::srv::TelloAction::Request> request,
-        std::shared_ptr<tello_msgs::srv::TelloAction::Response> response)
-    {
+        std::shared_ptr<tello_msgs::srv::TelloAction::Response> response
+    ) {
         (void) request_header;
         if (!state_socket_->receiving() || !video_socket_->receiving()) {
             RCLCPP_WARN(get_logger(), "Not connected, dropping '%s'", request->cmd.c_str());
@@ -95,8 +91,7 @@ namespace tello_driver
         }
     }
 
-    void TelloDriverNode::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg)
-    {
+    void TelloDriverNode::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
         // TODO cmd_vel should specify velocity, not joystick position
         if (!command_socket_->waiting()) {
             std::ostringstream rc;
@@ -109,8 +104,7 @@ namespace tello_driver
     }
 
     // Do work every second
-    void TelloDriverNode::timer_callback()
-    {
+    void TelloDriverNode::timer_callback() {
         //====
         // Startup
         //====
@@ -151,9 +145,7 @@ namespace tello_driver
             timeout = true;
         }
 
-        if (timeout) {
-            return;
-        }
+        if (timeout) {return;}
 
         //====
         // Keep-alive, drone will auto-land if it hears nothing for 15s
