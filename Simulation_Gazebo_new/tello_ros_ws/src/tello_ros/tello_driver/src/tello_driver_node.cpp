@@ -4,8 +4,7 @@
 
 using asio::ip::udp;
 
-namespace tello_driver
-{
+namespace tello_driver {
 
 #define TELLO_DRIVER_ALL_PARAMS                                                                                     \
     CXT_MACRO_MEMBER(drone_ip, std::string, std::string("192.168.10.1")) /* Send commands to this IP address */     \

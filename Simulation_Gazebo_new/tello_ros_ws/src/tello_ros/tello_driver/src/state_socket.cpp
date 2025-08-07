@@ -2,29 +2,27 @@
 
 #include <regex>
 
-namespace tello_driver
-{
+namespace tello_driver {
 
     // Goals:
     // * make the data useful by parsing all documented fields
     // * some future SDK version might introduce new field types, so don't parse undocumented fields
     // * send the raw string as well
 
-    StateSocket::StateSocket(TelloDriverNode *driver, unsigned short data_port) : TelloSocket(driver, data_port)
-    {
+    StateSocket::StateSocket(TelloDriverNode *driver, unsigned short data_port) : TelloSocket(driver, data_port) {
         buffer_ = std::vector<unsigned char>(1024);
         listen();
     }
 
 // Process a state packet from the drone, runs at 10Hz
-    void StateSocket::process_packet(size_t r)
-    {
+    void StateSocket::process_packet(size_t r) {
         std::lock_guard<std::mutex> lock(mtx_);
 
         static std::map<uint8_t, std::string> enum_names{
             {tello_msgs::msg::FlightData::SDK_UNKNOWN, "unknown"},
             {tello_msgs::msg::FlightData::SDK_1_3,         "v1.3"},
-            {tello_msgs::msg::FlightData::SDK_2_0,         "v2.0"}};
+            {tello_msgs::msg::FlightData::SDK_2_0,         "v2.0"}
+        };
 
         receive_time_ = driver_->now();
 
@@ -55,8 +53,8 @@ namespace tello_driver
             RCLCPP_INFO(driver_->get_logger(), "Receiving state, SDK version %s", enum_names[sdk_].c_str());
         }
 
-        // Only send ROS messages if there are subscribers
-        if (driver_->count_subscribers(driver_->flight_data_pub_->get_topic_name()) > 0) {
+        // Only send ROS messages if there are subscribers // not wanted behavior for the moment, as a test
+        // if (driver_->count_subscribers(driver_->flight_data_pub_->get_topic_name()) > 0) {
             tello_msgs::msg::FlightData msg;
             msg.header.stamp = receive_time_;
             msg.raw = raw;
@@ -94,7 +92,6 @@ namespace tello_driver
             }
 
             driver_->flight_data_pub_->publish(msg);
-        }
+        // }
     }
-
 } // namespace tello_driver
