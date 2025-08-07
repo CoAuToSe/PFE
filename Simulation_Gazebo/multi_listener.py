@@ -167,6 +167,7 @@ FILTERED_TOPICS = [
     "/rosout",
     "/performance_metrics",
     "/tf_static",
+    "/tello_7/flight_data",
     "/tello_7/joy",
     "/tello_7/cmd_vel",
     "/tello_7/imu_plugin_7/out",
