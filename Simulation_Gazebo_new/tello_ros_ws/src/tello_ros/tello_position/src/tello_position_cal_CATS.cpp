@@ -18,7 +18,7 @@ class TelloPosition : public rclcpp::Node {
             "flight_data", 10,
             std::bind(&TelloPosition::flight_data_callback, this,
                       std::placeholders::_1));
-
+        // ok for some reason the topic tello_position doesn't seems to work
         publisher_ = this->create_publisher<tello_msgs::msg::TelloPosition>(
             "tello_position", 10);
 
@@ -122,6 +122,7 @@ class TelloPosition : public rclcpp::Node {
         // std::cout << "vx_" << vx_ << std::endl;
         // std::cout << "vy_" << vy_ << std::endl;
         // std::cout << "vz_" << vz_ << std::endl;
+
         double height_tof =
             (msg->tof / 100.0) * std::cos(pitch) * std::cos(roll);
         if (msg->tof == 6553) {
