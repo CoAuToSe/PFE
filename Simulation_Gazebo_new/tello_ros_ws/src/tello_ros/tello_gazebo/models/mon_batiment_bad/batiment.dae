@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 4.3.2 commit date:2024-12-16, commit time:21:10, hash:32f5fdce0a0a</authoring_tool>
+    </contributor>
+    <created>2025-03-18T14:57:56</created>
+    <modified>2025-03-18T14:57:56</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_cameras>
+    <camera id="Camera-camera" name="Camera">
+      <optics>
+        <technique_common>
+          <perspective>
+            <xfov sid="xfov">39.59775</xfov>
+            <aspect_ratio>1.777778</aspect_ratio>
+            <znear sid="znear">0.1</znear>
+            <zfar sid="zfar">100</zfar>
+          </perspective>
+        </technique_common>
+      </optics>
+      <extra>
+        <technique profile="blender">
+          <shiftx sid="shiftx" type="float">0</shiftx>
+          <shifty sid="shifty" type="float">0</shifty>
+          <dof_distance sid="dof_distance" type="float">10</dof_distance>
+        </technique>
+      </extra>
+    </camera>
+  </library_cameras>
+  <library_lights>
+    <light id="Light-light" name="Light">
+      <technique_common>
+        <point>
+          <color sid="color">1000 1000 1000</color>
+          <constant_attenuation>1</constant_attenuation>
+          <linear_attenuation>0</linear_attenuation>
+          <quadratic_attenuation>0</quadratic_attenuation>
+        </point>
+      </technique_common>
+      <extra>
+        <technique profile="blender">
+          <type sid="type" type="int">0</type>
+          <flag sid="flag" type="int">0</flag>
+          <mode sid="mode" type="int">2097153</mode>
+          <red sid="red" type="float">1</red>
+          <green sid="green" type="float">1</green>
+          <blue sid="blue" type="float">1</blue>
+          <energy sid="blender_energy" type="float">1000</energy>
+          <spotsize sid="spotsize" type="float">75</spotsize>
+          <spotblend sid="spotblend" type="float">0.15</spotblend>
+          <clipsta sid="clipsta" type="float">0.04999995</clipsta>
+          <clipend sid="clipend" type="float">40</clipend>
+          <radius sid="radius" type="float">0.1</radius>
+          <area_shape sid="area_shape" type="int">1</area_shape>
+          <area_size sid="area_size" type="float">0.1</area_size>
+          <area_sizey sid="area_sizey" type="float">0.1</area_sizey>
+          <area_sizez sid="area_sizez" type="float">1</area_sizez>
+        </technique>
+      </extra>
+    </light>
+  </library_lights>
+  <library_images/>
+  <library_geometries>
+    <geometry id="Areas_building-mesh" name="Areas:building">
+      <mesh>
+        <source id="Areas_building-mesh-positions">
+          <float_array id="Areas_building-mesh-positions-array" count="96">6.756693 27.5839 157.5885 7.090652 36.69398 157.3119 -9.284445 37.5375 157.1261 -9.662932 30.41815 157.5018 0.3780866 30.047 157.5169 0.3001629 27.83696 157.6038 6.756693 27.5839 177.6038 7.090652 36.69398 177.6038 -9.284445 37.5375 177.6038 -9.662932 30.41815 177.6038 0.3780866 30.047 177.6038 0.3001629 27.83696 177.6038 15.11679 27.55016 157.4688 -9.050675 28.46117 157.6053 -9.896703 5.804117 158.775 -11.92272 5.888469 158.8414 -13.51459 -35.39343 159.6616 -0.5124694 -35.88267 158.866 -0.4122818 -33.20029 158.8341 10.30778 -33.60517 158.1901 11.2206 -14.84529 158.106 13.55831 -14.92965 157.9763 15.11679 27.55016 171.6616 -9.050675 28.46117 171.6616 -9.896703 5.804117 171.6616 -11.92272 5.888469 171.6616 -13.51459 -35.39343 171.6616 -0.5124694 -35.88267 171.6616 -0.4122818 -33.20029 171.6616 10.30778 -33.60517 171.6616 11.2206 -14.84529 171.6616 13.55831 -14.92965 171.6616</float_array>
+          <technique_common>
+            <accessor source="#Areas_building-mesh-positions-array" count="32" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Areas_building-mesh-normals">
+          <float_array id="Areas_building-mesh-normals-array" count="132">0 0 1 0.9993287 -0.03663355 0 0.05144441 0.9986758 0 -0.9985899 0.05308806 0 -0.03693825 -0.9993175 0 -0.999379 0.03523707 0 -0.03916394 -0.9992328 0 0 0 1 0.03766882 0.9992902 0 -0.9993036 0.03731459 0 0.04159837 0.9991344 0 -0.9992573 0.03853225 0 -0.03760129 -0.9992928 0 0.9993032 -0.03732407 0 -0.03774225 -0.9992876 0 0.9988183 -0.04860055 0 -0.03605991 -0.9993496 0 0.9993277 -0.03666269 0 0 0 1 0 0 1 0 0 1 0.9993288 -0.03663355 0 0.05144441 0.9986758 0 -0.9985898 0.05308806 0 -0.03693825 -0.9993175 0 -0.999379 0.03523707 0 -0.03916394 -0.9992329 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0.03766882 0.9992903 0 -0.9993035 0.03731459 0 0.04159837 0.9991344 0 -0.9992574 0.03853225 0 -0.03760129 -0.9992929 0 0.9993032 -0.03732407 0 -0.03774225 -0.9992876 0 0.9988183 -0.04860055 0 -0.03605991 -0.9993497 0 0.9993277 -0.03666269 0</float_array>
+          <technique_common>
+            <accessor source="#Areas_building-mesh-normals-array" count="44" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Areas_building-mesh-vertices">
+          <input semantic="POSITION" source="#Areas_building-mesh-positions"/>
+        </vertices>
+        <triangles count="44">
+          <input semantic="VERTEX" source="#Areas_building-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Areas_building-mesh-normals" offset="1"/>
+          <p>8 0 9 0 10 0 7 1 0 1 1 1 8 2 1 2 2 2 3 3 8 3 2 3 4 4 9 4 3 4 5 5 10 5 4 5 6 6 5 6 0 6 28 7 30 7 24 7 13 8 22 8 12 8 14 9 23 9 13 9 15 10 24 10 14 10 16 11 25 11 15 11 27 12 16 12 17 12 28 13 17 13 18 13 29 14 18 14 19 14 30 15 19 15 20 15 31 16 20 16 21 16 22 17 21 17 12 17 11 18 6 18 10 18 6 19 7 19 10 19 7 20 8 20 10 20 7 21 6 21 0 21 8 22 7 22 1 22 3 23 9 23 8 23 4 24 10 24 9 24 5 25 11 25 10 25 6 26 11 26 5 26 31 27 22 27 30 27 22 28 23 28 24 28 24 29 25 29 26 29 22 30 24 30 30 30 28 31 29 31 30 31 24 32 26 32 28 32 26 33 27 33 28 33 13 34 23 34 22 34 14 35 24 35 23 35 15 36 25 36 24 36 16 37 26 37 25 37 27 38 26 38 16 38 28 39 27 39 17 39 29 40 28 40 18 40 30 41 29 41 19 41 31 42 30 42 20 42 22 43 31 43 21 43</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Areas_building" name="Areas:building" type="NODE">
+        <matrix sid="transform">1 0 0 -38.23218 0 1 0 0 0 0 1 -157.6324 0 0 0 1</matrix>
+        <instance_geometry url="#Areas_building-mesh" name="Areas:building"/>
+      </node>
+      <node id="GOOGLE_SAT_WM" name="GOOGLE_SAT_WM" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+      </node>
+      <node id="Camera" name="Camera" type="NODE">
+        <matrix sid="transform">0.6859207 -0.3240135 0.6515582 -246891.9 0.7276763 0.3054208 -0.6141704 -6.22608e6 0 0.8953956 0.4452714 4.958309 0 0 0 1</matrix>
+        <instance_camera url="#Camera-camera"/>
+      </node>
+      <node id="Light" name="Light" type="NODE">
+        <matrix sid="transform">-0.2908646 -0.7711008 0.5663932 -246894.9 0.9551712 -0.1998834 0.2183912 -6.22607e6 -0.05518906 0.6045247 0.7946723 5.903862 0 0 0 1</matrix>
+        <instance_light url="#Light-light"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>
