@@ -3,7 +3,7 @@
 #include <gazebo_ros/node.hpp>
 #include <tello_msgs/msg/tello_position.hpp>
 #include "nav_msgs/msg/odometry.hpp"
-
+#include <rclcpp/qos.hpp> 
 
 namespace tello_gazebo
 {
@@ -57,7 +57,6 @@ namespace tello_gazebo
 
             // ROS node
             node_ = gazebo_ros::Node::Get(sdf);
-
             
             auto node_name = node_->get_name();
             auto node_namespace = node_->get_namespace();
@@ -79,9 +78,9 @@ namespace tello_gazebo
             {
                 RCLCPP_ERROR(node_->get_logger(), "use_sim_time is false, could be a bug");
             }
-
+            auto qos = rclcpp::SensorDataQoS();
             position_sub_ = node_->create_subscription<tello_msgs::msg::TelloPosition>(
-                    "tello_position", 10,
+                    "tello_position", qos,
                     std::bind(&TelloPositionSyncPlugin::OnPositionUpdate, this, std::placeholders::_1));
 
             update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
@@ -91,18 +90,21 @@ namespace tello_gazebo
         void OnPositionUpdate(const tello_msgs::msg::TelloPosition::SharedPtr msg)
         {
             last_position_ = msg;
+            std::cout << "received position" << std::endl;
         }
 
         void OnOdomUpdate(const nav_msgs::msg::Odometry::SharedPtr msg)
         {
             last_odom_ = msg;
+            std::cout << "received odom" << std::endl;
         }
 
         void OnUpdate()
         {
-            if (last_odom_ && last_position_)
+            // if (last_odom_ && last_position_)
+            if (last_position_)
             {
-                auto pos = last_odom_->pose.pose.position;
+                // auto pos = last_odom_->pose.pose.position;
                 {
                     ignition::math::Pose3d pose(
                             ignition::math::Vector3d(-last_position_->x, last_position_->y, last_position_->z),
