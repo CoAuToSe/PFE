@@ -238,15 +238,19 @@ install_ros2_foxy: install_cmake
 
 setup_bashrc:
 # Add some custom information into ~/.bashrc
-	grep -qxF "# Custom commands" $$HOME/.bashrc || ( \
-		echo "" >> $$HOME/.bashrc && \
-		echo "# Custom commands" >> $$HOME/.bashrc && \
-		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && \
-		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && \
-		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && \
-		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && \
-		echo "alias my-sc=\"cd $(TELLO_MSGS) && source install/setup.bash && cd - && cd $(ROS2_SHARED) && source install/setup.bash && cd -\"" >> $$HOME/.bashrc && \
-		echo "" >> $$HOME/.bashrc \
+	grep -qxF "# Custom commands" $$HOME/.bashrc || ( 																					\
+		echo "" >> $$HOME/.bashrc && 																									\
+		echo "# Custom commands" >> $$HOME/.bashrc && 																					\
+		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && 										\
+		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && 				\
+		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
+		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && 																	\
+		echo "alias my-sc=\"source $(TELLO_MSGS)/install/setup.bash && source $(ROS2_SHARED)/install/setup.bash\"" >> $$HOME/.bashrc && \
+		echo "" >> $$HOME/.bashrc && 																									\
+		echo "this-sc() {" >> $$HOME/.bashrc && 																						\
+		echo "    cd "$1" && source install/setup.bash && cd -> /dev/null 2>&1 " >> $$HOME/.bashrc && 									\
+		echo "}" >> $$HOME/.bashrc && 																									\
+		echo "" >> $$HOME/.bashrc 																										\
 	)
 
 # 4 — Gazebo 11 (classic) ------------------------------------------------------
