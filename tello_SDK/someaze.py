@@ -4,7 +4,7 @@ import time
 
 # IP et ports des drones Tello EDU
 TELLO_DRONES = [
-    {"ip": "192.168.50.33", "cmd_port": 8889, "telemetry_port": 8890, "name": "Tello1"},
+    {"ip": "192.168.50.33",  "cmd_port": 8889, "telemetry_port": 8890, "name": "Tello1"},
     {"ip": "192.168.50.103", "cmd_port": 8889, "telemetry_port": 8891, "name": "Tello2"},
 ]
 
