@@ -244,6 +244,8 @@ setup_bashrc:
 		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && \
+		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && \
+		echo "alias my-sc=\"cd $(TELLO_MSGS) && source install/setup.bash && cd - && cd $(ROS2_SHARED) && source install/setup.bash && cd -\"" >> $$HOME/.bashrc && \
 		echo "" >> $$HOME/.bashrc \
 	)
 
