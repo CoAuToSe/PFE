@@ -4,7 +4,7 @@ import subprocess
 import importlib
 from rclpy.qos import QoSProfile
 import time
-import tello_msgs.msg
+# import tello_msgs.msg
 
 # # # from pprint import pformat
 # # # from rclpy.serialization import serialize_message
@@ -152,15 +152,32 @@ def get_topics_and_types():
         return []
 
 
-def import_message_type(type_str):
-    """Ex: 'std_msgs/msg/String' -> <class 'std_msgs.msg.String'>"""
+# def import_message_type(type_str):
+#     """Ex: 'std_msgs/msg/String' -> <class 'std_msgs.msg.String'>"""
+#     try:
+#         package, _, msg_type = type_str.partition('/msg/')
+#         module = importlib.import_module(f'{package}.msg')
+#         return getattr(module, msg_type)
+#     except (ImportError, AttributeError) as e:
+#         print(f"Impossible d'importer le type {type_str}: {e}")
+#         return None
+
+from rosidl_runtime_py.utilities import get_message
+
+def import_message_type(type_str: str):
+    """
+    Retourne la classe Python correspondant à <package>/msg/<Type>.
+    Renvoie None si le type n’existe pas.
+    """
     try:
-        package, _, msg_type = type_str.partition('/msg/')
-        module = importlib.import_module(f'{package}.msg')
-        return getattr(module, msg_type)
-    except (ImportError, AttributeError) as e:
+        return get_message(type_str)
+    except (LookupError, AttributeError, ValueError, ModuleNotFoundError) as e:
+        # AttributeError : la classe n’existe pas dans le module
+        # LookupError / ValueError : chaîne mal formée ou interface inconnue
+        # ModuleNotFoundError : le paquet n’est pas installé
         print(f"Impossible d'importer le type {type_str}: {e}")
         return None
+
 
 FILTERED_TOPICS = [
     "/clock",
