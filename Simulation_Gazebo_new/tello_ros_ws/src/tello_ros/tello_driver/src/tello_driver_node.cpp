@@ -7,7 +7,7 @@ using asio::ip::udp;
 namespace tello_driver {
 
 #define TELLO_DRIVER_ALL_PARAMS                                                                                     \
-    CXT_MACRO_MEMBER(drone_ip, std::string, std::string("192.168.50.103")) /* Send commands to this IP address */     \
+    CXT_MACRO_MEMBER(drone_ip, std::string, std::string("192.168.10.1")) /* Send commands to this IP address */     \
     CXT_MACRO_MEMBER(drone_port, int, 8889)                              /* Send commands to this port */           \
     CXT_MACRO_MEMBER(command_port, int, 38065)                           /* Send commands from this port */         \
     CXT_MACRO_MEMBER(data_port, int, 8890)                               /* Flight data will arrive at this port */ \

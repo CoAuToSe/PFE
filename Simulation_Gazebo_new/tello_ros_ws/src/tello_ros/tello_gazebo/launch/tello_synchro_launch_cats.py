@@ -36,12 +36,13 @@ def generate_launch_description():
         
             Node(package='tello_driver', executable='tello_driver_main', output='screen', namespace=namespace,
                      parameters=[{
-                'drone_ip': '192.168.50.103',
+                'drone_ip': '192.168.50.63',
                 'drone_port': 8889,
                 'command_port': 38065,
                 'data_port': 8890,
                 'video_port': 11111
-            }] ),        
+                }] 
+            ),        
         
             Node(package='tello_position', executable='tello_position_cal_CATS', output='screen', namespace=namespace),        
         

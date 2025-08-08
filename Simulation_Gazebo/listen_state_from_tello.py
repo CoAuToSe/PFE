@@ -3,7 +3,7 @@ import socket
 ## On a dit que le tello est en command
 
 # Adresse et port du drone
-tello_address = ('192.168.50.144', 8889)
+tello_address = ('192.168.50.103', 8889)
 
 # Créer un socket d’envoi de commandes
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
