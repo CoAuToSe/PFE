@@ -1,0 +1,21 @@
+name: clearpath_msgs_ci
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *" # every day at midnight
+
+jobs:
+  build_and_test:
+    name: jazzy
+    strategy:
+      matrix:
+        env:
+          - {ROS_DISTRO: jazzy, ROS_REPO: main}
+          - {ROS_DISTRO: jazzy, ROS_REPO: testing}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{matrix.env}}
