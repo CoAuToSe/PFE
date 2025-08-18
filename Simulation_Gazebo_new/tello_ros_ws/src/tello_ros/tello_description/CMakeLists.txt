@@ -36,14 +36,14 @@ foreach(SRC_FILE ${SRC_FILES})
         message(STATUS "creating rules for ${URDF_FILE}")
         add_custom_command( OUTPUT ${URDF_FILE}
             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/src/replace.py"
-                "${CMAKE_CURRENT_SOURCE_DIR}/urdf/tello.xml" "suffix=${ROBOT_SUFFIX}" "topic_ns=${TOPIC_NS}" "robot_name=${ROBOT_FILE_NAME}" ">" "${URDF_FILE}"
+                "${SRC_FILE}" "suffix=${ROBOT_SUFFIX}" "topic_ns=${TOPIC_NS}" "robot_name=${ROBOT_FILE_NAME}" ">" "${URDF_FILE}"
             DEPENDS ${SRC_FILE}
             COMMENT "Generating ${URDF_FILE} from ${SRC_FILE}"
             VERBATIM
         )
         # TODO investigate why configure_file isn't working
         # configure_file("urdf/tello.xml" ${URDF_FILE})
-        add_custom_target(generate_urdf${ROBOT_SUFFIX} ALL DEPENDS ${URDF_FILE})
+        add_custom_target(generate_urdf_${ROBOT_FILE_NAME}${ROBOT_SUFFIX} ALL DEPENDS ${URDF_FILE})
     endforeach ()
     list(APPEND GENERATED_FILES ${OUT_FILE})
 endforeach()
