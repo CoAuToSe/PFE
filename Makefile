@@ -9,7 +9,7 @@
 
 SHELL := /bin/bash
 
-.PHONY: all install_all install_terminator install_vscode correct_vscode install_ros2_foxy install_gazebo install_python_3_10 \
+.PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
 		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
@@ -33,8 +33,8 @@ min_install_2004: 				\
 	sudo_upgrade				\
 	install_github_desktop_2004	\
 	install_python_3_10			\
-	install_software			\
-	install_software_2004
+	install_software_2004		\
+	install_software_2004_bis
 	@echo "After clonning you need to execute 'make copy_from_github'"
 
 min_install_2404: 				\
@@ -46,19 +46,37 @@ min_install_2404: 				\
 install_deps_2404:	\
 	install_git			
 
-# Install targets -------------------------------------------------------------
+# Works on 2004 and 2404
 install_software:			\
+	sudo_upgrade			\
+	install_discord-snap	\
+	install_terminator		\
+	install_code_2404		\
+
+
+# Install targets -------------------------------------------------------------
+install_software_2004:		\
 	sudo_upgrade			\
 	install_terminator		\
 	install_cmake			\
 	install_discord-snap	\
-	install_vscode			\
-	correct_vscode			\
+	install_vscode_2004		\
+	correct_vscode_2004		\
 	install_FaMe_modeler	\
 	install_deps
 
-install_software_2004:	\
-	install_gazebo		\
+install_software_2004:		\
+	sudo_upgrade			\
+	install_terminator		\
+	install_cmake			\
+	install_discord-snap	\
+	install_vscode_2004		\
+	correct_vscode_2004		\
+	install_FaMe_modeler	\
+	install_deps
+
+install_software_2004_bis:	\
+	install_gazebo			\
 	install_ros2_foxy		
 
 # Aggregate install target ----------------------------------------------------
@@ -176,7 +194,7 @@ install_terminator:
 	sudo apt install -y terminator
 
 # 2 — Visual Studio Code -------------------------------------------------------
-install_vscode:
+install_vscode_2004:
 	sudo apt-get update
 	sudo apt-get install -y wget gpg apt-transport-https
 	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
@@ -186,7 +204,7 @@ install_vscode:
 	sudo apt update
 	sudo apt install -y code  # or code-insiders
 
-correct_vscode:
+correct_vscode_2004:
 	sudo rm -f /etc/apt/sources.list.d/vscode.list
 	sudo rm -f /etc/apt/sources.list.d/vscode.sources
 	sudo rm -f /usr/share/keyrings/microsoft.gpg
@@ -207,6 +225,10 @@ correct_vscode:
 	# sudo install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/
 	# sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
 	# sudo apt update
+
+install_vscode_2404:
+	sudo apt install code -y
+
 
 
 # 3 — ROS 2 Foxy --------------------------------------------------------------
@@ -699,6 +721,8 @@ setup_gazebo_models:
 # |         Github integration         |
 # \====================================/
 
+PATH_PFE:=~/PFE
+
 check_with_user_first_time:
 	@echo ""
 	@echo "You are REALLY going to ERASE EVERYTHING of the local version"
@@ -713,8 +737,11 @@ check_with_user:
 
 
 copy_to_github:						\
-	copy_simu_gazebo_from_Github	\
-	copy_makefile_from_Github
+	copy_simu_gazebo_to_Github		\
+	copy_makefile_to_Github			\
+	copy_bashrc_to_Github			\
+	copy_code_setup_to_Github		\
+	copy_gazebo_models_to_Github	\
 
 copy_from_github:					\
 	check_with_user					\
@@ -722,25 +749,17 @@ copy_from_github:					\
 	copy_simu_gazebo_from_Github	\
 	copy_makefile_from_Github
 
+define github
+copy_$1_to_Github:
+	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
+copy_$1_from_Github: check_with_user
+	cp -r $3 $2
+endef
 
-copy_simu_gazebo_to_Github: 
-	cp -r ~/Simulation_Gazebo/tello_ros_ws/ ~/PFE/Simulation_Gazebo_new/
+$(eval $(call github,simu_gazebo,~/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
+$(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
+$(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
+$(eval $(call github,code_setup,~/.config/Code/User/,${PATH_PFE}/Code/))
+$(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/models))
+# $(eval $(call github,,,))
 
-copy_simu_gazebo_from_Github: check_with_user
-	cp -r ~/PFE/Simulation_Gazebo_new/ ~/Simulation_Gazebo/tello_ros_ws/ 
-
-
-copy_makefile_to_Github:
-	cp  ~/Makefile ~/PFE/Makefile
-
-copy_makefile_from_Github: check_with_user
-	cp  ~/PFE/Makefile ~/Makefile
-
-
-copy_bashrc_to_Github:
-	cp  ~/.bashrc ~/PFE/.bashrc
-
-copy_bashrc_from_Github: check_with_user
-	cp  ~/PFE/.bashrc ~/.bashrc
-
-#TODO: copy gazebo models ; refer to 'setup_gazebo_models'
