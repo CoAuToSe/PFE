@@ -90,13 +90,13 @@ namespace tello_gazebo
         void OnPositionUpdate(const tello_msgs::msg::TelloPosition::SharedPtr msg)
         {
             last_position_ = msg;
-            std::cout << "received position" << std::endl;
+            // std::cout << "received position" << std::endl;
         }
 
         void OnOdomUpdate(const nav_msgs::msg::Odometry::SharedPtr msg)
         {
             last_odom_ = msg;
-            std::cout << "received odom" << std::endl;
+            // std::cout << "received odom" << std::endl;
         }
 
         void OnUpdate()
