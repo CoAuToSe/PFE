@@ -7,8 +7,9 @@ from launch.actions import ExecuteProcess
 
 def generate_launch_description():
     namespaces = {
-        'tello_7': [],
-        # 'tello_5': [],
+        'tello_7': [0,0,0],
+        'tello_5': [1,1,1],
+        'tello_2': [2,2,2],
     }
     world_path = os.path.join(get_package_share_directory('tello_gazebo'), 'worlds', 'simple.world')
     to_return = [
@@ -35,23 +36,31 @@ def generate_launch_description():
             Node(package='tello_driver', executable='tello_joy_main', output='screen', namespace=namespace),        
         
             Node(package='tello_driver', executable='tello_driver_main', output='screen', namespace=namespace,
-                     parameters=[{
-                'drone_ip': '192.168.50.63',
-                'drone_port': 8889,
-                'command_port': 38065,
-                'data_port': 8890,
-                'video_port': 11111
-                }] 
+                #      parameters=[{
+                # 'drone_ip': '192.168.50.63',
+                # 'drone_port': 8889,
+                # 'command_port': 38065,
+                # 'data_port': 8890,
+                # 'video_port': 11111
+                # }] 
             ),        
         
-            Node(package='tello_position', executable='tello_position_cal_CATS', output='screen', namespace=namespace),        
+            Node(package='tello_position', executable='tello_position_cal_CATS', output='screen', namespace=namespace, 
+            parameters=[{
+                'initial_x': data[0],
+                'initial_y': data[1],
+                'initial_z': data[2]
+            }]),        
         
             # Spawn tello_1.urdf
             Node(package='gazebo_ros', executable='spawn_entity.py', output='screen', namespace=namespace,
                 arguments=[
                     '-file', urdf_path,
                     '-entity', namespace,
-                    '-robot_namespace', namespace
+                    '-robot_namespace', namespace,
+                    '-x', str(data[0]),
+                    '-y', str(data[1]),
+                    '-z', str(data[2])
                 ]
             ),
         ])
