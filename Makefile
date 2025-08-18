@@ -736,4 +736,11 @@ copy_makefile_to_Github:
 copy_makefile_from_Github: check_with_user
 	cp  ~/PFE/Makefile ~/Makefile
 
+
+copy_bashrc_to_Github:
+	cp  ~/.bashrc ~/PFE/.bashrc
+
+copy_bashrc_from_Github: check_with_user
+	cp  ~/PFE/.bashrc ~/.bashrc
+
 #TODO: copy gazebo models ; refer to 'setup_gazebo_models'
