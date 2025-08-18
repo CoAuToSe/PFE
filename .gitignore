@@ -144,3 +144,4 @@ GitHubDesktop-linux-2.9.6-linux1.deb*
 /ros2_shared
 /tello_msgs
 !**/buildings.obj
+/Code/User/History

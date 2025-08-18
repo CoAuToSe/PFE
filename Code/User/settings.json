@@ -1,0 +1,7 @@
+{
+    "workbench.colorTheme": "Monokai Dimmed",
+    "files.exclude": {
+        "**/.git": false
+    },
+    "files.autoSave": "onFocusChange"
+}
