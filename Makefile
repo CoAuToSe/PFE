@@ -758,12 +758,13 @@ copy_from_github:					\
 	check_with_user_first_time		\
 	copy_simu_gazebo_from_Github	\
 	copy_code_setup_from_Github		\
-	copy_makefile_from_Github
+	copy_makefile_from_Github 		\
+	setup_bashrc
 
 define github
-copy_$1_to_Github:
+copy_$1_to_github:
 	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
-copy_$1_from_Github: check_with_user
+copy_$1_from_github: check_with_user
 # 	@echo "$2"
 	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
 	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
