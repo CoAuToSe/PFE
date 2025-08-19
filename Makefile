@@ -758,10 +758,10 @@ define github
 copy_$1_to_Github:
 	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
 copy_$1_from_Github: check_with_user
-	@echo "$2"
+# 	@echo "$2"
 	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
 	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
-	if [ -d $2 ] ; then echo "dic $2 $(dir ${2:/=})"; cp -r $3/* $(dir ${2:/=}); fi
+	@if [ -d $2 ] ; then echo "dic $2 $(dir ${2:/=})"; cp -r $3/* $(dir ${2:/=}); fi
 clean_$1:	
 	rm -r $2
 endef
