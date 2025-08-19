@@ -751,14 +751,18 @@ copy_from_github:					\
 	check_with_user					\
 	check_with_user_first_time		\
 	copy_simu_gazebo_from_Github	\
+	copy_code_setup_from_Github		\
 	copy_makefile_from_Github
 
 define github
 copy_$1_to_Github:
 	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
 copy_$1_from_Github: check_with_user
-	cp -r $3 $2
-clean_$1:
+	@echo "$2"
+	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
+	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
+	if [ -d $2 ] ; then echo "dic $2 $(dir ${2:/=})"; cp -r $3/* $(dir ${2:/=}); fi
+clean_$1:	
 	rm -r $2
 endef
 
