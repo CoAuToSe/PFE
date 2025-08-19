@@ -11,8 +11,8 @@ SHELL := /bin/bash
 
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
-		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
-		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
+		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_FaMe \
+		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement setup_FaMe_simulation \
 		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
 DELAY ?= 20
@@ -42,6 +42,10 @@ min_install_2404: 				\
 	install_github_desktop_2404	\
 	install_deps_2404			\
 	install_software
+
+# /====================================\
+# |           Macro  install           |
+# \====================================/
 
 install_deps_2404:	\
 	install_git			
@@ -89,7 +93,7 @@ install_all2: 					\
 	setup_ros2_shared			\
 	clone_tello_msgs 			\
 	setup_tello_msgs			\
-	install_examples 			\
+	install_FaMe 			\
 	setup_FaMe_agri 			\
 	copy_models_FaMe_agri		\
 	setup_gazebo 				\
@@ -105,6 +109,11 @@ install_all_2404:\
 update: sudo_upgrade
 
 
+
+# /====================================\
+# |            Define Macro            |
+# \====================================/
+
 define _clear_ros
 	if [ -d "build" ] && [ -d "install" ] && [ -d "log" ]; then 					\
 		echo "Tous les dossiers sont présents. Suppression..."; 					\
@@ -114,22 +123,32 @@ define _clear_ros
 	fi;	
 endef
 
-# missing dependencies
-install_git:
-	sudo apt install -y git
+define pip 
+	python3.10 -m pip 
+endef
 
-# 0-Update System
+# /====================================\
+# |           System install           |
+# \====================================/
+
 sudo_upgrade:
 	sudo apt update
 	sudo apt upgrade -y
 
+
 update_source:
 	source ~/.bashrc
+
 
 refresh_env:
 	@echo "Sourcing .bashrc..."
 	source ~/.bashrc 
 	@echo "Environment refreshed"
+
+# /====================================\
+# |         install  softwares         |
+# \====================================/
+
 
 # install_FaMe: 
 # 	git clone https://github.com/SaraPettinari/fame-modeler.git -q
@@ -138,6 +157,13 @@ refresh_env:
 # 	npm install
 # 	@npm run start
 
+
+install_%:
+	sudo apt install -y $<
+
+install_git:
+	sudo apt install -y git
+
 install_snap:
 	sudo apt update
 	sudo apt install snapd
@@ -145,58 +171,58 @@ install_snap:
 install_cmake: install_snap
 	sudo snap install cmake --classic
 
-install_FaMe_modeler: update_source install_node update_source
-	@if [ ! -d "fame-modeler" ]; then \
-		git clone https://github.com/SaraPettinari/fame-modeler.git; \
-	else \
-		echo "Directory 'fame-modeler' already exists. Skipping clone."; \
-	fi
-	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm install
-
-run_FaMe_modeler:
-	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
-
-
 install_nvm: update_source
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 	@echo "NVM installation complete."
 
 NPM_VERSION := 16
-
 install_node: install_nvm update_source
-#TODO change install depending on version to have only lst versions of npm
+#TODO change install depending on version to have only LTS versions of npm
 	@echo "Setting up Node.js version ${NPM_VERSION}..."
-	@export NVM_DIR="$$HOME/.nvm" && \
-	. $$NVM_DIR/nvm.sh && \
-	nvm install --lts=gallium && \
-	nvm use ${NPM_VERSION} && \
-	nvm alias default ${NPM_VERSION}
+	@export NVM_DIR="$$HOME/.nvm" && 						\
+		. $$NVM_DIR/nvm.sh && 								\
+		nvm install --lts=gallium && 						\
+		nvm use ${NPM_VERSION} && 							\
+		nvm alias default ${NPM_VERSION}
 	@echo "Node.js version ${NPM_VERSION} is now active."
 
-
-# install_node: install_nvmtest
-# 	nvm install 18
-# 	nvm use 18
-# 	nvm alias default 18
-
-# install_nvm:
-# 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-# 	export NVM_DIR="$$HOME/.nvm"
-# 	[ -s "$$NVM_DIR/nvm.sh" ] && \. "$$NVM_DIR/nvm.sh"  # This loads nvm
-# 	[ -s "$$NVM_DIR/bash_completion" ] && \. "$$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-	
-install_nvmtest: install_nvm refresh_env
-#command -v nvm
-	source ~/.bashrc && nvm -v
-
-
-# 1 — Terminator --------------------------------------------------------------
 install_terminator:
 	sudo add-apt-repository -y ppa:mattrose/terminator
 	sudo apt update
 	sudo apt install -y terminator
 
-# 2 — Visual Studio Code -------------------------------------------------------
+install_discord-snap: install_snap
+	@echo "Installation de Discord via Snap..."
+	@sudo snap install discord
+	@echo "Discord installé avec Snap."
+
+install_FaMe_modeler: update_source
+	@if [ ! -d "fame-modeler" ]; then 										\
+		git clone https://github.com/SaraPettinari/fame-modeler.git; 		\
+	else 																	\
+		echo "Directory 'fame-modeler' already exists. Skipping clone."; 	\
+	fi
+	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm install
+
+install_python_3_10:
+	sudo apt update
+	sudo apt install -y software-properties-common
+	sudo add-apt-repository -y ppa:deadsnakes/ppa
+	sudo apt update
+	sudo apt install -y python3.10 python3.10-venv python3.10-dev
+	curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+	$(pip) --version
+	$(pip) install pyparrot djitellopy
+
+install_deps:
+# sudo apt update
+	sudo apt install python3-pip -y
+	$(pip) install transformations djitellopy
+
+# /====================================\
+# |       install softwares  2004      |
+# \====================================/
+
 install_vscode_2004:
 	sudo apt-get update
 	sudo apt-get install -y wget gpg apt-transport-https
@@ -229,12 +255,7 @@ correct_vscode_2004:
 	# sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
 	# sudo apt update
 
-install_vscode_2404:
-	sudo apt install code -y
 
-
-
-# 3 — ROS 2 Foxy --------------------------------------------------------------
 install_ros2_foxy: install_cmake
 	@echo "Bienvenu dans l'installation de ROS2 Foxy"
 	locale || true                               # check current locale (non-fatal)
@@ -261,6 +282,20 @@ install_ros2_foxy: install_cmake
 	)
 	sudo apt install ros-foxy-nav2-bringup -y
 
+
+install_gazebo_2004:
+	sudo apt update
+	sudo apt install -y ros-foxy-gazebo-ros-pkgs
+# deps Gazebo
+	sudo apt install libasio-dev
+
+
+# /====================================\
+# |       install softwares  2404      |
+# \====================================/
+
+install_vscode_2404:
+	sudo apt install code -y
 
 setup_ros2_jazzy:
 	@echo "Bienvenu dans le setup de ROS2 Jazzy"
@@ -292,7 +327,21 @@ install_ros2_jazzy: setup_ros2_jazzy
 		echo "" >> $$HOME/.bashrc \
 	)
 
+install_gazebo_2404:
+	sudo apt-get update
+	sudo apt-get install curl lsb-release gnupg
 
+	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+	sudo apt-get update
+	sudo apt-get install gz-harmonic
+
+	sudo apt-get install ros-jazzy-ros-gz
+
+
+# /====================================\
+# |           bashrc & params          |
+# \====================================/
 
 setup_bashrc:
 # Add some custom information into ~/.bashrc
@@ -313,41 +362,17 @@ setup_bashrc:
 		echo "" >> $$HOME/.bashrc 																										\
 	)
 
-# 4 — Gazebo 11 (classic) ------------------------------------------------------
-install_gazebo_2004:
-	sudo apt update
-	sudo apt install -y ros-foxy-gazebo-ros-pkgs
-# deps Gazebo
-	sudo apt install libasio-dev
 
-install_gazebo_2404:
-	sudo apt-get update
-	sudo apt-get install curl lsb-release gnupg
+# /====================================\
+# |          random & unsorted         |
+# \====================================/
 
-	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-	sudo apt-get update
-	sudo apt-get install gz-harmonic
+test_nvm_install: refresh_env
+#command -v nvm
+	source ~/.bashrc && nvm -v
 
-	sudo apt-get install ros-jazzy-ros-gz
-
-
-# 5 — Python 3.10 & pip --------------------------------------------------------
-install_python_3_10:
-	sudo apt update
-	sudo apt install -y software-properties-common
-	sudo add-apt-repository -y ppa:deadsnakes/ppa
-	sudo apt update
-	sudo apt install -y python3.10 python3.10-venv python3.10-dev
-	curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
-	$(pip) --version
-	$(pip) install pyparrot djitellopy
-
-
-install_discord-snap: install_snap
-	@echo "Installation de Discord via Snap..."
-	@sudo snap install discord
-	@echo "Discord installé avec Snap."
+run_FaMe_modeler:
+	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
 
 # -----------------------------------------------------------------------------
 # Test targets (run manually; they only print the commands to execute) ---------
@@ -365,10 +390,11 @@ test_gazebo:
 	@echo "Terminal 1 ➜ gazebo --verbose /opt/ros/foxy/share/gazebo_plugins/worlds/gazebo_ros_diff_drive_demo.world"
 	@echo "Terminal 2 ➜ ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{linear: {x: 1.0}}' -1"
 
-# ------------------------------Session-2--------------------------------------
 
+# /====================================\
+# |          Paths & Variables         |
+# \====================================/
 
-# Variables
 HOME_DIR := $(PWD)
 ROS2_SHARED := $(HOME_DIR)/ros2_shared
 TELLO_MSGS := $(HOME_DIR)/tello_msgs
@@ -379,32 +405,54 @@ FAME_SIMU := $(FAME)/fame_simulation
 GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
 MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
 
-define pip 
-	python3.10 -m pip 
+
+MBROS_DIR      := /home/ubuntu/mbros/fame_engine
+NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
+NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
+
+# /====================================\
+# |            package  deps           |
+# \====================================/
+
+define from_git_clean
+clone_$1:
+	@if [ -d $2 ] ; then echo -n "clonning $3 into $2" && git clone $3 $2; fi
+clean_$1:
+	@rm -r $2
 endef
+
+$(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git))
+$(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git))
+$(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git))
+
+
+define clear_package_ros
+clear_$1:
+	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
+endef
+
+$(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
+$(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
+$(eval $(call clear_package_ros,FaMe,$(FAME)))
 
 clone_FaMe_deps:	  \
 	clone_ros2_shared \
 	clone_tello_msgs  \
 
-install_deps:
-# sudo apt update
-	sudo apt install python3-pip -y
-	$(pip) install transformations djitellopy
 
-clone_ros2_shared:
-	@if [ ! -d "$(ROS2_SHARED)" ]; then git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); fi
-clear_ros2_shared:
-	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
+# clone_ros2_shared:
+# 	@if [ ! -d "$(ROS2_SHARED)" ]; then git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); fi
+# clear_ros2_shared:
+# 	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
 
 setup_ros2_shared:
 	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
 
 
-clone_tello_msgs:
-	@if [ ! -d "$(TELLO_MSGS)" ]; then git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); fi
-clear_tello_msgs:
-	@cd $(TELLO_MSGS) && echo -n "[$(TELLO_MSGS)] " && $(call _clear_ros)
+# clone_tello_msgs:
+# 	@if [ ! -d "$(TELLO_MSGS)" ]; then git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); fi
+# clear_tello_msgs:
+# 	@cd $(TELLO_MSGS) && echo -n "[$(TELLO_MSGS)] " && $(call _clear_ros)
 
 setup_tello_msgs: setup_ros2_shared
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
@@ -412,11 +460,7 @@ setup_tello_msgs: setup_ros2_shared
 		cd $(ROS2_SHARED) && source install/setup.bash && \
 		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
 
-
-install_examples:
-	@if [ ! -d "$(FAME)" ]; then git clone https://bitbucket.org/proslabteam/fame.git $(FAME); fi
-
-setup_FaMe_agri: setup_tello_msgs install_examples install_node
+setup_FaMe_agri: setup_tello_msgs install_FaMe install_node
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
 		cd $(FAME_AGRI) && nvm install --lts=gallium && nvm use 16 && \
 		cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -424,21 +468,31 @@ setup_FaMe_agri: setup_tello_msgs install_examples install_node
 		cd $(FAME_AGRI) && colcon build
 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
 
+#deprecated
 copy_models_FaMe_agri:
 	mkdir -p $(GZ_MODEL_DIR)
 	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
 
-clear_fame_agri:
-	@cd $(FAME_AGRI) && echo -n "[$(FAME_AGRI)] " && $(call _clear_ros)
+# clear_fame_agri:
+# 	@cd $(FAME_AGRI) && echo -n "[$(FAME_AGRI)] " && $(call _clear_ros)
 
-launch_gazebo:
-	cd $(ROS2_SHARED) && source install/setup.bash && \
-		cd $(TELLO_MSGS) && source install/setup.bash && \
-		cd $(FAME_AGRI) && source install/setup.bash && \
-		source /usr/share/gazebo/setup.bash && \
-		# RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-		ros2 launch fame_agricultural multi_launch.py \
-			# --ros-args -r gazebo_ros_force:=blade_force
+# /====================================\
+# |               Gazebo               |
+# \====================================/
+
+launch_gazebo_2004:
+	cd $(ROS2_SHARED) && source install/setup.bash && 		\
+		cd $(TELLO_MSGS) && source install/setup.bash && 	\
+		cd $(FAME_AGRI) && source install/setup.bash && 	\
+		source /usr/share/gazebo/setup.bash && 				\
+		# RMW_IMPLEMENTATION=rmw_cyclonedds_cpp 			\
+		ros2 launch fame_agricultural multi_launch.py 		
+# 			--ros-args -r gazebo_ros_force:=blade_force
+
+
+# /====================================\
+# |                FaMe                |
+# \====================================/
 
 install_FaMe_engine:
 	# sudo apt update
@@ -486,39 +540,7 @@ setup_FaMe_engine:
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
 		cd $(FAME_ENGINE) && colcon build
 
-clear_ros2_FaMe_engine:
-	@cd $(FAME_ENGINE) && echo -n "[$(FAME_ENGINE)] " && $(call _clear_ros)
 
-	
-
-MBROS_DIR      := /home/ubuntu/mbros/fame_engine
-NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
-NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
-
-.PHONY: install_FaMe_engine
-# install_FaMe_engine_not_opti_GPT:
-# 	# 1. Lien symbolique une seule fois
-# 	sudo install -d $(MBROS_DIR)
-# 	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
-
-# 	# 2. Tout le reste dans un shell bash unique
-# 	@bash -ec '\
-# 		. $(NVM_SCRIPT); nvm install --lts=gallium; nvm use $(NODE_VERSION); \
-# 		cd $(FAME_ENGINE); \
-# 		# Dépendances Node : install propre + version exacte de rclnodejs
-# 		npm pkg set dependencies.rclnodejs="0.27.1"; \
-# 		npm ci --prefer-offline; \
-# 		# Génération des messages JS (oblige rclnodejs >=0.20)      
-# 		npx rclnodejs-cli generate-ros-messages; \
-# 		# Build ROS 2 : symlink-install pour éviter les copies redondantes
-# 		colcon build --packages-select fame_engine; \
-# 	'
-
-
-# ros2-source:
-# 	cd $(ROS2_SHARED) && source install/setup.bash
-# 	cd $(TELLO_MSGS) && source install/setup.bash
-# 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
 #deprecated
 launch_comportement:
 	@echo "be sure to have use 'make install_FaMe_engine' before using this command"
@@ -619,53 +641,9 @@ launch_example:
 	wait $$PID_SIM $$PID_ENG
 	@echo "======= simu and engine done ======="
 
-# # garantit qu’un seul shell est utilisé pour toute la recette
-# .ONESHELL: launch_example_GPT
-# launch_example_GPT:
-# # Prépare env. ROS + Node une seule fois
-# 	source /usr/share/gazebo/setup.bash
-# 	export NVM_DIR="$$HOME/.nvm"; . "$$NVM_DIR/nvm.sh"; nvm use 16 >/dev/null
-# 	export NODE_OPTIONS="--unhandled-rejections=strict"
-
-# 	for ws in "$(ROS2_SHARED)" "$(TELLO_MSGS)" "$(FAME_AGRI)" "$(FAME_ENGINE)"; do \
-# 	  [ -f "$$ws/install/setup.bash" ] && source "$$ws/install/setup.bash"; \
-# 	done
-
-# # Lance la simulation en arrière-plan, capture son PID
-# 	@echo "▶️  Launch simulation"
-# 	ros2 launch fame_simulation multi_launch.py & \
-# 	PID_SIM=$$!
-
-# 	# Délai paramétrable sans bloquer la simulation
-# 	@echo "⏳ Waiting $$DELAY s…"; sleep $(DELAY)
-
-# 	# Lance le moteur de comportement, capture son PID
-# 	@echo "▶️  Launch engine"
-# 	ros2 launch fame_engine example.launch.py & \
-# 	PID_ENG=$$!
-
-# 	# Attend proprement la fin des deux processus
-# 	wait $$PID_SIM $$PID_ENG
-# 	@echo "✅  Both launches exited."
-
 launch_fame_modeler:
 	cd ./fame-modeler && npm start
 
-# cd /home/dell/ros2_shared && source install/setup.bash && \
-# 	cd /home/dell/tello_msgs && source install/setup.bash && \
-# 	source /usr/share/gazebo/setup.bash && \
-# 	export NVM_DIR="$HOME/.nvm" && . $NVM_DIR/nvm.sh && \
-# 	cd /home/dell/fame/fame_engine && nvm install --lts=hydrogen && nvm use 18 && \
-# 	export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 	cd /home/dell/fame/fame_agricultural && source install/setup.bash && \
-# 	cd /home/dell/fame/fame_engine && source install/setup.bash && \
-# 	ros2 launch fame_engine agri_engine.launch.py
-
-kill_all:
-	killall -9 gzserver
-	killall -9 gzclient
-
-#ensta3012*
 
 PATH_TELLO_WS=$(PWD)/Simulation_Gazebo/tello_ros_ws
 
@@ -681,6 +659,8 @@ setup_pfe_simulation_gazebo:
 		cd $(FAME_SIMU) && source install/setup.bash && \
 		cd $(PATH_TELLO_WS) && \
 		colcon build
+
+$(eval $(call clean_package,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
 
 clear_pfe_simulation_gazebo:
 	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
@@ -710,16 +690,6 @@ launch_pfe_simulation_gazebo:
 
 
 install_github_desktop_2004:
-# # UPDATE (2024-01-24)
-
-# ## Direct copy-paste from official instrubtions
-# ## Github Desktop for Ubuntu
-# ## Get the @shiftkey package feed
-# 	wget -qO - https://apt.packages.shiftkey.dev/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/shiftkey-packages.gpg > /dev/null
-# 	sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/shiftkey-packages.gpg] https://apt.packages.shiftkey.dev/ubuntu/ any main" > /etc/apt/sources.list.d/shiftkey-packages.list'
-# ## Install Github Desktop for Ubuntu
-# 	sudo apt update && sudo apt install github-desktop
-
 	if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
 		wget https://github.com/shiftkey/desktop/releases/download/release-2.9.6-linux1/GitHubDesktop-linux-2.9.6-linux1.deb;
 	fi
@@ -732,16 +702,6 @@ install_github_desktop_2004:
 
 
 install_github_desktop_2404:
-# # UPDATE (2024-01-24)
-
-# ## Direct copy-paste from official instrubtions
-# ## Github Desktop for Ubuntu
-# ## Get the @shiftkey package feed
-# 	wget -qO - https://apt.packages.shiftkey.dev/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/shiftkey-packages.gpg > /dev/null
-# 	sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/shiftkey-packages.gpg] https://apt.packages.shiftkey.dev/ubuntu/ any main" > /etc/apt/sources.list.d/shiftkey-packages.list'
-# ## Install Github Desktop for Ubuntu
-# 	sudo apt update && sudo apt install github-desktop
-
 	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
 		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
 	fi
@@ -753,15 +713,12 @@ install_github_desktop_2404:
 # 	sudo apt-mark hold github-desktop
 
 
-# -----------------------------------------------------------------------------
-# Helper target: display installed versions -----------------------------------
-
-versions:
+test_python_versions:
 	python3 --version || true
 	python3.10 --version || true
 	node -v # Bonus
 
-setup_gazebo_models:
+setup_gazebo_models_2004:
 	@echo "for the moment unable to find where does the coke can belongs from"
 	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
 
