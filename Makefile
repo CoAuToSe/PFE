@@ -420,14 +420,16 @@ NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
 
 define from_git_clean
 clone_$1:
-	@if [ -d $2 ] ; then echo -n "clonning $3 into $2" && git clone $3 $2; fi
+	if [ ! -f $2 ] ; then mkdir -p $2 ; fi
+	if [ -d $2 ] ; then echo -n "clonning $3 into $2" && git clone $3 $2 -b $4 ; fi
 clean_$1:
 	@rm -r $2
 endef
 
-$(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git))
-$(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git))
-$(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git))
+$(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
+$(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
+$(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
+$(eval $(call from_git_clean,husky,~/husky_ws/husky,https://github.com/husky/husky.git,foxy-devel))
 
 
 define clear_package_ros
