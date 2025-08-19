@@ -9,8 +9,8 @@
 
 SHELL := /bin/bash
 
-.PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo install_python_3_10 \
-        test_ros2 test_gazebo versions install_FaMe_modeler run-FaMe install_nvm install_node install_cmake \
+.PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
+        test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_examples \
 		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo install_FaMe_engine launch_comportement setup_FaMe_simulation \
 		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
@@ -76,7 +76,7 @@ install_software_2004:		\
 	install_deps
 
 install_software_2004_bis:	\
-	install_gazebo			\
+	install_gazebo_2004			\
 	install_ros2_foxy		
 
 # Aggregate install target ----------------------------------------------------
@@ -98,6 +98,9 @@ install_all2: 					\
 	install_github_desktop_2004 \
 	setup_bashrc 				\
 	setup_pfe_simulation_gazebo
+
+install_all_2404:\
+	install_node
 
 update: sudo_upgrade
 
@@ -123,7 +126,7 @@ sudo_upgrade:
 update_source:
 	source ~/.bashrc
 
-refresh-env:
+refresh_env:
 	@echo "Sourcing .bashrc..."
 	source ~/.bashrc 
 	@echo "Environment refreshed"
@@ -150,7 +153,7 @@ install_FaMe_modeler: update_source install_node update_source
 	fi
 	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm install
 
-run-FaMe: install_FaMe_modeler update_source
+run_FaMe_modeler:
 	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
 
 
@@ -182,7 +185,7 @@ install_node: install_nvm update_source
 # 	[ -s "$$NVM_DIR/nvm.sh" ] && \. "$$NVM_DIR/nvm.sh"  # This loads nvm
 # 	[ -s "$$NVM_DIR/bash_completion" ] && \. "$$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 	
-install_nvmtest: install_nvm refresh-env
+install_nvmtest: install_nvm refresh_env
 #command -v nvm
 	source ~/.bashrc && nvm -v
 
@@ -234,7 +237,7 @@ install_vscode_2404:
 # 3 — ROS 2 Foxy --------------------------------------------------------------
 install_ros2_foxy: install_cmake
 	@echo "Bienvenu dans l'installation de ROS2 Foxy"
-	locale || true                               # check current locale (non‑fatal)
+	locale || true                               # check current locale (non-fatal)
 	sudo apt update
 	sudo apt install -y locales
 	sudo locale-gen en_US en_US.UTF-8
@@ -249,14 +252,47 @@ install_ros2_foxy: install_cmake
 	sudo apt update
 	sudo apt upgrade -y
 	sudo apt install -y ros-foxy-desktop python3-argcomplete ros-dev-tools
-	# Add ROS 2 environment setup to bashrc only once
-	grep -qxF "source /opt/ros/foxy/setup.bash" $$HOME/.bashrc || ( \
+# 	Add ROS 2 environment setup to bashrc only once
+	grep -qxF "# ROS 2 Foxy" $$HOME/.bashrc || ( \
 		echo "" >> $$HOME/.bashrc && \
 		echo "# ROS 2 Foxy" >> $$HOME/.bashrc && \
 		echo "source /opt/ros/foxy/setup.bash" >> $$HOME/.bashrc && \
 		echo "" >> $$HOME/.bashrc \
 	)
 	sudo apt install ros-foxy-nav2-bringup -y
+
+
+setup_ros2_jazzy:
+	@echo "Bienvenu dans le setup de ROS2 Jazzy"
+	locale  # check for UTF-8
+
+	sudo apt update && sudo apt install locales
+	sudo locale-gen en_US en_US.UTF-8
+	sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+	export LANG=en_US.UTF-8
+
+	locale  # verify settings
+
+	sudo apt install software-properties-common
+	sudo add-apt-repository universe
+
+	sudo apt update && sudo apt install curl -y
+	export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
+	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $UBUNTU_CODENAME
+	sudo dpkg -i /tmp/ros2-apt-source.deb
+
+install_ros2_jazzy: setup_ros2_jazzy
+	@echo "Bienvenu dans l'installation de ROS2 Jazzy"
+	sudo apt install ros-jazzy-desktop
+
+	grep -qxF "# ROS 2 Jazzy" $$HOME/.bashrc || ( \
+		echo "" >> $$HOME/.bashrc && \
+		echo "# ROS 2 Jazzy" >> $$HOME/.bashrc && \
+		echo "source /opt/ros/jazzy/setup.bash" >> $$HOME/.bashrc && \
+		echo "" >> $$HOME/.bashrc \
+	)
+
+
 
 setup_bashrc:
 # Add some custom information into ~/.bashrc
@@ -265,6 +301,8 @@ setup_bashrc:
 		echo "# Custom commands" >> $$HOME/.bashrc && 																					\
 		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && 										\
 		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && 				\
+		echo "alias ros-build-sym-ver="colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash"\"" >> $$HOME/.bashrc && \
+		echo "alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select \"\$1\" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -temp temp; }; temp'\"" >> $$HOME/.bashrc && \
 		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
 		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && 																	\
 		echo "alias my-sc=\"source $(TELLO_MSGS)/install/setup.bash && source $(ROS2_SHARED)/install/setup.bash\"" >> $$HOME/.bashrc && \
@@ -276,11 +314,23 @@ setup_bashrc:
 	)
 
 # 4 — Gazebo 11 (classic) ------------------------------------------------------
-install_gazebo:
+install_gazebo_2004:
 	sudo apt update
 	sudo apt install -y ros-foxy-gazebo-ros-pkgs
 # deps Gazebo
 	sudo apt install libasio-dev
+
+install_gazebo_2404:
+	sudo apt-get update
+	sudo apt-get install curl lsb-release gnupg
+
+	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+	sudo apt-get update
+	sudo apt-get install gz-harmonic
+
+	sudo apt-get install ros-jazzy-ros-gz
+
 
 # 5 — Python 3.10 & pip --------------------------------------------------------
 install_python_3_10:
@@ -333,26 +383,28 @@ define pip
 	python3.10 -m pip 
 endef
 
+clone_FaMe_deps:	  \
+	clone_ros2_shared \
+	clone_tello_msgs  \
+
 install_deps:
 # sudo apt update
 	sudo apt install python3-pip -y
 	$(pip) install transformations djitellopy
 
 clone_ros2_shared:
-	@if [ ! -d "$(ROS2_SHARED)" ]; then \
-		git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); \
-	fi
+	@if [ ! -d "$(ROS2_SHARED)" ]; then git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); fi
+clear_ros2_shared:
+	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
 
 setup_ros2_shared:
 	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
 
-clear_ros2_shared:
-	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
 
 clone_tello_msgs:
-	@if [ ! -d "$(TELLO_MSGS)" ]; then \
-		git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); \
-	fi
+	@if [ ! -d "$(TELLO_MSGS)" ]; then git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); fi
+clear_tello_msgs:
+	@cd $(TELLO_MSGS) && echo -n "[$(TELLO_MSGS)] " && $(call _clear_ros)
 
 setup_tello_msgs: setup_ros2_shared
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
@@ -360,13 +412,9 @@ setup_tello_msgs: setup_ros2_shared
 		cd $(ROS2_SHARED) && source install/setup.bash && \
 		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
 
-clear_tello_msgs:
-	@cd $(TELLO_MSGS) && echo -n "[$(TELLO_MSGS)] " && $(call _clear_ros)
 
 install_examples:
-	@if [ ! -d "$(FAME)" ]; then \
-		git clone https://bitbucket.org/proslabteam/fame.git $(FAME); \
-	fi
+	@if [ ! -d "$(FAME)" ]; then git clone https://bitbucket.org/proslabteam/fame.git $(FAME); fi
 
 setup_FaMe_agri: setup_tello_msgs install_examples install_node
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
@@ -721,7 +769,6 @@ setup_gazebo_models:
 # |         Github integration         |
 # \====================================/
 
-PATH_PFE:=~/PFE
 
 check_with_user_first_time:
 	@echo ""
@@ -754,8 +801,12 @@ copy_$1_to_Github:
 	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
 copy_$1_from_Github: check_with_user
 	cp -r $3 $2
+clean_$1:
+	rm -r $2
 endef
 
+# Don't forget to let a folder of space while copying a folder
+PATH_PFE:=~/PFE
 $(eval $(call github,simu_gazebo,~/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
 $(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
