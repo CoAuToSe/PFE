@@ -93,7 +93,7 @@ install_all2: 					\
 	setup_ros2_shared			\
 	clone_tello_msgs 			\
 	setup_tello_msgs			\
-	install_FaMe 			\
+	install_FaMe 				\
 	setup_FaMe_agri 			\
 	copy_models_FaMe_agri		\
 	setup_gazebo 				\
@@ -390,6 +390,10 @@ test_gazebo:
 	@echo "Terminal 1 ➜ gazebo --verbose /opt/ros/foxy/share/gazebo_plugins/worlds/gazebo_ros_diff_drive_demo.world"
 	@echo "Terminal 2 ➜ ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{linear: {x: 1.0}}' -1"
 
+
+kill_all:
+	killall -9 gzserver
+	killall -9 gzclient
 
 # /====================================\
 # |          Paths & Variables         |
