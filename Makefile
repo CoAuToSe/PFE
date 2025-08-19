@@ -281,8 +281,18 @@ install_ros2_foxy: install_cmake
 		echo "" >> $$HOME/.bashrc \
 	)
 	sudo apt install ros-foxy-nav2-bringup -y
+# 	deps for husky
 	sudo apt install ros-foxy-xacro
 	sudo apt install ros-foxy-controller-interface ros-foxy-ros2-control ros-foxy-ros2-controllers
+	sudo apt install \
+		ros-foxy-robot-localization \
+		ros-foxy-gazebo-ros-pkgs \
+		ros-foxy-ros2-control \
+		ros-foxy-ros2-controllers \
+		ros-foxy-controller-manager \
+		ros-foxy-controller-manager-msgs
+	sudo apt install ros-foxy-interactive-marker-twist-server ros-foxy-interactive-markers
+	sudo apt install ros-foxy-twist-mux
 
 
 install_gazebo_2004:
