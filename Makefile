@@ -12,7 +12,7 @@ SHELL := /bin/bash
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
 		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_FaMe \
-		setup_FaMe_agri copy_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement setup_FaMe_simulation \
+		setup_FaMe_agri setup_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement setup_FaMe_simulation \
 		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
 DELAY ?= 20
@@ -95,7 +95,7 @@ install_all2: 					\
 	setup_tello_msgs			\
 	install_FaMe 				\
 	setup_FaMe_agri 			\
-	copy_models_FaMe_agri		\
+	setup_models_FaMe_agri		\
 	setup_gazebo 				\
 	install_FaMe_engine 		\
 	setup_FaMe_simulation 		\
@@ -282,17 +282,17 @@ install_ros2_foxy: install_cmake
 	)
 	sudo apt install ros-foxy-nav2-bringup -y
 # 	deps for husky
-	sudo apt install ros-foxy-xacro
-	sudo apt install ros-foxy-controller-interface ros-foxy-ros2-control ros-foxy-ros2-controllers
-	sudo apt install \
+	sudo apt install ros-foxy-xacro -y
+	sudo apt install -y ros-foxy-controller-interface ros-foxy-ros2-control ros-foxy-ros2-controllers
+	sudo apt install -y \
 		ros-foxy-robot-localization \
 		ros-foxy-gazebo-ros-pkgs \
 		ros-foxy-ros2-control \
 		ros-foxy-ros2-controllers \
 		ros-foxy-controller-manager \
 		ros-foxy-controller-manager-msgs
-	sudo apt install ros-foxy-interactive-marker-twist-server ros-foxy-interactive-markers
-	sudo apt install ros-foxy-twist-mux
+	sudo apt install -y ros-foxy-interactive-marker-twist-server ros-foxy-interactive-markers
+	sudo apt install -y ros-foxy-twist-mux
 
 
 install_gazebo_2004:
@@ -387,12 +387,6 @@ test_nvm_install: refresh_env
 run_FaMe_modeler:
 	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
 
-# -----------------------------------------------------------------------------
-# Test targets (run manually; they only print the commands to execute) ---------
-
-# ROS 2 minimal pub/sub demo
-# Open **two** terminals and run the printed commands.
-
 test_ros2:
 	@echo "Terminal 1 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_cpp talker"
 	@echo "Terminal 2 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_py listener"
@@ -432,6 +426,7 @@ NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
 # \====================================/
 
 define from_git_clean
+.PHONY: clone_$1 clean_$1
 clone_$1:
 	if [ ! -f $2 ] ; then mkdir -p $2 ; fi
 	if [ -d $2 ] ; then echo -n "clonning $3 into $2" && git clone $3 $2 -b $4 ; fi
@@ -444,11 +439,56 @@ $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemc
 $(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
 $(eval $(call from_git_clean,husky,~/husky_ws/husky,https://github.com/husky/husky.git,foxy-devel))
 
+
+define setup_pkg
+.PHONY: setup_$(1)
+setup_$(1):
+	@bash -lc '\
+		DEPS="$(3)" && \
+		[ -z "$(4)" ] || ( export NVM_DIR="$$HOME/.nvm" && . "$$NVM_DIR/nvm.sh" && nvm install "$$NODE_VERSION" && nvm use "$$NODE_VERSION" ) && \
+		for d in $$DEPS; do [ -f "$$d/install/setup.bash" ] && . "$$d/install/setup.bash"; done && \
+		cd "$(2)" && colcon build && . install/setup.bash \
+	'
+endef
+
+# ros2_shared : pas de NVM, pas de deps
+$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
+
+# tello_msgs : sourcer ros2_shared + NVM (NODE_VERSION doit être défini à l’extérieur)
+$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm))
+
+# FaMe_agri : sourcer ros2_shared et tello_msgs + NVM # TODO check if 'source /usr/share/gazebo/setup.bash' is necessary
+$(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
+
+
+# setup_ros2_shared:
+# 	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
+
+# setup_tello_msgs: setup_ros2_shared
+# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+# 		cd $(TELLO_MSGS) && nvm install --lts=gallium && nvm use 16 && \
+# 		cd $(ROS2_SHARED) && source install/setup.bash && \
+# 		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
+
+# setup_FaMe_agri: setup_tello_msgs install_FaMe install_node
+# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+# 		cd $(FAME_AGRI) && nvm install --lts=gallium && nvm use 16 && \
+# 		cd $(ROS2_SHARED) && source install/setup.bash && \
+# 		cd $(TELLO_MSGS) && source install/setup.bash && \
+# 		cd $(FAME_AGRI) && colcon build
+# 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
+
+
 setup_husky:
 	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
 
+#deprecated
+setup_models_FaMe_agri:
+	mkdir -p $(GZ_MODEL_DIR)
+	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
 
 define clear_package_ros
+.PHONY: clear_$1
 clear_$1:
 	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
 endef
@@ -461,42 +501,6 @@ clone_FaMe_deps:	  \
 	clone_ros2_shared \
 	clone_tello_msgs  \
 
-
-# clone_ros2_shared:
-# 	@if [ ! -d "$(ROS2_SHARED)" ]; then git clone https://github.com/ptrmu/ros2_shared.git $(ROS2_SHARED); fi
-# clear_ros2_shared:
-# 	@cd $(ROS2_SHARED) && echo -n "[$(ROS2_SHARED)] " && $(call _clear_ros)
-
-setup_ros2_shared:
-	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
-
-
-# clone_tello_msgs:
-# 	@if [ ! -d "$(TELLO_MSGS)" ]; then git clone https://github.com/clydemcqueen/tello_ros.git $(TELLO_MSGS); fi
-# clear_tello_msgs:
-# 	@cd $(TELLO_MSGS) && echo -n "[$(TELLO_MSGS)] " && $(call _clear_ros)
-
-setup_tello_msgs: setup_ros2_shared
-	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-		cd $(TELLO_MSGS) && nvm install --lts=gallium && nvm use 16 && \
-		cd $(ROS2_SHARED) && source install/setup.bash && \
-		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
-
-setup_FaMe_agri: setup_tello_msgs install_FaMe install_node
-	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-		cd $(FAME_AGRI) && nvm install --lts=gallium && nvm use 16 && \
-		cd $(ROS2_SHARED) && source install/setup.bash && \
-		cd $(TELLO_MSGS) && source install/setup.bash && \
-		cd $(FAME_AGRI) && colcon build
-	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
-
-#deprecated
-copy_models_FaMe_agri:
-	mkdir -p $(GZ_MODEL_DIR)
-	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
-
-# clear_fame_agri:
-# 	@cd $(FAME_AGRI) && echo -n "[$(FAME_AGRI)] " && $(call _clear_ros)
 
 # /====================================\
 # |               Gazebo               |
