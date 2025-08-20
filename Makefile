@@ -365,6 +365,7 @@ setup_bashrc:
 		echo "alias ros-build-sym-ver="colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash"\"" >> $$HOME/.bashrc && \
 		echo "alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select \"\$1\" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -temp temp; }; temp'\"" >> $$HOME/.bashrc && \
 		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
+		echo "alias sc-ros=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
 		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && 																	\
 		echo "alias my-sc=\"source $(TELLO_MSGS)/install/setup.bash && source $(ROS2_SHARED)/install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "" >> $$HOME/.bashrc && 																									\
