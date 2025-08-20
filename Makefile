@@ -415,6 +415,9 @@ FAME_ENGINE := $(FAME)/fame_engine
 FAME_SIMU := $(FAME)/fame_simulation
 GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
 MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
+HUSKY_WS := ~/husky_ws
+HUSKY := $(HUSKY_WS)/husky
+SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
 
 
 MBROS_DIR      := /home/ubuntu/mbros/fame_engine
@@ -437,19 +440,42 @@ endef
 $(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
 $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
 $(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
-$(eval $(call from_git_clean,husky,~/husky_ws/husky,https://github.com/husky/husky.git,foxy-devel))
+$(eval $(call from_git_clean,husky,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
 
+
+# define setup_pkg
+# .PHONY: setup_$(1)
+# setup_$(1):
+# 	@bash -lc '\
+# 		DEPS="$(3)" && \
+# 		[ -z "$(4)" ] || ( export NVM_DIR="$$HOME/.nvm" && . "$$NVM_DIR/nvm.sh" && nvm install $(NODE_VERSION) && nvm use $(NODE_VERSION) ) && \
+# 		for d in $$DEPS; do [ -f "$$d/install/setup.bash" ] && . "$$d/install/setup.bash"; done && \
+# 		cd "$(2)" && colcon build && . install/setup.bash \
+# 	'
+# endef
 
 define setup_pkg
 .PHONY: setup_$(1)
 setup_$(1):
-	@bash -lc '\
-		DEPS="$(3)" && \
-		[ -z "$(4)" ] || ( export NVM_DIR="$$HOME/.nvm" && . "$$NVM_DIR/nvm.sh" && nvm install "$$NODE_VERSION" && nvm use "$$NODE_VERSION" ) && \
-		for d in $$DEPS; do [ -f "$$d/install/setup.bash" ] && . "$$d/install/setup.bash"; done && \
-		cd "$(2)" && colcon build && . install/setup.bash \
+	@bash -lc 'set -euo pipefail; \
+	DEPS="$(3)"; \
+	if [ -n "$(4)" ]; then \
+	  export NVM_DIR="/home/dell/.nvm"; \
+	  if [ -f "/home/dell/.nvm/nvm.sh" ]; then . "/home/dell/.nvm/nvm.sh"; \
+	  else echo "NVM introuvable (cherché: /home/dell/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
+	  nvm use $(NODE_VERSION); \
+	fi; \
+	for d in $$DEPS; do \
+	  if [ -f "$$d/install/setup.bash" ]; then \
+	    echo "source $$d/install/setup.bash"; \
+	    . "$$d/install/setup.bash"; \
+	  fi; \
+	done; \
+	cd $(2); \
+	colcon build --symlink-install \
 	'
 endef
+
 
 # ros2_shared : pas de NVM, pas de deps
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
@@ -459,6 +485,11 @@ $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm))
 
 # FaMe_agri : sourcer ros2_shared et tello_msgs + NVM # TODO check if 'source /usr/share/gazebo/setup.bash' is necessary
 $(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
+
+# deprecated ?
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm))
+
+$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
 
 
 # setup_ros2_shared:
@@ -479,7 +510,23 @@ $(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm)
 # 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
 
 
-setup_husky:
+# setup_FaMe_engine:
+# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+# 		cd $(FAME_ENGINE) && colcon build
+
+
+setup_FaMe_simulation:
+	cd $(ROS2_SHARED) && source install/setup.bash && \
+		cd $(TELLO_MSGS) && source install/setup.bash && \
+		source /usr/share/gazebo/setup.bash && \
+		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+		cd $(FAME_ENGINE) && nvm use 16 && \
+		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+		cd $(FAME_AGRI) && source install/setup.bash && \
+		cd $(FAME_ENGINE) && source install/setup.bash && \
+		cd $(FAME_SIMU) && colcon build
+
+setup_husky_launch:
 	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
 
 #deprecated
@@ -521,19 +568,19 @@ launch_gazebo_2004:
 # \====================================/
 
 install_FaMe_engine:
-	# sudo apt update
-	# sudo apt install ros-foxy-rmw-cyclonedds-cpp -y
+# 	sudo apt update
+# 	sudo apt install ros-foxy-rmw-cyclonedds-cpp -y
 	sudo mkdir -p $(MBROS_DIR)
 	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
-	# @export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-	# 	cd $(FAME_ENGINE) && nvm install 12 && nvm use 12
+# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+# 		cd $(FAME_ENGINE) && nvm install 12 && nvm use 12
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
 		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16
 	cd $(FAME_ENGINE) && rm -rf node_modules package-lock.json
 
-	# @export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-	# 	cd $(FAME_ENGINE) && nvm install 12 && nvm use 12 && \
-	# 	cd $(FAME_ENGINE) && npm install
+# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+# 		cd $(FAME_ENGINE) && nvm install 12 && nvm use 12 && \
+# 		cd $(FAME_ENGINE) && npm install
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
 		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16 && \
 		cd $(FAME_ENGINE) && npm install
@@ -553,18 +600,15 @@ install_FaMe_engine:
 	cd $(FAME_ENGINE)/install/fame_engine/share/fame_engine && rm -rf node_modules/rclnodejs
 	cd $(FAME_ENGINE)/install/fame_engine/share/fame_engine && npm install rclnodejs@^0.21.0  
 
-	# @export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-	# 	cd $(FAME_ENGINE) && npm i rclnodejs@^0.21.0  
+# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
+# 		cd $(FAME_ENGINE) && npm i rclnodejs@^0.21.0  
 
 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
 		cd $(FAME_ENGINE) && colcon build
 
-	# export NODE_OPTIONS="--unhandled-rejections=strict"
-	# ros2 launch fame_engine agri_engine.launch.py
+# 	export NODE_OPTIONS="--unhandled-rejections=strict"
+# 	ros2 launch fame_engine agri_engine.launch.py
 
-setup_FaMe_engine:
-	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-		cd $(FAME_ENGINE) && colcon build
 
 
 #deprecated
@@ -611,16 +655,6 @@ launch_comportement_agri:
 	wait $$PID_SIM $$PID_ENG
 	@echo "======= agri and engine done ======="
 
-setup_FaMe_simulation:
-	cd $(ROS2_SHARED) && source install/setup.bash && \
-		cd $(TELLO_MSGS) && source install/setup.bash && \
-		source /usr/share/gazebo/setup.bash && \
-		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-		cd $(FAME_ENGINE) && nvm use 16 && \
-		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-		cd $(FAME_AGRI) && source install/setup.bash && \
-		cd $(FAME_ENGINE) && source install/setup.bash && \
-		cd $(FAME_SIMU) && colcon build
 
 
 launch_example_alone:
@@ -781,9 +815,9 @@ copy_from_github:					\
 	copy_makefile_from_Github
 
 define github
-copy_$1_to_Github:
+copy_$1_to_github:
 	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
-copy_$1_from_Github: check_with_user
+copy_$1_from_github: check_with_user
 # 	@echo "$2"
 	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
 	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
