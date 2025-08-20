@@ -300,6 +300,17 @@ install_gazebo_2004:
 # deps Gazebo
 	sudo apt install libasio-dev
 
+install_github_desktop_2004:
+	if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
+		wget https://github.com/shiftkey/desktop/releases/download/release-2.9.6-linux1/GitHubDesktop-linux-2.9.6-linux1.deb;
+	fi
+	sudo apt-get update
+	sudo apt-get install gdebi-core -y
+	sudo gdebi GitHubDesktop-linux-2.9.6-linux1.deb -y
+	sudo dpkg -i GitHubDesktop-linux-2.9.6-linux1.deb 
+	sudo apt-get install -f -y
+	sudo apt-mark hold github-desktop
+
 
 # /====================================\
 # |       install softwares  2404      |
@@ -349,6 +360,16 @@ install_gazebo_2404:
 
 	sudo apt-get install ros-jazzy-ros-gz
 
+install_github_desktop_2404:
+	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
+		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
+	fi
+	sudo apt-get update
+	sudo apt-get install gdebi-core -y
+	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
+	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
+	sudo apt-get install -f -y
+# 	sudo apt-mark hold github-desktop
 
 # /====================================\
 # |           bashrc & params          |
@@ -396,6 +417,14 @@ test_gazebo:
 	@echo "Terminal 1 ➜ gazebo --verbose /opt/ros/foxy/share/gazebo_plugins/worlds/gazebo_ros_diff_drive_demo.world"
 	@echo "Terminal 2 ➜ ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{linear: {x: 1.0}}' -1"
 
+test_python_versions:
+	python3 --version || true
+	python3.10 --version || true
+	node -v # Bonus
+
+setup_gazebo_models_2004:
+	@echo "for the moment unable to find where does the coke can belongs from"
+	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
 
 kill_all:
 	killall -9 gzserver
@@ -458,9 +487,9 @@ define setup_pkg
 .PHONY: setup_$(1)
 setup_$(1):
 	if [ -n "$(4)" ]; then \
-	  export NVM_DIR="/home/dell/.nvm"; \
-	  if [ -f "/home/dell/.nvm/nvm.sh" ]; then . "/home/dell/.nvm/nvm.sh"; \
-	  else echo "NVM introuvable (cherché: /home/dell/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
+	  export NVM_DIR="$$$$HOME/.nvm"; \
+	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; \
+	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
 	  nvm use $(NODE_VERSION); \
 	fi; \
 	for d in $(3); do \
@@ -604,24 +633,30 @@ install_FaMe_engine:
 define launch_pkg
 .PHONY: launch_$(1)
 launch_$(1):
-	@DEPS="$(3)"; \
-	if [ -n "$(4)" ]; then \
-	  export NVM_DIR="/home/dell/.nvm"; \
-	  if [ -f "/home/dell/.nvm/nvm.sh" ]; then . "/home/dell/.nvm/nvm.sh"; \
-	  else echo "NVM introuvable (cherché: /home/dell/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
-	  nvm use $(NODE_VERSION); \
-	fi; \
-	for d in $$$$DEPS; do \
-	  if [ -f "$$$$d/install/setup.bash" ]; then \
-	    echo "source $$$$d/install/setup.bash"; \
-	    . "$$$$d/install/setup.bash"; \
-	  fi; \
-	done; \
+	if [ -n "$(6)" ]; then make -i kill_all; fi;
+	if [ -n "$(5)" ]; then 
+	  export NVM_DIR="$$$$HOME/.nvm"; 
+	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; 
+	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; 
+	  nvm use $(NODE_VERSION); 
+	fi; 
+	for d in $(3); do 
+	  if [ -f "$$$$d/install/setup.bash" ]; then 
+	    echo "source $$$$d/install/setup.bash"; 
+	    . "$$$$d/install/setup.bash"; 
+	  fi; 
+	done; 
+	for rf in $(4); do 
+	  if [ -f "$$$$rf" ]; then 
+	    echo "source $$$$rf"; 
+	    . "$$$$rf"; 
+	  fi; 
+	done; 
 	ros2 launch $(2) 
 endef
 
 
-$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU) /usr/share/gazebo/setup.bash,nvm))
+$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,nvm,kill))
 
 #deprecated
 launch_comportement:
@@ -717,7 +752,7 @@ launch_fame_modeler:
 	cd ./fame-modeler && npm start
 
 
-PATH_TELLO_WS=$(PWD)/Simulation_Gazebo/tello_ros_ws
+PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
 
 setup_pfe_simulation_gazebo:
 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -732,18 +767,20 @@ setup_pfe_simulation_gazebo:
 		cd $(PATH_TELLO_WS) && \
 		colcon build
 
-$(eval $(call clean_package,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
 
-clear_pfe_simulation_gazebo:
-	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
+# clear_pfe_simulation_gazebo:
+# 	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
 
-PATH_TELLO_WS=$(PWD)/Simulation_Gazebo_old/tello_ros_ws
-clear_pfe_simulation_gazebo_old:
-	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
+PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
+# clear_pfe_simulation_gazebo_old:
+# 	@cd $(PATH_TELLO_WS_OLD) && echo -n "[$(PATH_TELLO_WS_OLD)] " && $(call _clear_ros)
 
-PATH_TELLO_WS=$(PWD)/Simulation_Gazebo_SW/tello_ros_ws
-clear_pfe_simulation_gazebo_SW:
-	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
+PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
+# clear_pfe_simulation_gazebo_SW:
+# 	@cd $(PATH_TELLO_WS_SW) && echo -n "[$(PATH_TELLO_WS_SW)] " && $(call _clear_ros)
 
 
 launch_pfe_simulation_gazebo:
@@ -761,38 +798,6 @@ launch_pfe_simulation_gazebo:
 		ros2 launch tello_gazebo someaze.py
 
 
-install_github_desktop_2004:
-	if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
-		wget https://github.com/shiftkey/desktop/releases/download/release-2.9.6-linux1/GitHubDesktop-linux-2.9.6-linux1.deb;
-	fi
-	sudo apt-get update
-	sudo apt-get install gdebi-core -y
-	sudo gdebi GitHubDesktop-linux-2.9.6-linux1.deb -y
-	sudo dpkg -i GitHubDesktop-linux-2.9.6-linux1.deb 
-	sudo apt-get install -f -y
-	sudo apt-mark hold github-desktop
-
-
-install_github_desktop_2404:
-	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
-		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
-	fi
-	sudo apt-get update
-	sudo apt-get install gdebi-core -y
-	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
-	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
-	sudo apt-get install -f -y
-# 	sudo apt-mark hold github-desktop
-
-
-test_python_versions:
-	python3 --version || true
-	python3.10 --version || true
-	node -v # Bonus
-
-setup_gazebo_models_2004:
-	@echo "for the moment unable to find where does the coke can belongs from"
-	@echo "so, for the moment, you need to copy the \`.gazebo/models\` folder to you working space"
 
 # /====================================\
 # |         Github integration         |
