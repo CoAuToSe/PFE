@@ -1,12 +1,15 @@
 {
     "telemetry.sqmId": "",
     "telemetry.machineId": "7549f82564bfef833210e8ce15cdf57c2beee94eccad468c54d4696fb78b9281",
-    "telemetry.devDeviceId": "ee80a49f-f842-472f-8413-104af8828ea5",
+    "telemetry.devDeviceId": "ee02a536-4026-4395-81a2-64f76d2b8d05",
     "backupWorkspaces": {
         "workspaces": [],
         "folders": [
             {
                 "folderUri": "file:///home/dell"
+            },
+            {
+                "folderUri": "file:///home/dell/PFE"
             }
         ],
         "emptyWindows": []
@@ -14,7 +17,8 @@
     "windowControlHeight": 35,
     "profileAssociations": {
         "workspaces": {
-            "file:///home/dell": "__default__profile__"
+            "file:///home/dell": "__default__profile__",
+            "file:///home/dell/PFE": "__default__profile__"
         },
         "emptyWindows": {}
     },
@@ -38,7 +42,7 @@
             "editorPartMinWidth": 220,
             "titleBarHeight": 35,
             "activityBarWidth": 48,
-            "sideBarWidth": 300,
+            "sideBarWidth": 340,
             "auxiliaryBarWidth": 0,
             "statusBarHeight": 22,
             "windowBorder": false
@@ -56,14 +60,41 @@
                 "height": 800
             }
         },
-        "openedWindows": []
+        "openedWindows": [
+            {
+                "folder": "file:///home/dell",
+                "backupPath": "/home/dell/.config/Code/Backups/81386d876f69acb033bc76ca2799321e",
+                "uiState": {
+                    "mode": 0,
+                    "x": 360,
+                    "y": 140,
+                    "width": 1200,
+                    "height": 800
+                }
+            },
+            {
+                "folder": "file:///home/dell/PFE",
+                "backupPath": "/home/dell/.config/Code/Backups/bfd8ccc784e3c084f847c9a799bc7a12",
+                "uiState": {
+                    "mode": 0,
+                    "x": 360,
+                    "y": 140,
+                    "width": 1200,
+                    "height": 800
+                }
+            }
+        ]
     },
     "windowSplashWorkspaceOverride": {
         "layoutInfo": {
-            "sideBarWidth": 300,
+            "sideBarWidth": 340,
             "auxiliaryBarWidth": 300,
             "workspaces": {
-                "dfbfa4ca3b4a90267b7d2fe10577d6a9": {
+                "72cb92b4008ebe994bd164be5c624365": {
+                    "sideBarVisible": true,
+                    "auxiliaryBarVisible": false
+                },
+                "d47559d37f4e65e1e212e839d2848d96": {
                     "sideBarVisible": true,
                     "auxiliaryBarVisible": false
                 }
