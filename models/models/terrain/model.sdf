@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="terrain">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+      	<pose> 2.5 7.5 0 0 0 0 </pose>
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>5 5 </size>
+          </plane>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://terrain/materials/scripts</uri>
+            <uri>model://terrain/materials/textures</uri>
+            <name>terrain/img</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="visual1">
+      	<pose> 2.5 2.5 0 0 0 0 </pose>
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>5 5 </size>
+          </plane>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://terrain/materials/scripts</uri>
+            <uri>model://terrain/materials/textures</uri>
+            <name>terrain/img</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="visual2">
+      	<pose> 7.5 7.5 0 0 0 0 </pose>
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>5 5 </size>
+          </plane>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://terrain/materials/scripts</uri>
+            <uri>model://terrain/materials/textures</uri>
+            <name>terrain/img</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="visual3">
+      	<pose> 7.5 2.5 0 0 0 0 </pose>
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>5 5 </size>
+          </plane>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://terrain/materials/scripts</uri>
+            <uri>model://terrain/materials/textures</uri>
+            <name>terrain/img</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

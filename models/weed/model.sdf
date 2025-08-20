@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="weed">
+    <!--    <static>true</static>-->
+    <link name="link">
+      <visual name="visual">
+        <pose>0.05 0 0 0 0 -1</pose>
+        <geometry>
+          <mesh>
+            <uri>model://weed/meshes/weed.dae</uri>
+            <scale>0.2 0.2 0.14</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://weed/materials/scripts/</uri>
+            <uri>model://weed/materials/textures/</uri>
+            <name>weed</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="visual1">
+        <pose>0.06 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://weed/meshes/weed.dae</uri>
+            <scale>0.1 0.1 0.1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://weed/materials/scripts/</uri>
+            <uri>model://weed/materials/textures/</uri>
+            <name>weed</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="visual2">
+        <pose>0.045 0 0 0 0 1</pose>
+        <geometry>
+          <mesh>
+            <uri>model://weed/meshes/weed.dae</uri>
+            <scale>0.2 0.2 0.14</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://weed/materials/scripts/</uri>
+            <uri>model://weed/materials/textures/</uri>
+            <name>weed</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="visual3">
+        <pose>0.065 0 0 0 0 -2</pose>
+        <geometry>
+          <mesh>
+            <uri>model://weed/meshes/weed.dae</uri>
+            <scale>0.1 0.1 0.1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://weed/materials/scripts/</uri>
+            <uri>model://weed/materials/textures/</uri>
+            <name>weed</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0.2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.2 0.2</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
