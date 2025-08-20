@@ -15,7 +15,6 @@ SHELL := /bin/bash
 		setup_FaMe_agri setup_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement setup_FaMe_simulation \
 		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
-DELAY ?= 20
 
 # Default target --------------------------------------------------------------
 all: min_install_2004
@@ -424,6 +423,7 @@ MBROS_DIR      := /home/ubuntu/mbros/fame_engine
 NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
 NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
 
+DELAY ?= 20
 # /====================================\
 # |            package  deps           |
 # \====================================/
@@ -457,38 +457,28 @@ $(eval $(call from_git_clean,husky,$(HUSKY),https://github.com/husky/husky.git,f
 define setup_pkg
 .PHONY: setup_$(1)
 setup_$(1):
-	@bash -lc 'set -euo pipefail; \
-	DEPS="$(3)"; \
 	if [ -n "$(4)" ]; then \
 	  export NVM_DIR="/home/dell/.nvm"; \
 	  if [ -f "/home/dell/.nvm/nvm.sh" ]; then . "/home/dell/.nvm/nvm.sh"; \
 	  else echo "NVM introuvable (cherché: /home/dell/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
 	  nvm use $(NODE_VERSION); \
 	fi; \
-	for d in $$DEPS; do \
-	  if [ -f "$$d/install/setup.bash" ]; then \
-	    echo "source $$d/install/setup.bash"; \
-	    . "$$d/install/setup.bash"; \
+	for d in $(3); do \
+	  if [ -f "$$$$d/install/setup.bash" ]; then \
+	    echo "source $$$$d/install/setup.bash"; \
+	    . "$$$$d/install/setup.bash"; \
 	  fi; \
 	done; \
 	cd $(2); \
-	colcon build --symlink-install \
-	'
+	colcon build --symlink-install 
 endef
 
-
-# ros2_shared : pas de NVM, pas de deps
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
-
-# tello_msgs : sourcer ros2_shared + NVM (NODE_VERSION doit être défini à l’extérieur)
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm))
-
-# FaMe_agri : sourcer ros2_shared et tello_msgs + NVM # TODO check if 'source /usr/share/gazebo/setup.bash' is necessary
 $(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
-
-# deprecated ?
-$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm))
-
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm)) # deprecated ?
+$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),nvm))
+$(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
 $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
 
 
@@ -515,16 +505,16 @@ $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
 # 		cd $(FAME_ENGINE) && colcon build
 
 
-setup_FaMe_simulation:
-	cd $(ROS2_SHARED) && source install/setup.bash && \
-		cd $(TELLO_MSGS) && source install/setup.bash && \
-		source /usr/share/gazebo/setup.bash && \
-		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-		cd $(FAME_ENGINE) && nvm use 16 && \
-		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-		cd $(FAME_AGRI) && source install/setup.bash && \
-		cd $(FAME_ENGINE) && source install/setup.bash && \
-		cd $(FAME_SIMU) && colcon build
+# setup_FaMe_simulation:
+# 	cd $(ROS2_SHARED) && source install/setup.bash && \
+# 		cd $(TELLO_MSGS) && source install/setup.bash && \
+# 		source /usr/share/gazebo/setup.bash && \
+# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
+# 		cd $(FAME_ENGINE) && nvm use 16 && \
+# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
+# 		cd $(FAME_AGRI) && source install/setup.bash && \
+# 		cd $(FAME_ENGINE) && source install/setup.bash && \
+# 		cd $(FAME_SIMU) && colcon build
 
 setup_husky_launch:
 	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
@@ -553,6 +543,7 @@ clone_FaMe_deps:	  \
 # |               Gazebo               |
 # \====================================/
 
+# deprecated
 launch_gazebo_2004:
 	cd $(ROS2_SHARED) && source install/setup.bash && 		\
 		cd $(TELLO_MSGS) && source install/setup.bash && 	\
@@ -610,6 +601,27 @@ install_FaMe_engine:
 # 	ros2 launch fame_engine agri_engine.launch.py
 
 
+define launch_pkg
+.PHONY: launch_$(1)
+launch_$(1):
+	@DEPS="$(3)"; \
+	if [ -n "$(4)" ]; then \
+	  export NVM_DIR="/home/dell/.nvm"; \
+	  if [ -f "/home/dell/.nvm/nvm.sh" ]; then . "/home/dell/.nvm/nvm.sh"; \
+	  else echo "NVM introuvable (cherché: /home/dell/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
+	  nvm use $(NODE_VERSION); \
+	fi; \
+	for d in $$$$DEPS; do \
+	  if [ -f "$$$$d/install/setup.bash" ]; then \
+	    echo "source $$$$d/install/setup.bash"; \
+	    . "$$$$d/install/setup.bash"; \
+	  fi; \
+	done; \
+	ros2 launch $(2) 
+endef
+
+
+$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU) /usr/share/gazebo/setup.bash,nvm))
 
 #deprecated
 launch_comportement:
