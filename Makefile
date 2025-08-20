@@ -444,6 +444,9 @@ $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemc
 $(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
 $(eval $(call from_git_clean,husky,~/husky_ws/husky,https://github.com/husky/husky.git,foxy-devel))
 
+setup_husky:
+	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
+
 
 define clear_package_ros
 clear_$1:
