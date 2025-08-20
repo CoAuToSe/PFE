@@ -11,5 +11,11 @@ make clone_husky
 then copy `gazebo_cats.launch.py` inside `~/husky_ws/husky/husky_gazebo/launch`
 
 ```bash
-cp ./gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
+cp ./husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
+```
+
+then `colcon build` the folder `husky_ws` then source the install and run
+
+```bash
+ros2 launch husky_gazebo gazebo_cats.launch.py
 ```
