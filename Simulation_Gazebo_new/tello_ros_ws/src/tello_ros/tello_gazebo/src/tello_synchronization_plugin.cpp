@@ -105,13 +105,13 @@ namespace tello_gazebo
             if (last_position_)
             {
                 // auto pos = last_odom_->pose.pose.position;
-                {
+                // {
                     ignition::math::Pose3d pose(
-                            ignition::math::Vector3d(-last_position_->x, last_position_->y, last_position_->z),
+                            ignition::math::Vector3d(-5*last_position_->x, 5*last_position_->y, last_position_->z),
                             ignition::math::Quaterniond(last_position_->roll * M_PI / 180.0, -last_position_->pitch * M_PI / 180.0, -last_position_->yaw * M_PI / 180.0));
 
                     base_link_->SetWorldPose(pose);
-                }
+                // }
             }
         }
 

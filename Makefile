@@ -630,7 +630,7 @@ install_FaMe_engine:
 # 	ros2 launch fame_engine agri_engine.launch.py
 
 
-define launch_pkg
+define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
 .PHONY: launch_$(1)
 launch_$(1):
 	if [ -n "$(6)" ]; then make -i kill_all; fi;
