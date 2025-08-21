@@ -444,6 +444,8 @@ PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
 PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
 PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
 
+PATH_PFE:=~/PFE
+
 # /====================================\
 # |            package  deps           |
 # \====================================/
@@ -594,30 +596,36 @@ install_FaMe_engine:
 define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
 .PHONY: launch_$(1)
 launch_$(1):
-	if [ -n "$(6)" ]; then make -i kill_all; fi;
-	if [ -n "$(5)" ]; then 
+	if [ -n "$(4)" ]; then make -i kill_all; fi;
+	if [ -n "$(3)" ]; then 
 	  export NVM_DIR="$$$$HOME/.nvm"; 
 	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; 
 	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; 
 	  nvm use $(NODE_VERSION); 
 	fi; 
-	for d in $(3); do 
+	for d in $(5); do 
 	  if [ -f "$$$$d/install/setup.bash" ]; then 
 	    echo "source $$$$d/install/setup.bash"; 
 	    . "$$$$d/install/setup.bash"; 
 	  fi; 
 	done; 
-	for rf in $(4); do 
+	for rf in $(6); do 
 	  if [ -f "$$$$rf" ]; then 
 	    echo "source $$$$rf"; 
 	    . "$$$$rf"; 
+	  fi; 
+	done; 
+	for var in $(7); do 
+	  if [ -f "$$$$var" ]; then 
+	    echo "source $$$$var"; 
+	    export "$$$$var"; 
 	  fi; 
 	done; 
 	ros2 launch $(2) 
 endef
 
 
-$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,nvm,kill))
+$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 
 #deprecated
 launch_comportement:
@@ -744,7 +752,6 @@ launch_pfe_simulation_gazebo:
 		ros2 launch tello_gazebo someaze.py
 
 
-
 # /====================================\
 # |         Github integration         |
 # \====================================/
@@ -768,7 +775,7 @@ copy_to_github:						\
 	copy_makefile_to_github			\
 	copy_bashrc_to_github			\
 	copy_code_setup_to_github		\
-	copy_gazebo_models_to_github	\
+	copy_gazebo_models_to_github	
 
 copy_from_github:					\
 	check_with_user					\
@@ -790,7 +797,6 @@ clean_$1:
 endef
 
 # Don't forget to let a folder of space while copying a folder
-PATH_PFE:=~/PFE
 $(eval $(call github,simu_gazebo,~/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
 $(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
