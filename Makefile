@@ -1,12 +1,3 @@
-# Makefile — Automated setup for development environment @04Jun2025
-# ----------------------------------------------------
-# Usage examples:
-#   make              # install everything (default)
-#   make install_vscode
-#   make test_ros2
-#   make versions
-# ----------------------------------------------------
-
 SHELL := /bin/bash
 
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
@@ -16,8 +7,10 @@ SHELL := /bin/bash
 		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
 
-# Default target --------------------------------------------------------------
+# Default target
 all: min_install_2004
+
+
 clean:
 	make -i try_clean
 
@@ -26,7 +19,7 @@ try_clean: 						\
 	clear_tello_msgs 			\
 	clear_fame_agri				\
 	clear_ros2_FaMe_engine		\
-	clear_pfe_simulation_gazebo	\
+	clear_pfe_simulation_gazebo	
 
 min_install_2004: 				\
 	sudo_upgrade				\
@@ -41,13 +34,14 @@ min_install_2404: 				\
 	install_github_desktop_2404	\
 	install_deps_2404			\
 	install_software
+	@echo "After clonning you need to execute 'make copy_from_github'"
 
 # /====================================\
 # |           Macro  install           |
 # \====================================/
 
-install_deps_2404:	\
-	install_git			
+#TODO: redo those macros as they are almost all deprecated and may not work completely
+	
 
 # Works on 2004 and 2404
 install_software:			\
@@ -55,10 +49,19 @@ install_software:			\
 	install_discord-snap	\
 	install_terminator		\
 	install_code_2404		\
+	install_FaMe_modeler	\
+
+install_software_2004:
+	install_vscode_2004		\
+	correct_vscode_2004		\
 
 
-# Install targets -------------------------------------------------------------
-install_software_2004:		\
+# deprecated use github
+install_deps_2404:	\
+	install_git		
+	
+# deprecated use github
+install_software_2004_old:		\
 	sudo_upgrade			\
 	install_terminator		\
 	install_cmake			\
@@ -68,25 +71,18 @@ install_software_2004:		\
 	install_FaMe_modeler	\
 	install_deps
 
-install_software_2004:		\
-	sudo_upgrade			\
-	install_terminator		\
-	install_cmake			\
-	install_discord-snap	\
-	install_vscode_2004		\
-	correct_vscode_2004		\
-	install_FaMe_modeler	\
-	install_deps
 
+# deprecated use github
 install_software_2004_bis:	\
 	install_gazebo_2004			\
 	install_ros2_foxy		
 
-# Aggregate install target ----------------------------------------------------
+# deprecated use github
 install_all: 			\
 	install_software	\
 	install_all2
 
+# deprecated use github
 install_all2: 					\
 	clone_ros2_shared 			\
 	setup_ros2_shared			\
@@ -102,6 +98,7 @@ install_all2: 					\
 	setup_bashrc 				\
 	setup_pfe_simulation_gazebo
 
+# deprecated use github
 install_all_2404:\
 	install_node
 
@@ -147,15 +144,6 @@ refresh_env:
 # /====================================\
 # |         install  softwares         |
 # \====================================/
-
-
-# install_FaMe: 
-# 	git clone https://github.com/SaraPettinari/fame-modeler.git -q
-# 	cd fame-modeler/
-# 	pwd
-# 	npm install
-# 	@npm run start
-
 
 install_%:
 	sudo apt install -y $<
@@ -401,11 +389,9 @@ setup_bashrc:
 # \====================================/
 
 test_nvm_install: refresh_env
-#command -v nvm
+#	command -v nvm
 	source ~/.bashrc && nvm -v
 
-run_FaMe_modeler:
-	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
 
 test_ros2:
 	@echo "Terminal 1 ➜ source /opt/ros/foxy/setup.bash && ros2 run demo_nodes_cpp talker"
@@ -453,6 +439,7 @@ NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
 NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
 
 DELAY ?= 20
+
 # /====================================\
 # |            package  deps           |
 # \====================================/
@@ -472,33 +459,22 @@ $(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame
 $(eval $(call from_git_clean,husky,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
 
 
-# define setup_pkg
-# .PHONY: setup_$(1)
-# setup_$(1):
-# 	@bash -lc '\
-# 		DEPS="$(3)" && \
-# 		[ -z "$(4)" ] || ( export NVM_DIR="$$HOME/.nvm" && . "$$NVM_DIR/nvm.sh" && nvm install $(NODE_VERSION) && nvm use $(NODE_VERSION) ) && \
-# 		for d in $$DEPS; do [ -f "$$d/install/setup.bash" ] && . "$$d/install/setup.bash"; done && \
-# 		cd "$(2)" && colcon build && . install/setup.bash \
-# 	'
-# endef
-
 define setup_pkg
 .PHONY: setup_$(1)
 setup_$(1):
-	if [ -n "$(4)" ]; then \
-	  export NVM_DIR="$$$$HOME/.nvm"; \
-	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; \
-	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; \
-	  nvm use $(NODE_VERSION); \
-	fi; \
-	for d in $(3); do \
-	  if [ -f "$$$$d/install/setup.bash" ]; then \
-	    echo "source $$$$d/install/setup.bash"; \
-	    . "$$$$d/install/setup.bash"; \
-	  fi; \
-	done; \
-	cd $(2); \
+	if [ -n "$(4)" ]; then 
+	  export NVM_DIR="$$$$HOME/.nvm"; 
+	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; 
+	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; 
+	  nvm use $(NODE_VERSION); 
+	fi; 
+	for d in $(3); do 
+	  if [ -f "$$$$d/install/setup.bash" ]; then 
+	    echo "source $$$$d/install/setup.bash"; 
+	    . "$$$$d/install/setup.bash"; 
+	  fi; 
+	done; 
+	cd $(2); 
 	colcon build  --symlink-install
 endef
 
@@ -509,30 +485,6 @@ $(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm)) # deprecated ?
 $(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),nvm))
 $(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
 $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
-
-
-# setup_ros2_shared:
-# 	cd $(ROS2_SHARED) && colcon build && source install/setup.bash
-
-# setup_tello_msgs: setup_ros2_shared
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(TELLO_MSGS) && nvm install --lts=gallium && nvm use 16 && \
-# 		cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && colcon build && source install/setup.bash
-
-# setup_FaMe_agri: setup_tello_msgs install_FaMe install_node
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_AGRI) && nvm install --lts=gallium && nvm use 16 && \
-# 		cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		cd $(FAME_AGRI) && colcon build
-# 	cd $(FAME_AGRI) && source install/setup.bash && source /usr/share/gazebo/setup.bash
-
-
-# setup_FaMe_engine:
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-# 		cd $(FAME_ENGINE) && colcon build
-
 
 # setup_FaMe_simulation:
 # 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -548,10 +500,6 @@ $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
 setup_husky_launch:
 	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
 
-#deprecated
-setup_models_FaMe_agri:
-	mkdir -p $(GZ_MODEL_DIR)
-	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
 
 define clear_package_ros
 .PHONY: clear_$1
@@ -563,9 +511,6 @@ $(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
 $(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
 $(eval $(call clear_package_ros,FaMe,$(FAME)))
 
-clone_FaMe_deps:	  \
-	clone_ros2_shared \
-	clone_tello_msgs  \
 
 
 # /====================================\
@@ -586,6 +531,18 @@ launch_gazebo_2004:
 # /====================================\
 # |                FaMe                |
 # \====================================/
+
+run_FaMe_modeler:
+	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
+
+clone_FaMe_deps:	  \
+	clone_ros2_shared \
+	clone_tello_msgs  
+
+#deprecated
+setup_models_FaMe_agri:
+	mkdir -p $(GZ_MODEL_DIR)
+	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
 
 install_FaMe_engine:
 # 	sudo apt update
