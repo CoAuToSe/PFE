@@ -162,7 +162,6 @@ install_nvm: update_source
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 	@echo "NVM installation complete."
 
-NPM_VERSION := 16
 install_node: install_nvm update_source
 #TODO change install depending on version to have only LTS versions of npm
 	@echo "Setting up Node.js version ${NPM_VERSION}..."
@@ -437,8 +436,13 @@ SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
 MBROS_DIR      := /home/ubuntu/mbros/fame_engine
 NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
 NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
+NPM_VERSION := 16
 
 DELAY ?= 20
+
+PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
+PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
+PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
 
 # /====================================\
 # |            package  deps           |
@@ -708,9 +712,6 @@ launch_example:
 launch_fame_modeler:
 	cd ./fame-modeler && npm start
 
-
-PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
-
 setup_pfe_simulation_gazebo:
 	cd $(ROS2_SHARED) && source install/setup.bash && \
 		cd $(TELLO_MSGS) && source install/setup.bash && \
@@ -727,18 +728,6 @@ setup_pfe_simulation_gazebo:
 $(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
 $(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
 $(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
-
-# clear_pfe_simulation_gazebo:
-# 	@cd $(PATH_TELLO_WS) && echo -n "[$(PATH_TELLO_WS)] " && $(call _clear_ros)
-
-PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
-# clear_pfe_simulation_gazebo_old:
-# 	@cd $(PATH_TELLO_WS_OLD) && echo -n "[$(PATH_TELLO_WS_OLD)] " && $(call _clear_ros)
-
-PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
-# clear_pfe_simulation_gazebo_SW:
-# 	@cd $(PATH_TELLO_WS_SW) && echo -n "[$(PATH_TELLO_WS_SW)] " && $(call _clear_ros)
-
 
 launch_pfe_simulation_gazebo:
 	make -i kill_all
