@@ -237,15 +237,15 @@ namespace tello_gazebo
 
             // ROS service
             command_srv_ = node_->create_service<tello_msgs::srv::TelloAction>("tello_action",
-                                                                                                                                                 std::bind(&TelloPlugin::command_callback, this,
-                                                                                                                                                                     std::placeholders::_1,
-                                                                                                                                                                     std::placeholders::_2,
-                                                                                                                                                                     std::placeholders::_3));
+                                                                                std::bind(&TelloPlugin::command_callback, this,
+                                                                                                    std::placeholders::_1,
+                                                                                                    std::placeholders::_2,
+                                                                                                    std::placeholders::_3));
 
             // ROS subscription
             cmd_vel_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10,
-                                                                                                                                                     std::bind(&TelloPlugin::cmd_vel_callback,
-                                                                                                                                                                         this, std::placeholders::_1));
+                                                                                std::bind(&TelloPlugin::cmd_vel_callback,
+                                                                                                    this, std::placeholders::_1));
 
             // Listen for the Gazebo update event. This event is broadcast every simulation iteration.
             update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(

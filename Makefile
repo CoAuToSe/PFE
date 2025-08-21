@@ -499,7 +499,7 @@ setup_$(1):
 	  fi; \
 	done; \
 	cd $(2); \
-	colcon build --symlink-install 
+	colcon build  --symlink-install
 endef
 
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
@@ -818,18 +818,18 @@ check_with_user:
 
 
 copy_to_github:						\
-	copy_simu_gazebo_to_Github		\
-	copy_makefile_to_Github			\
-	copy_bashrc_to_Github			\
-	copy_code_setup_to_Github		\
-	copy_gazebo_models_to_Github	\
+	copy_simu_gazebo_to_github		\
+	copy_makefile_to_github			\
+	copy_bashrc_to_github			\
+	copy_code_setup_to_github		\
+	copy_gazebo_models_to_github	\
 
 copy_from_github:					\
 	check_with_user					\
 	check_with_user_first_time		\
-	copy_simu_gazebo_from_Github	\
-	copy_code_setup_from_Github		\
-	copy_makefile_from_Github
+	copy_simu_gazebo_from_github	\
+	copy_code_setup_from_github		\
+	copy_makefile_from_github
 
 define github
 copy_$1_to_github:
