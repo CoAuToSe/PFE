@@ -22,8 +22,8 @@ class TelloPosition : public rclcpp::Node {
         publisher_ = this->create_publisher<tello_msgs::msg::TelloPosition>(
             "tello_position", 10);
 
-        initial_barometer_ = 0.0;
-        initial_barometer_set_ = false;
+        // initial_barometer_ = 0.0;
+        // initial_barometer_set_ = false;
 
         initial_barometer_ = 0.0;
         initial_barometer_set_ = false;
@@ -69,6 +69,7 @@ class TelloPosition : public rclcpp::Node {
         double pitch = msg->pitch * M_PI / 180.0;
         double roll = msg->roll * M_PI / 180.0;
 
+        // compute values relative to the world
         double vx_natural =
             msg->vgx * (std::cos(yaw) * std::cos(pitch)) +
             msg->vgy * (-std::sin(yaw) * std::cos(roll) +
@@ -91,40 +92,67 @@ class TelloPosition : public rclcpp::Node {
             msg->agx * (std::cos(yaw) * std::cos(pitch)) +
             msg->agy * (-std::sin(yaw) * std::cos(roll) +
                         std::cos(yaw) * std::sin(pitch) * std::sin(roll)) +
-            (msg->agz + 1000) *
+            (msg->agz) *
                 (std::sin(yaw) * std::sin(roll) +
                  std::cos(yaw) * std::sin(pitch) * std::cos(roll));
+            // (msg->agz + 1000) *
+            //     (std::sin(yaw) * std::sin(roll) +
+            //      std::cos(yaw) * std::sin(pitch) * std::cos(roll));// sensor is weird so we center at 1000 ?// fucking wrong
 
         double ay_natural =
             msg->agx * (std::sin(yaw) * std::cos(pitch)) +
             msg->agy * (std::cos(yaw) * std::cos(roll) +
                         std::sin(yaw) * std::sin(pitch) * std::sin(roll)) +
-            (msg->agz + 1000) *
+            (msg->agz) *
                 (-std::cos(yaw) * std::sin(roll) +
                  std::sin(yaw) * std::sin(pitch) * std::cos(roll));
+            // (msg->agz + 1000) *
+            //     (-std::cos(yaw) * std::sin(roll) +
+            //      std::sin(yaw) * std::sin(pitch) * std::cos(roll));// sensor is weird so we center at 1000 ?// fucking wrong
 
         double az_natural =
             msg->agx * (-std::sin(pitch)) +
             msg->agy * (std::cos(pitch) * std::sin(roll)) +
-            (msg->agz + 1000) * (std::cos(pitch) * std::cos(roll));
+            (msg->agz) * (std::cos(pitch) * std::cos(roll));
+            // (msg->agz + 1000) * (std::cos(pitch) * std::cos(roll));// sensor is weird so we center at 1000 ?// fucking wrong
 
         // kalman_update(vx_, ax_natural, dt);
         // kalman_update(vy_, ay_natural, dt);
         // kalman_update(vz_, az_natural, dt);
-        kalman_update(vx_, vx_natural, ax_natural, dt);
-        kalman_update(vy_, vy_natural, ay_natural, dt);
-        kalman_update(vz_, vz_natural, az_natural, dt);
 
-        x_ += (vx_natural / 100.0) * dt + 0.5 * (ax_natural / 100.0) * dt * dt;
-        y_ += (vy_natural / 100.0) * dt + 0.5 * (ay_natural / 100.0) * dt * dt;
-        z_ += (vz_natural / 100.0) * dt + 0.5 * (az_natural / 100.0) * dt * dt;
+        auto K_vx = 10;
+        auto K_vy = 10;
+        auto K_vz = 1;
 
+        kalman_update(vx_, K_vx * vx_natural / 100.0, ax_natural / 100.0, dt);
+        kalman_update(vy_, K_vy * vy_natural / 100.0, ay_natural / 100.0, dt);
+        kalman_update(vz_, K_vz * vz_natural / 100.0, az_natural / 100.0, dt);
+
+        x_ += K_vx * (vx_natural / 100.0) * dt + 0.5 * (ax_natural / 100.0) * dt * dt;
+        y_ += K_vy * (vy_natural / 100.0) * dt + 0.5 * (ay_natural / 100.0) * dt * dt;
+        z_ += K_vz * (vz_natural / 100.0) * dt + 0.5 * (az_natural / 100.0) * dt * dt;
+
+        std::cout << "yaw (deg) " << msg->yaw << std::endl;
+        std::cout << "pitch (deg) " << msg->pitch << std::endl;
+        std::cout << "roll (deg) " << msg->roll << std::endl;
+        std::cout << "vgx " << msg->vgx << std::endl;
+        std::cout << "vgy " << msg->vgy << std::endl;
+        std::cout << "vgz " << msg->vgz << std::endl;
+        std::cout << "agx " << msg->agx << std::endl;
+        std::cout << "agy " << msg->agy << std::endl;
+        std::cout << "agz " << msg->agz << std::endl;
         std::cout << "x_" << x_ << std::endl;
         std::cout << "y_" << y_ << std::endl;
         std::cout << "z_" << z_ << std::endl;
         std::cout << "vx_" << vx_ << std::endl;
         std::cout << "vy_" << vy_ << std::endl;
         std::cout << "vz_" << vz_ << std::endl;
+        std::cout << "vx_natural " << vx_natural / 100.0 << std::endl;
+        std::cout << "vy_natural " << vy_natural / 100.0 << std::endl;
+        std::cout << "vz_natural " << vz_natural / 100.0 << std::endl;
+        std::cout << "ax_natural " << ax_natural / 100.0 << std::endl;
+        std::cout << "ay_natural " << ay_natural / 100.0 << std::endl;
+        std::cout << "az_natural " << az_natural / 100.0 << std::endl;
 
 
         double height_tof =
@@ -138,10 +166,10 @@ class TelloPosition : public rclcpp::Node {
         if (msg->baro != 0.0) {
             height_barometer = msg->baro - initial_barometer_;
         }
-        std::cout << "height_tof" << height_tof << std::endl;
-        std::cout << "height_relevant" << height_relevant << std::endl;
-        std::cout << "height_barometer" << height_barometer << std::endl;
-        std::cout << "initial_barometer_" << initial_barometer_ << std::endl;
+        std::cout << "height_tof " << height_tof << std::endl;
+        std::cout << "height_relevant " << height_relevant << std::endl;
+        std::cout << "height_barometer " << height_barometer << std::endl;
+        std::cout << "initial_barometer_ " << initial_barometer_ << std::endl;
 
 
         z_ = 0.4 * height_tof + 0.3 * height_relevant + 0.2 * z_ +
@@ -171,7 +199,7 @@ class TelloPosition : public rclcpp::Node {
     //     P = (1 - K) * P;
     // }
 
-    /// x: vitesse estimée, z: vitesse mesurée (capteur), a: accélération (entrée), dt pas de temps
+    /// estm_velocity: vitesse estimée, mes_velocity: vitesse mesurée (capteur), acceleration: accélération (entrée), dt pas de temps
     void kalman_update(
         double& estm_velocity,
         double mes_velocity,
