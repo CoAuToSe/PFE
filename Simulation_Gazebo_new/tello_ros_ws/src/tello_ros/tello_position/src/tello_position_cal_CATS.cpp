@@ -108,20 +108,23 @@ class TelloPosition : public rclcpp::Node {
             msg->agy * (std::cos(pitch) * std::sin(roll)) +
             (msg->agz + 1000) * (std::cos(pitch) * std::cos(roll));
 
-        kalman_update(vx_, ax_natural, dt);
-        kalman_update(vy_, ay_natural, dt);
-        kalman_update(vz_, az_natural, dt);
+        // kalman_update(vx_, ax_natural, dt);
+        // kalman_update(vy_, ay_natural, dt);
+        // kalman_update(vz_, az_natural, dt);
+        kalman_update(vx_, vx_natural, ax_natural, dt);
+        kalman_update(vy_, vy_natural, ay_natural, dt);
+        kalman_update(vz_, vz_natural, az_natural, dt);
 
-        x_ += vx_natural / 100.0 * dt + 0.5 * ax_natural * dt * dt / 100.0;
-        y_ += vy_natural / 100.0 * dt + 0.5 * ay_natural * dt * dt / 100.0;
-        z_ += vz_natural / 100.0 * dt + 0.5 * az_natural * dt * dt / 100.0;
+        x_ += (vx_natural / 100.0) * dt + 0.5 * (ax_natural / 100.0) * dt * dt;
+        y_ += (vy_natural / 100.0) * dt + 0.5 * (ay_natural / 100.0) * dt * dt;
+        z_ += (vz_natural / 100.0) * dt + 0.5 * (az_natural / 100.0) * dt * dt;
 
-        // std::cout << "x_" << x_ << std::endl;
-        // std::cout << "y_" << y_ << std::endl;
-        // std::cout << "z_" << z_ << std::endl;
-        // std::cout << "vx_" << vx_ << std::endl;
-        // std::cout << "vy_" << vy_ << std::endl;
-        // std::cout << "vz_" << vz_ << std::endl;
+        std::cout << "x_" << x_ << std::endl;
+        std::cout << "y_" << y_ << std::endl;
+        std::cout << "z_" << z_ << std::endl;
+        std::cout << "vx_" << vx_ << std::endl;
+        std::cout << "vy_" << vy_ << std::endl;
+        std::cout << "vz_" << vz_ << std::endl;
 
         double height_tof =
             (msg->tof / 100.0) * std::cos(pitch) * std::cos(roll);
@@ -133,7 +136,7 @@ class TelloPosition : public rclcpp::Node {
         double height_barometer = msg->baro - initial_barometer_;
 
         z_ = 0.4 * height_tof + 0.3 * height_relevant + 0.2 * z_ +
-             0.1 * height_barometer;
+             0.1 * height_barometer; // badly comput
 
         auto position_msg = tello_msgs::msg::TelloPosition();
         position_msg.x = x_;
@@ -146,17 +149,39 @@ class TelloPosition : public rclcpp::Node {
         publisher_->publish(position_msg);
     }
 
-    void kalman_update(double& velocity, double acceleration, double dt) {
-        static double P = 1.0;
-        static double R = 1.0;
-        static double Q = 0.1;
+    // void kalman_update(double& velocity, double acceleration, double dt) {
+    //     static double P = 1.0;
+    //     static double R = 1.0;
+    //     static double Q = 0.1;
 
-        double velocity_predict = velocity + acceleration * dt;
-        P += Q;
+    //     double velocity_predict = velocity + acceleration * dt;
+    //     P += Q;
 
+    //     double K = P / (P + R);
+    //     velocity = velocity_predict + K * (velocity - velocity_predict);
+    //     P = (1 - K) * P;
+    // }
+
+    /// x: vitesse estimée, z: vitesse mesurée (capteur), a: accélération (entrée), dt pas de temps
+    void kalman_update(
+        double& estm_velocity,
+        double mes_velocity,
+        double acceleration,
+        double dt
+    ) {
+        static double P = 1.0;          // variance d’état
+        static double R = 1.0;          // variance de mesure (bruit capteur vitesse)
+        static double qa = 0.1;         // variance du bruit d’accélération
+        double Q = qa * dt * dt;        // bruit de processus induit par acceleration
+
+        // Prédiction
+        double estm_velocity_pred = estm_velocity + acceleration * dt;
+        P = P + Q;
+
+        // Mise à jour (avec la mesure mes_velocity)
         double K = P / (P + R);
-        velocity = velocity_predict + K * (velocity - velocity_predict);
-        P = (1 - K) * P;
+        estm_velocity = estm_velocity_pred + K * (mes_velocity - estm_velocity_pred);
+        P = (1.0 - K) * P;
     }
 
     rclcpp::Subscription<tello_msgs::msg::FlightData>::SharedPtr subscription_;
