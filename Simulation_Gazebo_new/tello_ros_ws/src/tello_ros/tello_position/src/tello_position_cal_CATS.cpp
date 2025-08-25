@@ -60,7 +60,7 @@ class TelloPosition : public rclcpp::Node {
         double dt = (current_time - last_time_).seconds();
         last_time_ = current_time;
 
-        if (!initial_barometer_set_) {
+        if (!initial_barometer_set_ && msg->baro != 0.0) {
             initial_barometer_ = msg->baro;
             initial_barometer_set_ = true;
         }
@@ -126,6 +126,7 @@ class TelloPosition : public rclcpp::Node {
         std::cout << "vy_" << vy_ << std::endl;
         std::cout << "vz_" << vz_ << std::endl;
 
+
         double height_tof =
             (msg->tof / 100.0) * std::cos(pitch) * std::cos(roll);
         if (msg->tof == 6553) {
@@ -133,7 +134,15 @@ class TelloPosition : public rclcpp::Node {
         }
 
         double height_relevant = msg->h / 100.0;
-        double height_barometer = msg->baro - initial_barometer_;
+        double height_barometer;
+        if (msg->baro != 0.0) {
+            height_barometer = msg->baro - initial_barometer_;
+        }
+        std::cout << "height_tof" << height_tof << std::endl;
+        std::cout << "height_relevant" << height_relevant << std::endl;
+        std::cout << "height_barometer" << height_barometer << std::endl;
+        std::cout << "initial_barometer_" << initial_barometer_ << std::endl;
+
 
         z_ = 0.4 * height_tof + 0.3 * height_relevant + 0.2 * z_ +
              0.1 * height_barometer; // badly comput
