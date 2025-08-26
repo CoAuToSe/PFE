@@ -798,13 +798,16 @@ copy_to_github:						\
 	copy_makefile_to_github			\
 	copy_bashrc_to_github			\
 	copy_code_setup_to_github		\
-	copy_gazebo_models_to_github	
+	copy_gazebo_models_to_github	\
+	copy_FaMe_to_github	
 
 copy_from_github:					\
 	check_with_user					\
 	check_with_user_first_time		\
 	copy_simu_gazebo_from_github	\
 	copy_code_setup_from_github		\
+	copy_gazebo_models_from_github	\
+	copy_FaMe_from_github			\
 	copy_makefile_from_github
 
 define github
@@ -826,7 +829,7 @@ $(eval $(call github,simu_gazebo,~/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/S
 $(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
 $(eval $(call github,code_setup,~/.config/Code/User/,${PATH_PFE}/Code/))
-$(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/models/))
+$(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/))
 $(eval $(call github,FaMe,~/fame/,${PATH_PFE}/))
 # $(eval $(call github,,,))
 
