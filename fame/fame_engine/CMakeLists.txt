@@ -64,3 +64,18 @@ install(DIRECTORY
     launch/splitter.launch.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+# find_package(ament_cmake REQUIRED)
+
+add_custom_target(${PROJECT_NAME}_npm ALL
+  COMMAND bash -lc "npm ci || npm install"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Installez les artefacts nécessaires à l’exécution
+install(DIRECTORY process/ DESTINATION share/${PROJECT_NAME}/process)
+install(FILES package.json package-lock.json DESTINATION share/${PROJECT_NAME})
+# Option A: embarquer node_modules (simple, volumineux)
+install(DIRECTORY node_modules/ DESTINATION share/${PROJECT_NAME}/node_modules)
+
+# ament_package()
