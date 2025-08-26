@@ -827,6 +827,6 @@ $(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
 $(eval $(call github,code_setup,~/.config/Code/User/,${PATH_PFE}/Code/))
 $(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/models/))
-$(eval $(call github,FaMe,~/fame/,${PATH_PFE}/fame/))
+$(eval $(call github,FaMe,~/fame/,${PATH_PFE}/))
 # $(eval $(call github,,,))
 
