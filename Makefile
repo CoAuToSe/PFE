@@ -602,15 +602,17 @@ install_FaMe_engine:
 define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
 .PHONY: launch_$(1)
 launch_$(1):
-	@if [ -n "$(4)" ]; then echo "make -i kill_all"; make -i kill_all; fi;
-	if [ -n "$(3)" ]; 
+	if [ -n "$(4)" ]; then 
+		echo "make --ignore-errors kill_all"; make --ignore-errors kill_all;
+	fi;
+	if [ -n "$(3)" ]; then
 		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
 		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
 			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
 		else 
 			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
 			exit 127; 
-		fi; 
+		fi;
 	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
 	fi; 
 	for d in $(5); do 
