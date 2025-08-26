@@ -630,7 +630,7 @@ launch_$(1):
 	    echo "export \"$$$$var\""; export "$$$$var"; 
 	  fi; 
 	done; 
-	ros2 launch $(2) 
+	echo "ros2 launch $(2)" ; ros2 launch $(2) 
 endef
 
 
