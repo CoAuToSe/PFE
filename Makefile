@@ -486,8 +486,8 @@ endef
 
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm))
-$(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
 $(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm)) # deprecated ?
+$(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
 $(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),nvm))
 $(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
 $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
@@ -786,11 +786,12 @@ copy_from_github:					\
 
 define github
 copy_$1_to_github:
-	if [ -d $2 ] || [ -f $2 ]; then cp -r $2 $3; fi
+	@if [ -d $2 ] || [ -f $2 ]; then echo "cp -r $2 $3" ; cp -r $2 $3 ; fi
 copy_$1_from_github: check_with_user
 # 	@echo "$2"
 	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
 	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
+	@if [ ! -d $2 ] && [ ! -f $2 ] ; then echo "mkdir $2" ; mkdir $2 ; fi
 	@if [ -d $2 ] ; then echo "dic $2 $(dir ${2:/=})"; cp -r $3/* $(dir ${2:/=}); fi
 clean_$1:	
 	rm -r $2
@@ -802,5 +803,6 @@ $(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
 $(eval $(call github,code_setup,~/.config/Code/User/,${PATH_PFE}/Code/))
 $(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/models))
+$(eval $(call github,my_FaMe,~/fame,${PATH_PFE}/))
 # $(eval $(call github,,,))
 
