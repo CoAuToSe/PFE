@@ -2,9 +2,9 @@ SHELL := /bin/bash
 
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
-		install_discord-snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_FaMe \
-		setup_FaMe_agri setup_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement setup_FaMe_simulation \
-		install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
+		install_discord_snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_FaMe \
+		setup_FaMe_agricultural setup_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement \
+		setup_FaMe_simulation install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
 
 # Default target
@@ -46,7 +46,7 @@ min_install_2404: 				\
 # Works on 2004 and 2404
 install_software:			\
 	sudo_upgrade			\
-	install_discord-snap	\
+	install_discord_snap	\
 	install_terminator		\
 	install_code_2404		\
 	install_FaMe_modeler	\
@@ -65,7 +65,7 @@ install_software_2004_old:		\
 	sudo_upgrade			\
 	install_terminator		\
 	install_cmake			\
-	install_discord-snap	\
+	install_discord_snap	\
 	install_vscode_2004		\
 	correct_vscode_2004		\
 	install_FaMe_modeler	\
@@ -89,7 +89,7 @@ install_all2: 					\
 	clone_tello_msgs 			\
 	setup_tello_msgs			\
 	install_FaMe 				\
-	setup_FaMe_agri 			\
+	setup_FaMe_agricultural 	\
 	setup_models_FaMe_agri		\
 	setup_gazebo 				\
 	install_FaMe_engine 		\
@@ -177,7 +177,7 @@ install_terminator:
 	sudo apt update
 	sudo apt install -y terminator
 
-install_discord-snap: install_snap
+install_discord_snap: install_snap
 	@echo "Installation de Discord via Snap..."
 	@sudo snap install discord
 	@echo "Discord installé avec Snap."
@@ -466,7 +466,7 @@ $(eval $(call from_git_clean,husky,$(HUSKY),https://github.com/husky/husky.git,f
 
 
 define setup_pkg
-.PHONY: setup_$(1)
+.PHONY: setup_$(1) clear_$(1)
 setup_$(1):
 	@if [ -n "$(4)" ]; then 
 		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
@@ -483,17 +483,25 @@ setup_$(1):
 			echo "source \"$$$$d/install/setup.bash\"" ; . "$$$$d/install/setup.bash"; 
 		fi; 
 	done; 
-	echo "cd $(2)" ; cd $(2); 
-	echo "colcon build  --symlink-install" ; colcon build  --symlink-install
+	echo "cd $(2)" ; cd $(2);
+
+	@if [ -n "$(5)" ]; then 
+		echo "colcon build" ; colcon build ;
+	else 
+		echo "colcon build --symlink-install" ; colcon build --symlink-install ;
+	fi;
+
+clear_$(1):
+	@cd $(2) && echo -n "[$(2)] " && $(call _clear_ros)
 endef
 
-$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
-$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm))
-$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm)) # deprecated ?
-$(eval $(call setup_pkg,FaMe_agri,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
-$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),nvm))
-$(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm))
-$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),))
+$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,))
+$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm,))
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm,build)) # symlink -> not working, need to clear before setup
+$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build)) # symlink -> not working, need to clear before setup
+$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build)) # symlink -> not working, need to clear before setup
+$(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm,build))
+$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,))
 
 # setup_FaMe_simulation:
 # 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -516,13 +524,16 @@ clear_$1:
 	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
 endef
 
-$(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
-$(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
-$(eval $(call clear_package_ros,FaMe,$(FAME)))
-$(eval $(call clear_package_ros,FaMe_agri,$(FAME_AGRI)))
-$(eval $(call clear_package_ros,FaMe_engine,$(FAME_ENGINE)))
-$(eval $(call clear_package_ros,FaMe_simu,$(FAME_SIMU)))
+# $(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
+# $(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
+# $(eval $(call clear_package_ros,FaMe,$(FAME)))
+# $(eval $(call clear_package_ros,FaMe_agri,$(FAME_AGRI)))
+# $(eval $(call clear_package_ros,FaMe_engine,$(FAME_ENGINE)))
+# $(eval $(call clear_package_ros,FaMe_simu,$(FAME_SIMU)))
 
+$(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
 
 
 # /====================================\
@@ -602,7 +613,7 @@ install_FaMe_engine:
 define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
 .PHONY: launch_$(1)
 launch_$(1):
-	if [ -n "$(4)" ]; then 
+	@if [ -n "$(4)" ]; then 
 		echo "make --ignore-errors kill_all"; make --ignore-errors kill_all;
 	fi;
 	if [ -n "$(3)" ]; then
@@ -634,7 +645,7 @@ launch_$(1):
 endef
 
 
-$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+$(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 
 #deprecated
 launch_comportement:
@@ -693,7 +704,7 @@ launch_example_alone:
 		cd $(FAME_ENGINE) && source install/setup.bash && \
 		ros2 launch fame_engine example.launch.py 
 	
-setup_example: setup_tello_msgs setup_FaMe_engine setup_FaMe_simulation setup_FaMe_agri
+setup_example: setup_tello_msgs setup_FaMe_engine setup_FaMe_simulation setup_FaMe_agricultural
 
 
 .ONESHELL: launch_example
@@ -742,9 +753,6 @@ setup_pfe_simulation_gazebo:
 		cd $(PATH_TELLO_WS) && \
 		colcon build
 
-$(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
-$(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
-$(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
 
 launch_pfe_simulation_gazebo:
 	make -i kill_all
@@ -794,6 +802,7 @@ copy_from_github:					\
 	copy_makefile_from_github
 
 define github
+.PHONY: copy_$1_to_github copy_$1_from_github clean_$1
 copy_$1_to_github:
 	@if [ -d $2 ] || [ -f $2 ]; then echo "cp -r $2 $3" ; cp -r $2 $3 ; fi
 copy_$1_from_github: check_with_user
