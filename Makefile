@@ -453,35 +453,38 @@ PATH_PFE:=~/PFE
 define from_git_clean
 .PHONY: clone_$1 clean_$1
 clone_$1:
-	if [ ! -f $2 ] ; then mkdir -p $2 ; fi
-	if [ -d $2 ] ; then echo -n "clonning $3 into $2" && git clone $3 $2 -b $4 ; fi
+	@if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
+	@if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
 clean_$1:
-	@rm -r $2
+	rm -r $2
 endef
 
 $(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
 $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
-$(eval $(call from_git_clean,FaMe,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
+$(eval $(call from_git_clean,FaMe_bitbucket,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
 $(eval $(call from_git_clean,husky,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
 
 
 define setup_pkg
 .PHONY: setup_$(1)
 setup_$(1):
-	if [ -n "$(4)" ]; then 
-	  export NVM_DIR="$$$$HOME/.nvm"; 
-	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; 
-	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; 
-	  nvm use $(NODE_VERSION); 
+	@if [ -n "$(4)" ]; then 
+		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
+		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
+			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
+		else 
+			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
+			exit 127; 
+		fi; 
+	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
 	fi; 
 	for d in $(3); do 
-	  if [ -f "$$$$d/install/setup.bash" ]; then 
-	    echo "source $$$$d/install/setup.bash"; 
-	    . "$$$$d/install/setup.bash"; 
-	  fi; 
+		if [ -f "$$$$d/install/setup.bash" ]; then 
+			echo "source \"$$$$d/install/setup.bash\"" ; . "$$$$d/install/setup.bash"; 
+		fi; 
 	done; 
-	cd $(2); 
-	colcon build  --symlink-install
+	echo "cd $(2)" ; cd $(2); 
+	echo "colcon build  --symlink-install" ; colcon build  --symlink-install
 endef
 
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,))
@@ -516,6 +519,9 @@ endef
 $(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
 $(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
 $(eval $(call clear_package_ros,FaMe,$(FAME)))
+$(eval $(call clear_package_ros,FaMe_agri,$(FAME_AGRI)))
+$(eval $(call clear_package_ros,FaMe_engine,$(FAME_ENGINE)))
+$(eval $(call clear_package_ros,FaMe_simu,$(FAME_SIMU)))
 
 
 
@@ -596,29 +602,30 @@ install_FaMe_engine:
 define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
 .PHONY: launch_$(1)
 launch_$(1):
-	if [ -n "$(4)" ]; then make -i kill_all; fi;
-	if [ -n "$(3)" ]; then 
-	  export NVM_DIR="$$$$HOME/.nvm"; 
-	  if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then . "$$$$HOME/.nvm/nvm.sh"; 
-	  else echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; exit 127; fi; 
-	  nvm use $(NODE_VERSION); 
+	@if [ -n "$(4)" ]; then echo "make -i kill_all"; make -i kill_all; fi;
+	if [ -n "$(3)" ]; 
+		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
+		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
+			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
+		else 
+			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
+			exit 127; 
+		fi; 
+	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
 	fi; 
 	for d in $(5); do 
 	  if [ -f "$$$$d/install/setup.bash" ]; then 
-	    echo "source $$$$d/install/setup.bash"; 
-	    . "$$$$d/install/setup.bash"; 
+	    echo "source \"$$$$d/install/setup.bash\""; . "$$$$d/install/setup.bash"; 
 	  fi; 
 	done; 
 	for rf in $(6); do 
 	  if [ -f "$$$$rf" ]; then 
-	    echo "source $$$$rf"; 
-	    . "$$$$rf"; 
+	    echo "source \"$$$$rf\""; . "$$$$rf"; 
 	  fi; 
 	done; 
 	for var in $(7); do 
 	  if [ -f "$$$$var" ]; then 
-	    echo "source $$$$var"; 
-	    export "$$$$var"; 
+	    echo "export \"$$$$var\""; export "$$$$var"; 
 	  fi; 
 	done; 
 	ros2 launch $(2) 
@@ -792,7 +799,7 @@ copy_$1_from_github: check_with_user
 	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
 	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
 	@if [ ! -d $2 ] && [ ! -f $2 ] ; then echo "mkdir $2" ; mkdir $2 ; fi
-	@if [ -d $2 ] ; then echo "dic $2 $(dir ${2:/=})"; cp -r $3/* $(dir ${2:/=}); fi
+	@if [ -d $2 ] ; then echo "cp -r $3 $(dir ${2:/=})"; cp -r $3 $(dir ${2:/=}); fi
 clean_$1:	
 	rm -r $2
 endef
@@ -802,7 +809,7 @@ $(eval $(call github,simu_gazebo,~/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/S
 $(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
 $(eval $(call github,code_setup,~/.config/Code/User/,${PATH_PFE}/Code/))
-$(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/models))
-$(eval $(call github,my_FaMe,~/fame,${PATH_PFE}/))
+$(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/models/))
+$(eval $(call github,FaMe,~/fame/,${PATH_PFE}/fame/))
 # $(eval $(call github,,,))
 
