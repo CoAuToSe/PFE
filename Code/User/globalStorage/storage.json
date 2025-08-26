@@ -12,7 +12,11 @@
                 "folderUri": "file:///home/dell/PFE"
             }
         ],
-        "emptyWindows": []
+        "emptyWindows": [
+            {
+                "backupFolder": "1756123480841"
+            }
+        ]
     },
     "windowControlHeight": 35,
     "profileAssociations": {
@@ -20,7 +24,9 @@
             "file:///home/dell": "__default__profile__",
             "file:///home/dell/PFE": "__default__profile__"
         },
-        "emptyWindows": {}
+        "emptyWindows": {
+            "1756123480841": "__default__profile__"
+        }
     },
     "theme": "vs-dark",
     "themeBackground": "#1e1e1e",
@@ -62,8 +68,8 @@
         },
         "openedWindows": [
             {
-                "folder": "file:///home/dell",
-                "backupPath": "/home/dell/.config/Code/Backups/81386d876f69acb033bc76ca2799321e",
+                "folder": "file:///home/dell/PFE",
+                "backupPath": "/home/dell/.config/Code/Backups/bfd8ccc784e3c084f847c9a799bc7a12",
                 "uiState": {
                     "mode": 0,
                     "x": 360,
@@ -73,8 +79,8 @@
                 }
             },
             {
-                "folder": "file:///home/dell/PFE",
-                "backupPath": "/home/dell/.config/Code/Backups/bfd8ccc784e3c084f847c9a799bc7a12",
+                "folder": "file:///home/dell",
+                "backupPath": "/home/dell/.config/Code/Backups/81386d876f69acb033bc76ca2799321e",
                 "uiState": {
                     "mode": 0,
                     "x": 360,
