@@ -485,7 +485,10 @@ setup_$(1):
 	done; 
 	echo "cd $(2)" ; cd $(2);
 
-	@if [ -n "$(5)" ]; then 
+	@if [ "$(5)" == "build" ]; then 
+		echo "colcon build" ; colcon build ;
+	elif [[ "$(5)" == "npm" ]]; then
+		echo "npm install" ; npm install ;
 		echo "colcon build" ; colcon build ;
 	else 
 		echo "colcon build --symlink-install" ; colcon build --symlink-install ;
@@ -497,11 +500,14 @@ endef
 
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,))
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm,))
-$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm,build)) # symlink -> not working, need to clear before setup
-$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build)) # symlink -> not working, need to clear before setup
-$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build)) # symlink -> not working, need to clear before setup
-$(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm,build))
 $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,))
+
+# symlink -> not working, need to clear before setup
+$(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm,build))
+# $(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm,npm))
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),nvm,build))
+$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build))
+$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build))
 
 # setup_FaMe_simulation:
 # 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -646,6 +652,7 @@ endef
 
 
 $(eval $(call launch_pkg,FaMe_agri_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+$(eval $(call launch_pkg,FaMe_engi_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 
 #deprecated
 launch_comportement:
