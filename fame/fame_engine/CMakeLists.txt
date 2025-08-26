@@ -68,7 +68,7 @@ install(DIRECTORY
 # find_package(ament_cmake REQUIRED)
 
 add_custom_target(${PROJECT_NAME}_npm ALL
-  COMMAND bash -lc "npm ci || npm install"
+  COMMAND bash -lc "npm install --no-progress --silent"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
