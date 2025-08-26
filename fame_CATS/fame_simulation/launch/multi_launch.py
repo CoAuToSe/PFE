@@ -18,15 +18,21 @@ def generate_launch_description():
     tractor_ns_1 = 'REX'
     tractor_ns_2 = 'DINGO'
 
+    drone_ns_1 = 'DRONE'
+
     tractor_1 = os.path.join(pkg, 'robot_description',
                              str('tractor_1.sdf'))
 
     tractor_2 = os.path.join(pkg, 'robot_description',
                              str('tractor_2.sdf'))
 
+    drone_1 = os.path.join(pkg, 'robot_description',
+                             str('Drone.sdf'))# "Drone_1" doesn't work for some reasons
+
     sc = os.path.join(pkg, 'robot_description',                      str('smart_car.sdf'))
 
-    world_path = os.path.join(pkg, 'worlds', 'empty.world')
+    # world_path = os.path.join(pkg, 'worlds', 'empty.world')
+    world_path = os.path.join(pkg, 'worlds', 'simple.world')
 
     return LaunchDescription([
         # Launch Gazebo, loading the world
@@ -45,6 +51,9 @@ def generate_launch_description():
 
         Node(package='fame_simulation', executable='spawn_elements.py', output='screen',
              arguments=[tractor_2, '0', '0', '0', '0', tractor_ns_2]),
+             
+        Node(package='fame_simulation', executable='spawn_elements.py', output='screen',
+             arguments=[drone_1, '2', '0', '0', '0', drone_ns_1]),
 
 
 

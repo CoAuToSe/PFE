@@ -41,6 +41,9 @@ if len(sys.argv) < 6:
     print('usage: ros2 run agriculture spawn_elements.py -- foo.sdf initial_x initial_y initial_z initial_yaw')
     sys.exit(1)
 
+import time
+time.sleep(10)
+
 f = open(sys.argv[1], 'r')
 
 # Robot initial position definition
