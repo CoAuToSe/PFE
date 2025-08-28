@@ -560,7 +560,7 @@ launch_gazebo_2004:
 # |                FaMe                |
 # \====================================/
 
-run_FaMe_modeler:
+launch_FaMe_modeler:
 	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
 
 clone_FaMe_deps:	  \
@@ -648,6 +648,10 @@ launch_$(1):
 	done; 
 	echo "ros2 launch $(2)" ; ros2 launch $(2) 
 endef
+
+# TODO add : ros2 launch tello_gazebo tello_synchro_launch_cats_3.py # and similar
+
+$(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 
 
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
@@ -861,7 +865,7 @@ copy_$1_from_github: check_with_user
 	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
 	@if [ ! -d $2 ] && [ ! -f $2 ] ; then echo "mkdir $2" ; mkdir $2 ; fi
 	@if [ -d $2 ] ; then echo "cp -r $3 $(dir ${2:/=})"; cp -r $3 $(dir ${2:/=}); fi
-clean_$1:	
+clean_$1: check_with_user
 	rm -r $2
 endef
 

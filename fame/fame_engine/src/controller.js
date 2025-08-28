@@ -52,8 +52,9 @@ function mergeCallActivity() {
   var conversion = convert.xml2json(xml, { compact: true, spaces: 4 });
   conversion = conversion.replace(/'/g, '"');
   var conversion_obj = JSON.parse(conversion);
+  // console.log(conversion_obj);
   var processObj = conversion_obj['bpmn:definitions']['bpmn:process'];
-  //  var caObjs = processObj['bpmn:callActivity'];
+   var caObjs = processObj['bpmn:callActivity'];
   var spObjs = processObj['bpmn:subProcess'];
   if (spObjs) { //the param triggeredByEvent = true blocks the execution of the subprocess
     if (spObjs.length) {
@@ -195,6 +196,7 @@ rclnodejs.init().then(() => {
     services: {
       get: bent('json'),
       set,
+      console,
     },
     moddleOptions: {
       camunda: require('camunda-bpmn-moddle/resources/camunda'),
