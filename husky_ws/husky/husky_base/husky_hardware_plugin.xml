@@ -1,0 +1,6 @@
+<class
+    name="husky_base/HuskyHardware"
+    type="husky_base::HuskyHardware"
+    base_class_type="hardware_interface::SystemInterface">
+  <description>Husky hardware interface</description>
+</class>
