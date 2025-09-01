@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
-		install_discord_snap install_deps clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_FaMe \
+		install_discord_snap install_deps_python clone_ros2_shared setup_ros2_shared clone_tello_msgs setup_tello_msgs install_FaMe \
 		setup_FaMe_agricultural setup_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement \
 		setup_FaMe_simulation install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
@@ -73,7 +73,7 @@ install_software_2004_old:	\
 	install_vscode_2004		\
 	correct_vscode_2004		\
 	install_FaMe_modeler	\
-	install_deps
+	install_deps_python
 
 
 # deprecated use github
@@ -103,9 +103,12 @@ install_all2: 					\
 	setup_pfe_simulation_gazebo
 
 # deprecated use github
-install_all_2404:\
+install_all_2404:	\
 	install_node
 
+install_dependencies:	\
+	install_node		\
+	
 
 
 
@@ -208,7 +211,7 @@ install_node: install_nvm update_source
 
 install_terminator:
 	sudo add-apt-repository -y ppa:mattrose/terminator
-	sudo apt update
+	$(update)
 	$(install) terminator
 
 install_discord_snap: install_snap
@@ -225,7 +228,7 @@ install_FaMe_modeler: update_source
 	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm install
 
 install_python_3_10:
-	sudo apt update
+	$(update)
 	$(install) software-properties-common
 	sudo add-apt-repository -y ppa:deadsnakes/ppa
 	$(update)
@@ -234,7 +237,7 @@ install_python_3_10:
 	$(pip) --version
 	$(pip) install pyparrot djitellopy
 
-install_deps:
+install_deps_python:
 # sudo apt update
 	$(install) python3-pip
 	$(pip) install transformations djitellopy
@@ -244,7 +247,7 @@ install_deps:
 # \====================================/
 
 install_vscode_2004:
-	sudo apt-get update
+	$(update)
 	$(install) wget gpg apt-transport-https
 	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 	sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
@@ -279,7 +282,7 @@ correct_vscode_2004:
 install_ros2_foxy: install_cmake
 	@echo "Bienvenu dans l'installation de ROS2 Foxy"
 	locale || true                               # check current locale (non-fatal)
-	sudo apt update
+	$(update)
 	$(install) locales
 	sudo locale-gen en_US en_US.UTF-8
 	sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
@@ -315,7 +318,7 @@ install_ros2_foxy: install_cmake
 
 
 install_gazebo_2004:
-	sudo apt update
+	$(update)
 	$(install) -y ros-foxy-gazebo-ros-pkgs
 # deps Gazebo
 	$(install) libasio-dev
@@ -338,17 +341,13 @@ install_github_desktop_2004:
 # \====================================/
 
 install_vscode_2404:
-	sudo apt install code -y
-
-.PHONY: install_vscode_2404_bis
-install_vscode_2404_bis:
-	$(install) code 
+	$(install) code
 
 setup_ros2_jazzy:
 	@echo "Bienvenu dans le setup de ROS2 Jazzy"
 	locale  # check for UTF-8
 
-	sudo apt update && sudo apt install locales
+	$(update) && $(install)locales
 	sudo locale-gen en_US en_US.UTF-8
 	sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 	export LANG=en_US.UTF-8
@@ -358,7 +357,7 @@ setup_ros2_jazzy:
 	$(install) software-properties-common
 	sudo add-apt-repository universe
 
-	sudo apt update && $(install) curl
+	$(update) && $(install) curl
 	export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
 	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $UBUNTU_CODENAME
 	sudo dpkg -i /tmp/ros2-apt-source.deb
