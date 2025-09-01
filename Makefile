@@ -10,7 +10,7 @@ SHELL := /bin/bash
 # Default target
 all: min_install_2004
 
-
+# meh
 clean:
 	make -i try_clean
 
@@ -26,13 +26,14 @@ min_install_2004: 				\
 	install_github_desktop_2004	\
 	install_python_3_10			\
 	install_software_2004		\
-	install_software_2004_bis
+	install_software
 	@echo "After clonning you need to execute 'make copy_from_github'"
 
-min_install_2404: 				\
+setup_2404:						\
 	sudo_upgrade				\
 	install_github_desktop_2404	\
 	install_deps_2404			\
+	install_software_2404		\
 	install_software
 	@echo "After clonning you need to execute 'make copy_from_github'"
 
@@ -48,20 +49,23 @@ install_software:			\
 	sudo_upgrade			\
 	install_discord_snap	\
 	install_terminator		\
-	install_code_2404		\
 	install_FaMe_modeler	\
 
 install_software_2004:
 	install_vscode_2004		\
 	correct_vscode_2004		\
+	install_gazebo_2004		\
+	install_ros2_foxy		
 
+install_software_2404: \
+	install_code_2404		
 
 # deprecated use github
 install_deps_2404:	\
 	install_git		
 	
 # deprecated use github
-install_software_2004_old:		\
+install_software_2004_old:	\
 	sudo_upgrade			\
 	install_terminator		\
 	install_cmake			\
@@ -74,7 +78,7 @@ install_software_2004_old:		\
 
 # deprecated use github
 install_software_2004_bis:	\
-	install_gazebo_2004			\
+	install_gazebo_2004		\
 	install_ros2_foxy		
 
 # deprecated use github
@@ -102,9 +106,46 @@ install_all2: 					\
 install_all_2404:\
 	install_node
 
+
+
+
+# /====================================\
+# |           Install macros           |
+# \====================================/
+
+.PHONY: sudo_update sud sudo_upgrade sug sudg
+
+define install
+	sudo apt install -y
+endef
+define update
+	sudo apt update
+endef
+define upgrade
+	sudo apt upgrade -y
+endef
+
+define update_upgrade
+	sudo apt update
+	sudo apt upgrade -y
+endef
+
 update: sudo_upgrade
 
+sudo_update:
+	sudo apt update
+sud: sudo_update
 
+sudo_upgrade:
+	sudo apt upgrade -y
+sug: sudo_upgrade
+
+sudg: sudo_update sudo_upgrade
+
+# i_%:
+# 	sudo apt install -y $*
+# install_%:
+# 	sudo apt install -y $<
 
 # /====================================\
 # |            Define Macro            |
@@ -127,11 +168,6 @@ endef
 # |           System install           |
 # \====================================/
 
-sudo_upgrade:
-	sudo apt update
-	sudo apt upgrade -y
-
-
 update_source:
 	source ~/.bashrc
 
@@ -145,15 +181,13 @@ refresh_env:
 # |         install  softwares         |
 # \====================================/
 
-install_%:
-	sudo apt install -y $<
 
 install_git:
-	sudo apt install -y git
+	$(install) git
 
 install_snap:
-	sudo apt update
-	sudo apt install snapd
+	$(update)
+	$(install) snapd
 
 install_cmake: install_snap
 	sudo snap install cmake --classic
@@ -175,7 +209,7 @@ install_node: install_nvm update_source
 install_terminator:
 	sudo add-apt-repository -y ppa:mattrose/terminator
 	sudo apt update
-	sudo apt install -y terminator
+	$(install) terminator
 
 install_discord_snap: install_snap
 	@echo "Installation de Discord via Snap..."
@@ -192,17 +226,17 @@ install_FaMe_modeler: update_source
 
 install_python_3_10:
 	sudo apt update
-	sudo apt install -y software-properties-common
+	$(install) software-properties-common
 	sudo add-apt-repository -y ppa:deadsnakes/ppa
-	sudo apt update
-	sudo apt install -y python3.10 python3.10-venv python3.10-dev
+	$(update)
+	$(install) python3.10 python3.10-venv python3.10-dev
 	curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 	$(pip) --version
 	$(pip) install pyparrot djitellopy
 
 install_deps:
 # sudo apt update
-	sudo apt install python3-pip -y
+	$(install) python3-pip
 	$(pip) install transformations djitellopy
 
 # /====================================\
@@ -211,13 +245,13 @@ install_deps:
 
 install_vscode_2004:
 	sudo apt-get update
-	sudo apt-get install -y wget gpg apt-transport-https
+	$(install) wget gpg apt-transport-https
 	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 	sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
 	echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
 	rm -f packages.microsoft.gpg
-	sudo apt update
-	sudo apt install -y code  # or code-insiders
+	$(update)
+	$(install) code # or code-insiders
 
 correct_vscode_2004:
 	sudo rm -f /etc/apt/sources.list.d/vscode.list
@@ -231,8 +265,8 @@ correct_vscode_2004:
 	echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
 	sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
 
-	sudo apt update
-	sudo apt install code -y
+	$(update)
+	$(install) code
 
 
 	# sudo apt install wget gpg
@@ -246,19 +280,18 @@ install_ros2_foxy: install_cmake
 	@echo "Bienvenu dans l'installation de ROS2 Foxy"
 	locale || true                               # check current locale (non-fatal)
 	sudo apt update
-	sudo apt install -y locales
+	$(install) locales
 	sudo locale-gen en_US en_US.UTF-8
 	sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 	export LANG=en_US.UTF-8
 	locale || true                               # verify settings
-	sudo apt install -y software-properties-common curl
+	$(install) software-properties-common curl
 	sudo add-apt-repository -y universe
 	sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $$(. /etc/os-release && echo $$UBUNTU_CODENAME) main" | \
 		sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-	sudo apt update
-	sudo apt upgrade -y
-	sudo apt install -y ros-foxy-desktop python3-argcomplete ros-dev-tools
+	$(update_upgrade)
+	$(install) ros-foxy-desktop python3-argcomplete ros-dev-tools
 # 	Add ROS 2 environment setup to bashrc only once
 	grep -qxF "# ROS 2 Foxy" $$HOME/.bashrc || ( \
 		echo "" >> $$HOME/.bashrc && \
@@ -266,26 +299,27 @@ install_ros2_foxy: install_cmake
 		echo "source /opt/ros/foxy/setup.bash" >> $$HOME/.bashrc && \
 		echo "" >> $$HOME/.bashrc \
 	)
-	sudo apt install ros-foxy-nav2-bringup -y
+	$(install) ros-foxy-nav2-bringup
 # 	deps for husky
-	sudo apt install ros-foxy-xacro -y
-	sudo apt install -y ros-foxy-controller-interface ros-foxy-ros2-control ros-foxy-ros2-controllers
-	sudo apt install -y \
+	$(install) ros-foxy-xacro
+	$(install) ros-foxy-controller-interface ros-foxy-ros2-control ros-foxy-ros2-controllers
+	$(install) \
 		ros-foxy-robot-localization \
 		ros-foxy-gazebo-ros-pkgs \
 		ros-foxy-ros2-control \
 		ros-foxy-ros2-controllers \
 		ros-foxy-controller-manager \
 		ros-foxy-controller-manager-msgs
-	sudo apt install -y ros-foxy-interactive-marker-twist-server ros-foxy-interactive-markers
-	sudo apt install -y ros-foxy-twist-mux
+	$(install) ros-foxy-interactive-marker-twist-server ros-foxy-interactive-markers
+	$(install) ros-foxy-twist-mux
 
 
 install_gazebo_2004:
 	sudo apt update
-	sudo apt install -y ros-foxy-gazebo-ros-pkgs
+	$(install) -y ros-foxy-gazebo-ros-pkgs
 # deps Gazebo
-	sudo apt install libasio-dev
+	$(install) libasio-dev
+
 
 install_github_desktop_2004:
 	if [ ! -f "$(PWD)/GitHubDesktop-linux-2.9.6-linux1.deb" ]; then \
@@ -306,6 +340,10 @@ install_github_desktop_2004:
 install_vscode_2404:
 	sudo apt install code -y
 
+.PHONY: install_vscode_2404_bis
+install_vscode_2404_bis:
+	$(install) code 
+
 setup_ros2_jazzy:
 	@echo "Bienvenu dans le setup de ROS2 Jazzy"
 	locale  # check for UTF-8
@@ -317,17 +355,29 @@ setup_ros2_jazzy:
 
 	locale  # verify settings
 
-	sudo apt install software-properties-common
+	$(install) software-properties-common
 	sudo add-apt-repository universe
 
-	sudo apt update && sudo apt install curl -y
+	sudo apt update && $(install) curl
 	export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
 	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $UBUNTU_CODENAME
 	sudo dpkg -i /tmp/ros2-apt-source.deb
 
 install_ros2_jazzy: setup_ros2_jazzy
 	@echo "Bienvenu dans l'installation de ROS2 Jazzy"
-	sudo apt install ros-jazzy-desktop
+	$(install) ros-jazzy-desktop
+
+	grep -qxF "# ROS 2 Jazzy" $$HOME/.bashrc || ( \
+		echo "" >> $$HOME/.bashrc && \
+		echo "# ROS 2 Jazzy" >> $$HOME/.bashrc && \
+		echo "source /opt/ros/jazzy/setup.bash" >> $$HOME/.bashrc && \
+		echo "" >> $$HOME/.bashrc \
+	)
+
+.PHONY: install_ros2_jazzy_bis
+install_ros2_jazzy_bis: setup_ros2_jazzy i_ros-jazzy-desktop
+	@echo "Bienvenu dans l'installation de ROS2 Jazzy"
+# 	sudo apt install ros-jazzy-desktop
 
 	grep -qxF "# ROS 2 Jazzy" $$HOME/.bashrc || ( \
 		echo "" >> $$HOME/.bashrc && \
@@ -337,22 +387,45 @@ install_ros2_jazzy: setup_ros2_jazzy
 	)
 
 install_gazebo_2404:
+	$(update)
+	$(install) curl lsb-release gnupg
+
+	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+	$(update)
+	$(install) gz-harmonic
+
+	$(install) ros-jazzy-ros-gz
+
+.PHONY: install_gazebo_2404_bis
+install_gazebo_2404_bis: i_curl i_lsb-release i_gnupg i_gz-harmonic i_ros-jazzy-ros-gz
 	sudo apt-get update
-	sudo apt-get install curl lsb-release gnupg
+# 	sudo apt-get install curl lsb-release gnupg
 
 	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 	sudo apt-get update
-	sudo apt-get install gz-harmonic
+# 	sudo apt-get install gz-harmonic
 
-	sudo apt-get install ros-jazzy-ros-gz
+# 	sudo apt-get install ros-jazzy-ros-gz
 
 install_github_desktop_2404:
 	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
 		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
 	fi
+	$(update)
+	$(install) gdebi-core -y
+	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
+	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
+	$(install) -f -y
+# 	sudo apt-mark hold github-desktop
+
+install_github_desktop_2404_bis: i_gdebi-core
+	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
+		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
+	fi
 	sudo apt-get update
-	sudo apt-get install gdebi-core -y
+# 	sudo apt-get install gdebi-core -y
 	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
 	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
 	sudo apt-get install -f -y
@@ -462,7 +535,7 @@ endef
 $(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
 $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
 $(eval $(call from_git_clean,FaMe_bitbucket,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
-$(eval $(call from_git_clean,husky,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
+$(eval $(call from_git_clean,husky_2004,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
 
 
 define setup_pkg
@@ -537,6 +610,7 @@ endef
 # $(eval $(call clear_package_ros,FaMe_simu,$(FAME_SIMU)))
 
 # $(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
+$(eval $(call clear_package_ros,simulation_gazebo,$(PATH_TELLO_WS)))
 $(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
 $(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
 
