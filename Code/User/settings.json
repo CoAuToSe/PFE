@@ -1,12 +1,13 @@
 {
     "workbench.colorTheme": "Monokai Dimmed",
-    "files.autoSave": "onFocusChange",
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
     },
-    "editor.multiCursorModifier": "ctrlCmd",
     "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Chromium, UseTab: Never, IndentWidth: 4, TabWidth: 4, BinPackArguments: AlwaysOnePerLine}",
     "files.exclude": {
         "**/.git": false
-    }
+    },
+    "files.autoSave": "onFocusChange",
+    "python.defaultInterpreterPath": "/bin/python3",
+    "editor.multiCursorModifier": "ctrlCmd"
 }
