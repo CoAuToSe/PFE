@@ -133,6 +133,9 @@ define update_upgrade
 	sudo apt upgrade -y
 endef
 
+update_upgrade:
+	$(update_upgrade)
+
 update: sudo_upgrade
 
 sudo_update:
@@ -319,7 +322,7 @@ install_ros2_foxy: install_cmake
 
 install_gazebo_2004:
 	$(update)
-	$(install) -y ros-foxy-gazebo-ros-pkgs
+	$(install) ros-foxy-gazebo-ros-pkgs
 # deps Gazebo
 	$(install) libasio-dev
 
@@ -358,8 +361,8 @@ setup_ros2_jazzy:
 	sudo add-apt-repository universe
 
 	$(update) && $(install) curl
-	export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
-	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $UBUNTU_CODENAME
+	export ROS_APT_SOURCE_VERSION=$$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}')
+	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/$${ROS_APT_SOURCE_VERSION}/ros2-apt-source_$${ROS_APT_SOURCE_VERSION}.$$(. /etc/os-release && echo $$VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $$UBUNTU_CODENAME
 	sudo dpkg -i /tmp/ros2-apt-source.deb
 
 install_ros2_jazzy: setup_ros2_jazzy
@@ -390,11 +393,9 @@ install_gazebo_2404:
 	$(install) curl lsb-release gnupg
 
 	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 	$(update)
-	$(install) gz-harmonic
-
-	$(install) ros-jazzy-ros-gz
+	$(install) gz-harmonic ros-jazzy-ros-gz
 
 .PHONY: install_gazebo_2404_bis
 install_gazebo_2404_bis: i_curl i_lsb-release i_gnupg i_gz-harmonic i_ros-jazzy-ros-gz
@@ -402,11 +403,23 @@ install_gazebo_2404_bis: i_curl i_lsb-release i_gnupg i_gz-harmonic i_ros-jazzy-
 # 	sudo apt-get install curl lsb-release gnupg
 
 	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 	sudo apt-get update
 # 	sudo apt-get install gz-harmonic
 
 # 	sudo apt-get install ros-jazzy-ros-gz
+
+.PHONY: install_gazebo_2404_ter
+install_gazebo_2404_ter: 
+	sudo apt-get update
+	sudo apt-get install curl lsb-release gnupg
+
+	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+	sudo apt-get update
+	sudo apt-get install gz-harmonic
+
+	sudo apt-get install ros-jazzy-ros-gz
 
 install_github_desktop_2404:
 	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
@@ -416,7 +429,7 @@ install_github_desktop_2404:
 	$(install) gdebi-core -y
 	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
 	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
-	$(install) -f -y
+	$(install) -f
 # 	sudo apt-mark hold github-desktop
 
 install_github_desktop_2404_bis: i_gdebi-core
@@ -441,18 +454,51 @@ setup_bashrc:
 		echo "# Custom commands" >> $$HOME/.bashrc && 																					\
 		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && 										\
 		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && 				\
-		echo "alias ros-build-sym-ver="colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash"\"" >> $$HOME/.bashrc && \
+		echo "alias ros-build-sym-ver="colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select \"\$1\" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -temp temp; }; temp'\"" >> $$HOME/.bashrc && \
 		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
 		echo "alias sc-ros=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
 		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && 																	\
 		echo "alias my-sc=\"source $(TELLO_MSGS)/install/setup.bash && source $(ROS2_SHARED)/install/setup.bash\"" >> $$HOME/.bashrc && \
 		echo "" >> $$HOME/.bashrc && 																									\
-		echo "this-sc() {" >> $$HOME/.bashrc && 																						\
-		echo "    cd "$1" && source install/setup.bash && cd -> /dev/null 2>&1 " >> $$HOME/.bashrc && 									\
+		echo "this-sc\(\) {" >> $$HOME/.bashrc && 																						\
+		echo "    cd \"$1\" && source install/setup.bash && cd -> /dev/null 2>&1 " >> $$HOME/.bashrc && 								\
 		echo "}" >> $$HOME/.bashrc && 																									\
-		echo "" >> $$HOME/.bashrc 																										\
+		echo "" >> $$HOME/.bashrc 																										
 	)
+
+.PHONY: setup_bashrc_GPT
+.ONESHELL:setup_bashrc_GPT
+setup_bashrc_GPT:
+	set -e
+	BRC="$$HOME/.bashrc"
+	# Sauvegarde une fois
+	[ -f "$$BRC.bak" ] || cp "$$BRC" "$$BRC.bak"
+	# Retire l'ancien bloc (s'il existe)
+	sed -i '/^# >>> CATS Custom commands >>>/,/^# <<< CATS Custom commands <<</d' "$$BRC"
+	# Ajoute le nouveau bloc
+	cat >> "$$BRC" <<'EOF'
+
+	# >>> CATS Custom commands >>>
+
+	# Custom commands
+	alias ros-build="colcon build && source install/setup.bash"
+	alias ros-build-sym="colcon build --symlink-install && source install/setup.bash"
+	alias ros-build-sym-ver='colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash'
+	alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select "$1" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -f temp; }; temp'
+	alias ros-sc="source install/setup.bash"
+	alias sc-ros="source install/setup.bash"
+	alias bash-sc="source ~/.bashrc"
+	alias my-sc="source ${TELLO_MSGS}/install/setup.bash && source ${ROS2_SHARED}/install/setup.bash"
+
+	this-sc() {
+	    cd "$1" && source install/setup.bash && cd - >/dev/null 2>&1
+	}
+
+	# <<< CATS Custom commands <<<
+	EOF
+	@echo "✔ Bloc 'Custom commands' mis à jour dans $$HOME/.bashrc"
+
 
 
 # /====================================\
@@ -487,6 +533,16 @@ kill_all:
 	killall -9 gzserver
 	killall -9 gzclient
 
+
+print_supported_version:
+	@if [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "24.04" ] ; then
+		echo "curent version is Ubuntu 24.04" 
+	elif [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "20.04" ] ; then
+		echo "curent version is Ubuntu 20.04" 
+	else 
+		echo "unsuported version : \"$(shell lsb_release -a)\"" 
+	fi
+
 # /====================================\
 # |          Paths & Variables         |
 # \====================================/
@@ -500,7 +556,7 @@ FAME_ENGINE := $(FAME)/fame_engine
 FAME_SIMU := $(FAME)/fame_simulation
 GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
 MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
-HUSKY_WS := ~/husky_ws
+HUSKY_WS := $(HOME)/husky_ws
 HUSKY := $(HUSKY_WS)/husky
 SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
 
@@ -526,10 +582,10 @@ PFE:=$(HOME)/PFE
 define from_git_clean
 .PHONY: clone_$1 clean_$1
 clone_$1:
-	@if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
-	@if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
+	@-if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
+	@-if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
 clean_$1:
-	rm -r $2
+	sudo rm -r $2
 endef
 
 $(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
@@ -537,6 +593,37 @@ $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemc
 $(eval $(call from_git_clean,FaMe_bitbucket,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
 $(eval $(call from_git_clean,husky_2004,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
 
+setup_with_git:				\
+	clone_ros2_shared		\
+	clone_tello_msgs		\
+	clone_FaMe_bitbucket	\
+	clone_husky_2004		\
+	correct_git_clone
+
+correct_git_clone:
+	@if [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "24.04" ] ; then
+# 		echo "curent version is Ubuntu 24.04" 
+		chmod +x $(TELLO_MSGS)/tello_description/src/replace.py
+		$(install) 											\
+			libasio-dev										\
+			ros-$$ROS_DISTRO-camera-calibration-parsers		\
+			ros-$$ROS_DISTRO-camera-info-manager			\
+			ros-$$ROS_DISTRO-image-transport				\
+			ros-$$ROS_DISTRO-rclcpp-components				\
+			ros-$$ROS_DISTRO-joy							\
+			ros-$$ROS_DISTRO-rclcpp-components 				\
+			ros-$$ROS_DISTRO-cv-bridge 						\
+			ros-$$ROS_DISTRO-image-transport 				\
+			ros-$$ROS_DISTRO-camera-info-manager 			\
+			ros-$$ROS_DISTRO-sensor-msgs 					\
+			ros-$$ROS_DISTRO-geometry-msgs
+		@touch "$(TELLO_MSGS)/tello_gazebo/COLCON_IGNORE"
+		@touch "$(TELLO_MSGS)/tello_driver/COLCON_IGNORE"
+	elif [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "20.04" ] ; then
+		echo "curent version is Ubuntu 20.04" 
+	else 
+		echo "unsuported version : \"$(shell lsb_release -a)\"" 
+	fi
 
 define setup_pkg
 .PHONY: setup_$(1) clear_$(1)
@@ -981,8 +1068,9 @@ endef
 $(eval $(call github,simu_gazebo,$(HOME)/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
 $(eval $(call github,makefile,$(HOME)/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,$(HOME)/.bashrc,${PATH_PFE}/.bashrc))
-$(eval $(call github,code_setup,$(HOME)/.config/Code/User/,${PATH_PFE}/Code/))
-$(eval $(call github,gazebo_models,$(HOME)/.gazebo/models,${PATH_PFE}/))
-$(eval $(call github,FaMe,$(HOME)/fame/,${PATH_PFE}/))
+$(eval $(call github,code_setup,$(HOME)/.config/Code/User/,${PATH_PFE}/Code/User))
+$(eval $(call github,gazebo_models,$(HOME)/.gazebo/models,${PATH_PFE}/models))
+$(eval $(call github,FaMe,$(HOME)/fame/,${PATH_PFE}/fame))
+$(eval $(call github,husky,$(HOME)/husky_ws/,${PATH_PFE}/husky_ws))
 # $(eval $(call github,,,))
 
