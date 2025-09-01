@@ -516,7 +516,8 @@ PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
 PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
 PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
 
-PATH_PFE:=~/PFE
+PATH_PFE:=$(HOME)/PFE
+PFE:=$(HOME)/PFE
 
 # /====================================\
 # |            package  deps           |
@@ -929,25 +930,59 @@ copy_from_github:					\
 	copy_makefile_from_github
 
 define github
-.PHONY: copy_$1_to_github copy_$1_from_github clean_$1
-copy_$1_to_github:
-	@if [ -d $2 ] || [ -f $2 ]; then echo "cp -r $2 $3" ; cp -r $2 $3 ; fi
-copy_$1_from_github: check_with_user
-# 	@echo "$2"
-	@if [ -f $2 ]; then echo "file $2"; cp -r $3 $2 ; fi
-	@if [ ! -f $2 ] ; then mkdir -p $(dir ${2:/=}) ; fi
-	@if [ ! -d $2 ] && [ ! -f $2 ] ; then echo "mkdir $2" ; mkdir $2 ; fi
-	@if [ -d $2 ] ; then echo "cp -r $3 $(dir ${2:/=})"; cp -r $3 $(dir ${2:/=}); fi
-clean_$1: check_with_user
-	rm -r $2
+.PHONY: copy_$(1)_to_github copy_$(1)_from_github clean_$(1)
+
+copy_$(1)_to_github:
+	@set -e; \
+	src="$(2)"; dst="$(3)"; \
+	case "$$$$src" in "~/"*) src="$$$$HOME/$$$${src#~/}";; "~") src="$$$$HOME";; esac; \
+	case "$$$$dst" in "~/"*) dst="$$$$HOME/$$$${dst#~/}";; "~") dst="$$$$HOME";; esac; \
+
+	if [ ! -e "$$$$src" ]; then echo "skip: $$$$src is missing"; exit 0; fi; \
+	if [ -d "$$$$src" ]; then \
+		mkdir -p "$$$$dst"; \
+		echo "rsync -a --delete $$$$src/ $$$$dst/"; \
+		rsync -a --delete "$$$$src"/ "$$$$dst"/; \
+	else \
+		mkdir -p "$$$$(dirname "$$$$dst")"; \
+		echo "install -m 0644 $$$$src $$$$dst"; \
+		install -m 0644 "$$$$src" "$$$$dst"; \
+	fi
+
+copy_$(1)_from_github: check_with_user
+	@set -e; \
+	dst="$(2)"; src="$(3)"; \
+	case "$$$$src" in "~/"*) src="$$$$HOME/$$$${src#~/}";; "~") src="$$$$HOME";; esac; \
+	case "$$$$dst" in "~/"*) dst="$$$$HOME/$$$${dst#~/}";; "~") dst="$$$$HOME";; esac; \
+	if [ ! -e "$$$$src" ]; then echo "error: $$$$src does not exist"; exit 1; fi; \
+	if [ -d "$$$$src" ]; then \
+		# On veut synchroniser un DOSSIER vers un DOSSIER
+		mkdir -p "$$$$dst"; \
+    	command -v rsync >/dev/null 2>&1 || { echo "error: rsync not found"; exit 127; }; \
+		echo "rsync -a --delete $$$$src/ $$$$dst/"; \
+		rsync -a --delete "$$$$src"/ "$$$$dst"/; \
+	else \
+		# Si la destination est un répertoire alors qu'on attend un fichier, on stoppe :
+		if [ -d "$$$$dst" ]; then \
+			echo "error: destination $$$$dst is a directory but src is a file (expected a file path like $$$$dst)"; \
+			echo "fix: remove or rename $$$$dst (e.g. mv $$$$dst $$$$dst.dir)"; \
+			exit 2; \
+		fi; \
+		mkdir -p "$$$$(dirname "$$$$dst")"; \
+		echo "install -m 0644 $$$$src $$$$dst"; \
+		install -m 0644 "$$$$src" "$$$$dst"; \
+	fi
+
+clean_$(1): check_with_user
+	@rm -rf "$(2)"
 endef
 
 # Don't forget to let a folder of space while copying a folder
-$(eval $(call github,simu_gazebo,~/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
-$(eval $(call github,makefile,~/Makefile,${PATH_PFE}/Makefile))
-$(eval $(call github,bashrc,~/.bashrc,${PATH_PFE}/.bashrc))
-$(eval $(call github,code_setup,~/.config/Code/User/,${PATH_PFE}/Code/))
-$(eval $(call github,gazebo_models,~/.gazebo/models,${PATH_PFE}/))
-$(eval $(call github,FaMe,~/fame/,${PATH_PFE}/))
+$(eval $(call github,simu_gazebo,$(HOME)/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
+$(eval $(call github,makefile,$(HOME)/Makefile,${PATH_PFE}/Makefile))
+$(eval $(call github,bashrc,$(HOME)/.bashrc,${PATH_PFE}/.bashrc))
+$(eval $(call github,code_setup,$(HOME)/.config/Code/User/,${PATH_PFE}/Code/))
+$(eval $(call github,gazebo_models,$(HOME)/.gazebo/models,${PATH_PFE}/))
+$(eval $(call github,FaMe,$(HOME)/fame/,${PATH_PFE}/))
 # $(eval $(call github,,,))
 
