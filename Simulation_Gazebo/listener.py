@@ -18,6 +18,9 @@ class ListenerNode(Node):
         self.get_logger().info(f"Message reçu: {msg.data}")
 
 def main(args=None):
+    print("DEPRECATED")
+    print("DEPRECATED")
+    print("DEPRECATED")
     rclpy.init(args=args)
     node = ListenerNode('/chatter')
     rclpy.spin(node)
