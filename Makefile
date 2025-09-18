@@ -1072,5 +1072,7 @@ $(eval $(call github,code_setup,$(HOME)/.config/Code/User/,${PATH_PFE}/Code/User
 $(eval $(call github,gazebo_models,$(HOME)/.gazebo/models,${PATH_PFE}/models))
 $(eval $(call github,FaMe,$(HOME)/fame/,${PATH_PFE}/fame))
 $(eval $(call github,husky,$(HOME)/husky_ws/,${PATH_PFE}/husky_ws))
+$(eval $(call github,clearpath,$(HOME)/clearpath/,${PATH_PFE}/clearpath))
+$(eval $(call github,clearpath_ws,$(HOME)/clearpath_ws/,${PATH_PFE}/clearpath_ws))
 # $(eval $(call github,,,))
 
