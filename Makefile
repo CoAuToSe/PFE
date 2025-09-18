@@ -1077,11 +1077,11 @@ copy_$(1)_to_github:
 	if [ -d "$$$$src" ]; then \
 		mkdir -p "$$$$dst"; \
 		echo "rsync -a --delete $$$$src/ $$$$dst/"; \
-		rsync -a --delete "$$$$src"/ "$$$$dst"/; \
+		sudo rsync -a --delete "$$$$src"/ "$$$$dst"/; \
 	else \
 		mkdir -p "$$$$(dirname "$$$$dst")"; \
 		echo "install -m 0644 $$$$src $$$$dst"; \
-		install -m 0644 "$$$$src" "$$$$dst"; \
+		sudo install -m 0644 "$$$$src" "$$$$dst"; \
 	fi
 
 copy_$(1)_from_github: check_with_user
@@ -1095,7 +1095,7 @@ copy_$(1)_from_github: check_with_user
 		mkdir -p "$$$$dst"; \
     	command -v rsync >/dev/null 2>&1 || { echo "error: rsync not found"; exit 127; }; \
 		echo "rsync -a --delete $$$$src/ $$$$dst/"; \
-		rsync -a --delete "$$$$src"/ "$$$$dst"/; \
+		sudo rsync -a --delete "$$$$src"/ "$$$$dst"/; \
 	else \
 		# Si la destination est un répertoire alors qu'on attend un fichier, on stoppe :
 		if [ -d "$$$$dst" ]; then \
@@ -1105,11 +1105,11 @@ copy_$(1)_from_github: check_with_user
 		fi; \
 		mkdir -p "$$$$(dirname "$$$$dst")"; \
 		echo "install -m 0644 $$$$src $$$$dst"; \
-		install -m 0644 "$$$$src" "$$$$dst"; \
+		sudo install -m 0644 "$$$$src" "$$$$dst"; \
 	fi
 
 clean_$(1): check_with_user
-	@rm -rf "$(2)"
+	@sudo rm -rf "$(2)"
 endef
 
 # Don't forget to let a folder of space while copying a folder
