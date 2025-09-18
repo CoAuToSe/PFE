@@ -1005,7 +1005,9 @@ copy_to_github:						\
 	copy_bashrc_to_github			\
 	copy_code_setup_to_github		\
 	copy_gazebo_models_to_github	\
-	copy_FaMe_to_github	
+	copy_FaMe_to_github				\
+	copy_clearpath_to_github		\
+	copy_clearpath_ws_to_github
 
 copy_from_github:					\
 	check_with_user					\
@@ -1014,7 +1016,9 @@ copy_from_github:					\
 	copy_code_setup_from_github		\
 	copy_gazebo_models_from_github	\
 	copy_FaMe_from_github			\
-	copy_makefile_from_github
+	copy_makefile_from_github		\
+	copy_clearpath_from_github		\
+	copy_clearpath_ws_from_github
 
 define github
 .PHONY: copy_$(1)_to_github copy_$(1)_from_github clean_$(1)
