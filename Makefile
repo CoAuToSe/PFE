@@ -829,7 +829,7 @@ Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 # hello:
 # 	@echo "Hello, ${Arguments}!"
 arg_command := fame_engine my_CATS.py ${Arguments}
-arg_deps := $(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI)
+arg_deps := $(FAME_ENGINE) $(FAME_AGRI)
 arg_deps2 := /usr/share/gazebo/setup.bash
 arg_export := NODE_OPTIONS="--unhandled-rejections=strict"
 launch_FaMe:
