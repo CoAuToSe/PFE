@@ -24,7 +24,7 @@ def generate_launch_description():
         name='engine_node',
         executable='node',
         output='screen',
-        namespace='tello_2',
+        namespace='husky_a300',
         parameters=[{'use_sim_time': use_sim_time}],
         arguments=[
             start_js_file

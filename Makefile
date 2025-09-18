@@ -664,11 +664,17 @@ $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,))
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm,))
 $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,))
 
+setup_FaMe_link:
+	-sudo mkdir /home/ubuntu
+	-sudo mkdir /home/ubuntu/mbros
+	sudo ln -sf $(FAME_ENGINE) $(MBROS_DIR)
+	@echo "Link succesfully created"
+
 # symlink -> might not be working for some reasons, need to clear before setup # to be checked as it might be rectified
-$(eval $(call setup_pkg,FaMe,$(FAME),$(ROS2_SHARED) $(TELLO_MSGS),nvm,build))
-$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),nvm,))
-$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build)) # symlink -> not working
-$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),nvm,build)) # to check
+$(eval $(call setup_pkg,FaMe,$(FAME),,nvm,build))
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm,))
+$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),nvm,build)) # symlink -> not working
+$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),nvm,build)) # to check
 
 # setup_FaMe_simulation:
 # 	cd $(ROS2_SHARED) && source install/setup.bash && \
