@@ -116,26 +116,24 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# ROS 2 Foxy
-source /opt/ros/foxy/setup.bash
 
+source /opt/ros/jazzy/setup.bash
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+# >>> CATS Custom commands >>>
 # Custom commands
-alias bash-sc="source ~/.bashrc"
-alias sc-bash="source ~/.bashrc"
 alias ros-build="colcon build && source install/setup.bash"
 alias ros-build-sym="colcon build --symlink-install && source install/setup.bash"
-alias ros-build-sym-ver="colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash"
-# ros-build-sym-pac-ver() { colcon build --packages-select $1 --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash ;}
-alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select "$1" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -temp temp; }; temp'
+alias ros-build-sym-ver='colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash'
+alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select "" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -f temp; }; temp'
 alias ros-sc="source install/setup.bash"
 alias sc-ros="source install/setup.bash"
-alias my2-sc="source /home/dell/tello_msgs/install/setup.bash && source /home/dell/ros2_shared/install/setup.bash"
-alias my-sc="source /home/dell/Simulation_Gazebo/tello_ros_ws/"
+alias bash-sc="source ~/.bashrc"
+alias my-sc="source /home/dell/tello_msgs/install/setup.bash && source /home/dell/ros2_shared/install/setup.bash"
 this-sc() {
-    cd "$1" && source install/setup.bash && cd -> /dev/null 2>&1 
+cd "" && source install/setup.bash && cd - >/dev/null 2>&1
 }
+# <<< CATS Custom commands <<<
