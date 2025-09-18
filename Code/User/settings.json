@@ -9,5 +9,6 @@
     },
     "files.autoSave": "onFocusChange",
     "python.defaultInterpreterPath": "/bin/python3",
-    "editor.multiCursorModifier": "ctrlCmd"
+    "editor.multiCursorModifier": "ctrlCmd",
+    "editor.largeFileOptimizations": false
 }
