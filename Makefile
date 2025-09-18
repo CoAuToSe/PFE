@@ -6,6 +6,8 @@ SHELL := /bin/bash
 		setup_FaMe_agricultural setup_models_FaMe_agri setup_gazebo launch_gazebo_2004 install_FaMe_engine launch_comportement \
 		setup_FaMe_simulation install_github_desktop_2004 min_install_2004 install_github_desktop_2404 min_install_2404
 
+%:
+	@:
 
 # Default target
 all: min_install_2004
@@ -817,6 +819,48 @@ $(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(ROS2_SHARED) $(
 
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 $(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+
+
+# Takes the first target as command
+Command := $(firstword $(MAKECMDGOALS))
+# Skips the first word
+Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+
+# hello:
+# 	@echo "Hello, ${Arguments}!"
+arg_command := fame_engine my_CATS.py ${Arguments}
+arg_deps := $(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI)
+arg_deps2 := /usr/share/gazebo/setup.bash
+arg_export := NODE_OPTIONS="--unhandled-rejections=strict"
+launch_FaMe:
+# 	$(eval $(call launch_pkg,FaMe_macro,fame_engine my_CATS.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+	echo "export NVM_DIR=\"$$HOME/.nvm\"" ; export NVM_DIR="$$HOME/.nvm"; 
+	if [ -f "$$HOME/.nvm/nvm.sh" ]; then 
+		echo "source \"$$HOME/.nvm/nvm.sh\"" ; . "$$HOME/.nvm/nvm.sh"; 
+	else 
+		echo "NVM introuvable (cherché: $$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
+		exit 127; 
+	fi;
+	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
+	for d in ${arg_deps}; do 
+	  if [ -f "$$d/install/setup.bash" ]; then 
+	    echo "source \"$$d/install/setup.bash\""; . "$$d/install/setup.bash"; 
+	  fi; 
+	done; 
+	for rf in ${arg_deps2}; do 
+	  if [ -f "$$rf" ]; then 
+	    echo "source \"$$rf\""; . "$$rf"; 
+	  fi; 
+	done; 
+	for var in ${arg_export}; do 
+	  if [ -f "$$var" ]; then 
+	    echo "export \"$$var\""; export "$$var"; 
+	  fi; 
+	done; 
+	echo "ros2 launch ${arg_command}" ; ros2 launch ${arg_command} 
+
+
+
 
 # #deprecated
 # launch_comportement:
