@@ -29,7 +29,7 @@ next();</bpmn:script>
             <bpmn:incoming>Flow_1913056</bpmn:incoming>
             <bpmn:outgoing>Flow_0zcyc0w</bpmn:outgoing>
             <bpmn:timerEventDefinition id="TimerEventDefinition_0z0agyt">
-                <bpmn:timeDuration xsi:type="tFormalExpression">PT10S</bpmn:timeDuration>
+                <bpmn:timeDuration xsi:type="tFormalExpression">PT1S</bpmn:timeDuration>
             </bpmn:timerEventDefinition>
         </bpmn:intermediateCatchEvent>
         <bpmn:sequenceFlow id="Flow_1913056" sourceRef="Activity_0q0spcq" targetRef="Event_1t9d9el" />
@@ -50,7 +50,7 @@ publisher.publish({
 });
 
 
-this.environment.services.console.log("landing");
+this.environment.services.console.log("one lights yellow end");
 
 next();</bpmn:script>
         </bpmn:scriptTask>
