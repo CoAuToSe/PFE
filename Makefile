@@ -820,7 +820,7 @@ endef
 
 # TODO add : ros2 launch tello_gazebo tello_synchro_launch_cats_3.py # and similar
 
-$(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+$(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
 
 
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
@@ -1124,9 +1124,10 @@ $(eval $(call github,makefile,$(HOME)/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,$(HOME)/.bashrc,${PATH_PFE}/.bashrc))
 $(eval $(call github,code_setup,$(HOME)/.config/Code/User/,${PATH_PFE}/Code/User))
 $(eval $(call github,gazebo_models,$(HOME)/.gazebo/models,${PATH_PFE}/models))
-$(eval $(call github,FaMe,$(HOME)/fame/,${PATH_PFE}/fame))
+$(eval $(call github,FaMe,$(FAME)/,${PATH_PFE}/fame))
 $(eval $(call github,husky,$(HOME)/husky_ws/,${PATH_PFE}/husky_ws))
 $(eval $(call github,clearpath,$(HOME)/clearpath/,${PATH_PFE}/clearpath))
 $(eval $(call github,clearpath_ws,$(HOME)/clearpath_ws/,${PATH_PFE}/clearpath_ws))
 # $(eval $(call github,,,))
+
 
