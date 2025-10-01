@@ -15,6 +15,7 @@ SHELL := /bin/bash
 # \====================================/
 
 HOME_DIR := $(PWD)
+ROS2_SETUP=/opt/ros/$$ROS_DISTRO/setup.bash
 ROS2_SHARED := $(HOME_DIR)/ros2_shared
 TELLO_MSGS := $(HOME_DIR)/tello_msgs
 FAME := /home/dell/Documents/GitHub/my_FaMe
@@ -651,7 +652,7 @@ correct_git_clone:
 define setup_pkg
 .PHONY: setup_$(1) clear_$(1)
 setup_$(1):
-	@if [ -n "$(4)" ]; then 
+	@if [ -n "$(5)" ]; then 
 		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
 		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
 			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
@@ -661,6 +662,11 @@ setup_$(1):
 		fi; 
 	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
 	fi; 
+	for rf in $(4); do 
+	  if [ -f "$$$$rf" ]; then 
+	    echo "source \"$$$$rf\""; . "$$$$rf"; 
+	  fi; 
+	done; 
 	for d in $(3); do 
 		if [ -f "$$$$d/install/setup.bash" ]; then 
 			echo "source \"$$$$d/install/setup.bash\"" ; . "$$$$d/install/setup.bash"; 
@@ -668,9 +674,9 @@ setup_$(1):
 	done; 
 	echo "cd $(2)" ; cd $(2);
 
-	@if [ "$(5)" == "build" ]; then 
+	@if [ "$(6)" == "build" ]; then 
 		echo "colcon build" ; colcon build ;
-# 	elif [[ "$(5)" == "npm" ]]; then
+# 	elif [[ "$(6)" == "npm" ]]; then
 # 		echo "npm install" ; npm install ;
 # 		echo "colcon build" ; colcon build ;
 	else 
@@ -681,9 +687,9 @@ clear_$(1):
 	@cd $(2) && echo -n "[$(2)] " && $(call _clear_ros)
 endef
 
-$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,))
-$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),nvm,))
-$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,))
+$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
+$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),$(ROS2_SETUP),nvm,))
+$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,,))
 
 setup_FaMe_link:
 	-sudo mkdir /home/ubuntu
@@ -1157,7 +1163,8 @@ $(eval $(call github,FaMe,$(FAME)/,${PATH_PFE}/fame))
 $(eval $(call github,husky,$(HOME)/husky_ws/,${PATH_PFE}/husky_ws))
 $(eval $(call github,clearpath,$(HOME)/clearpath/,${PATH_PFE}/clearpath))
 $(eval $(call github,clearpath_ws,$(HOME)/clearpath_ws/,${PATH_PFE}/clearpath_ws))
-$(eval $(call github,tello_msgs,$(TELLO_MSGS)/,${PATH_PFE}/tello_msgs))
+$(eval $(call github,tello_msgs_own,$(TELLO_MSGS)/,${PATH_PFE}/tello_msgs))
+$(eval $(call github,my_FaMe,/home/dell/Documents/GitHub/my_FaMe/,${PATH_PFE}/my_FaMe))
 # $(eval $(call github,,,))
 
 
