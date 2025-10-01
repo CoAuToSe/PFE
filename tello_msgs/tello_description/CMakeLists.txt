@@ -4,6 +4,17 @@ project(tello_description)
 find_package(ament_cmake REQUIRED)
 
 #=============
+# deps
+#=============
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/src/replace.py
+  COMMAND chmod +x src/replace.py
+  # COMMAND bash -lc "npm install rclnodejs@latest"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+#=============
 # Generate N urdf files, each with unique robot and frame names
 # Source file is in ${CMAKE_CURRENT_SOURCE_DIR}/urdf/tello.xml
 # Generated files are in ${CMAKE_CURRENT_BINARY_DIR}/urdf/telloX.urdf
