@@ -142,6 +142,6 @@ CATKIN_IGNORE
 GitHubDesktop-linux-2.9.6-linux1.deb*
 /fame-modeler
 /ros2_shared
-/tello_msgs
+!/tello_msgs
 !**/buildings.obj
 /Code/User/History
