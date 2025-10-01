@@ -7,34 +7,62 @@
         <bpmn:scriptTask id="Activity_0q0spcq" name="takeoff" scriptFormat="JavaScript">
             <bpmn:incoming>Flow_14zl0yu</bpmn:incoming>
             <bpmn:outgoing>Flow_1913056</bpmn:outgoing>
-            <bpmn:script>
-var node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "/a300_00041/platform/cmd_vel");
+<bpmn:script>
+    const node = this.environment.variables.ros_node;
+    const publisher = node.createPublisher(&quot;geometry_msgs/msg/Twist&quot;, &quot;/cmd_vel&quot;);
 
-// will probably skip the first one
-for( let izaeaz = 0; izaeaz &lt; 20; izaeaz++){
-    setTimeout(() =&gt; {
-            publisher.publish({
-            header: {
-                frame_id: "teleop_twist_joy"
-            }, twist: {
-                linear: {x: 0.3, y: 0.0, z: 0.0},
-                angular: {x: 0.0, y: 0.0, z: 0.0}
-            }
-        });
-    }, 100*izaeaz);
-}
+    // params mouvement
+    const speed = 0.0;        // m/s (rotation pure)
+    const rot = 0.7;          // rad/s
+    const duration_s = 3.1;   // durée totale
+    const hz = 20;            // frequence publication
 
+    // conversions
+    const period_ms = Math.round(1000 / hz);
+    const period_ns = BigInt(period_ms) * 1000000n;  // BigInt en ns
+    const ticks_total = Math.round(duration_s * hz);
 
-this.environment.services.console.log("one lights yellow");
-next();</bpmn:script>
+    // messages
+    const cmd = { linear: { x: speed, y: 0.0, z: 0.0 }, angular: { x: 0.0, y: 0.0, z: rot } };
+    const zero = { linear: { x: 0.0, y: 0.0, z: 0.0 }, angular: { x: 0.0, y: 0.0, z: 0.0 } };
+
+    this.environment.services.console.log(&quot;cmd_vel &quot; + hz + &quot;Hz pendant &quot; + duration_s + &quot;s : v=&quot; + speed + &quot; m/s, w=&quot; + rot + &quot; rad/s&quot;);
+
+    let ticks = 0;
+
+    // timer ROS en BigInt ns, signature a 2 arguments
+    const motionTimer = node.createTimer(period_ns, () =&gt; {
+        publisher.publish(cmd);
+        ticks += 1;
+
+        if (ticks &gt;= ticks_total) {
+            // arret du timer principal
+            if (motionTimer.cancel) motionTimer.cancel();
+
+            // sequence d arret: plusieurs zeros
+            let zeros = 0;
+            const stopTimer = node.createTimer(period_ns, () =&gt; {
+                publisher.publish(zero);
+                zeros += 1;
+                if (zeros &gt;= 3) {
+                    if (stopTimer.cancel) stopTimer.cancel();
+                    // pour l IntermediateCatchEvent
+                    this.environment.variables.nextTimerDuration = &quot;PT&quot; + duration_s + &quot;S&quot;;
+                    next();
+                }
+            });
+        }
+    });
+</bpmn:script>
         </bpmn:scriptTask>
         <bpmn:sequenceFlow id="Flow_14zl0yu" sourceRef="StartEvent_1y45yut" targetRef="Activity_0q0spcq" />
         <bpmn:intermediateCatchEvent id="Event_1t9d9el">
             <bpmn:incoming>Flow_1913056</bpmn:incoming>
             <bpmn:outgoing>Flow_0zcyc0w</bpmn:outgoing>
             <bpmn:timerEventDefinition id="TimerEventDefinition_0z0agyt">
-                <bpmn:timeDuration xsi:type="tFormalExpression">PT1S</bpmn:timeDuration>
+                <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
             </bpmn:timerEventDefinition>
         </bpmn:intermediateCatchEvent>
         <bpmn:sequenceFlow id="Flow_1913056" sourceRef="Activity_0q0spcq" targetRef="Event_1t9d9el" />
@@ -43,13 +71,13 @@ next();</bpmn:script>
             <bpmn:outgoing>Flow_17duhnu</bpmn:outgoing>
             <bpmn:script>
 var node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "/a300_00041/platform/cmd_vel");
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
 
 publisher.publish({
     header: {
         frame_id: "teleop_twist_joy"
     }, twist: {
-        linear: {x: 0.3, y: 0.0, z: 0.0},
+        linear: {x: 0.0, y: 0.0, z: 0.0},
         angular: {x: 0.0, y: 0.0, z: 0.0}
     }
 });

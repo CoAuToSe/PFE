@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://bpmn.io/bpmn" exporter="bpmn-js-token-simulation" exporterVersion="0.1.5">
+  <bpmn:process id="Process_1" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1y45yut" name="start">
+      <bpmn:outgoing>Flow_14zl0yu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_0q0spcq" name="going front" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_14zl0yu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1913056</bpmn:outgoing>
+      <bpmn:script>
+// Assumes: rclnodejs Node is available as this.environment.variables.ros_node
+// Publishes: geometry_msgs/msg/TwistStamped on /cmd_vel
+// Subscribes: nav_msgs/msg/Odometry on /odom
+
+const node = this.environment.variables.ros_node;
+
+// ==== User-tunable params ====
+const hz = 200;                      // control loop frequency [Hz]
+const duration_s = 1;                // hard stop safety duration
+const targetYawRad = 2*Math.PI;            // desired yaw (radians). Update at runtime if you like.
+const targetLinear = 0.5;            // desired forward speed [m/s] (set &gt;0 to drive while holding heading)
+
+// PID gains for yaw control (start modest; tune on your robot)
+const Kp = 1.8;
+const Ki = 0.1;
+const Kd = 0.0;
+
+// Output/slew limits
+const maxAngVel = 0.7;               // [rad/s]
+const maxAngAcc = 1.0;               // [rad/s^2] change allowed
+const maxLinVel = 0.7;               // [m/s]
+const maxLinAcc = 0.7;               // [m/s^2]
+
+// Deadbands and finishing criteria
+const yawDeadband = 0.03;            // [rad] ~0.6°*3
+const finishYawError = 0.02;         // [rad] ~1.1°
+const finishHoldTime_s = 0.3;        // [s] hold within finish error before stopping
+
+// Watchdog
+const odomTimeout_s = 0.25;          // stop if odom older than this
+const frame_id = "base_link";        // header.frame_id for TwistStamped
+
+// ==== Helpers ====
+function nowStamp() {
+  const ms = Date.now();
+  return { sec: Math.floor(ms / 1000), nanosec: (ms % 1000) * 1e6 };
+}
+function normAnglePi(a) {
+  // wrap to -pi, pi
+  const TWO_PI = Math.PI * 2;
+  a = ((a + Math.PI) % TWO_PI + TWO_PI) % TWO_PI - Math.PI;
+  return a;
+}
+function quatYaw(q) {
+  // q: {x,y,z,w}
+  const { x, y, z, w } = q;
+  // yaw (Z) from quaternion
+  const siny_cosp = 2 * (w * z + x * y);
+  const cosy_cosp = 1 - 2 * (y * y + z * z);
+  return Math.atan2(siny_cosp, cosy_cosp);
+}
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ==== State ====
+let lastOdom = null;      // {t_ms, x,y,theta, vx, wz}
+let lastCmd = { lin: 0, ang: 0 };
+let integ = 0;
+let prevErr = 0;
+let finishStartMs = null;
+
+// ==== Subscribers ====
+node.createSubscription("nav_msgs/msg/Odometry", "odom", (msg) =&gt; {
+  // pull out what we need (avoid keeping the entire message object)
+  try {
+    const p = msg.pose.pose.position;
+    const q = msg.pose.pose.orientation;
+    const t = msg.twist.twist;
+    const theta = quatYaw(q);
+    lastOdom = {
+      t_ms: Date.now(),
+      x: p.x, y: p.y, theta,
+      vx: t.linear.x,
+      wz: t.angular.z
+    };
+    // Optionally expose for debugging
+    this.environment.variables.odom_pose = msg.pose;
+    this.environment.variables.odom_twist = msg.twist;
+  } catch (e) {
+    this.environment.services.console.log("Odom parse error: " + e);
+  }
+});
+this.environment.services.console.log("Listening for nav_msgs/msg/Odometry on \"odom\".");
+
+// ==== Publisher ====
+const pub = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+// ==== Timing ====
+const period_s = 1.0 / hz;
+const period_ns_bigint = BigInt(Math.round(1_000_000_000 / hz));
+const duration_ns_bigint = BigInt(Math.round(duration_s * 1_000_000_000));
+
+// ==== Controller loop ====
+function publishCmd(lin, ang) {
+  pub.publish({
+    header: { stamp: nowStamp(), frame_id },
+    twist: {
+      linear: { x: lin, y: 0.0, z: 0.0 },
+      angular: { x: 0.0, y: 0.0, z: ang }
+    }
+  });
+  lastCmd = { lin, ang };
+}
+
+function controlTick() {
+  const t_ms = Date.now();
+
+  // Watchdog: stop if odom stale
+  if (!lastOdom || (t_ms - lastOdom.t_ms) / 1000.0 &gt; odomTimeout_s) {
+    integ = 0; prevErr = 0; finishStartMs = null;
+    if (Math.abs(lastCmd.lin) &gt; 1e-6 || Math.abs(lastCmd.ang) &gt; 1e-6) {
+      publishCmd(0.0, 0.0);
+    }
+    return;
+  }
+
+  // Yaw control
+  const yaw = lastOdom.theta;
+  let err = normAnglePi(targetYawRad - yaw);
+
+  // Deadband to avoid chatter
+  if (Math.abs(err) &lt; yawDeadband) err = 0;
+
+  // PID with basic anti-windup (only integrate when not saturated later)
+  integ += err * period_s;
+  const deriv = (err - prevErr) / period_s;
+  let u = Kp * err + Ki * integ + Kd * deriv;
+
+  // Saturate angular velocity
+  let angCmd = clamp(u, -maxAngVel, +maxAngVel);
+
+  // Anti-windup: if saturated, back off integral a bit
+  if (u !== angCmd) {
+    // bleed integrator towards zero to prevent windup
+    integ *= 0.9;
+  }
+
+  // Slew-rate limit angular velocity
+  const maxDeltaAng = maxAngAcc * period_s;
+  const deltaAng = clamp(angCmd - lastCmd.ang, -maxDeltaAng, +maxDeltaAng);
+  angCmd = lastCmd.ang + deltaAng;
+
+  // Linear command with slew &amp; limit
+  let linTarget = clamp(targetLinear, -maxLinVel, +maxLinVel);
+  const maxDeltaLin = maxLinAcc * period_s;
+  const deltaLin = clamp(linTarget - lastCmd.lin, -maxDeltaLin, +maxDeltaLin);
+  let linCmd = lastCmd.lin + deltaLin;
+
+  // Finish logic (only if you re doing a point-turn or precise heading)
+  const withinFinish = Math.abs(err) &lt;= finishYawError;
+  if (withinFinish) {
+    if (finishStartMs == null) finishStartMs = t_ms;
+    const held_s = (t_ms - finishStartMs) / 1000.0;
+    if (held_s &gt;= finishHoldTime_s &amp;&amp; Math.abs(linTarget) &lt; 1e-6) {
+      // stop and freeze controller
+      publishCmd(0.0, 0.0);
+      return;
+    }
+  } else {
+    finishStartMs = null;
+  }
+
+  publishCmd(linCmd, angCmd);
+}
+
+// ROS timer for control loop (BigInt nanoseconds)
+const ctlTimer = node.createTimer(period_ns_bigint, controlTick);
+
+// Safety timer to stop after duration_s (optional; remove if not desired)
+const stopTimer = node.createTimer(duration_ns_bigint, () =&gt; {
+  ctlTimer.cancel();
+  publishCmd(0.0, 0.0);
+  stopTimer.cancel();
+  if (typeof next === "function") next();
+});
+
+// For visibility in your env
+//this.environment.variables.nextTimerDuration = "PT"+duration_s+"S";
+this.environment.variables.nextTimerDuration = "PT1S";
+this.environment.services.console.log(
+  "Control loop "+hz+" Hz, target yaw "+targetYawRad.toFixed(3)+" rad, target v="+targetLinear+" m/s, safety "+duration_s+"s."
+);
+
+            </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_14zl0yu" sourceRef="StartEvent_1y45yut" targetRef="Activity_0q0spcq" />
+    <bpmn:intermediateCatchEvent id="Event_1t9d9el">
+      <bpmn:incoming>Flow_1913056</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zcyc0w</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0z0agyt">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1913056" sourceRef="Activity_0q0spcq" targetRef="Event_1t9d9el" />
+    <bpmn:scriptTask id="Activity_00jigd3" name="turning" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_0zcyc0w</bpmn:incoming>
+      <bpmn:outgoing>Flow_1w08rrk</bpmn:outgoing>
+      <bpmn:script>
+var node = this.environment.variables.ros_node;
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+const speed = 0.0; // scale of the speed of the command
+const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+const duration_s = 3;
+// const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+// const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+// const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+const hz = 200;
+const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+const period_ms = Math.round(1000 / hz);
+const ticks_total = Math.round(duration_s * hz);
+
+// const time_in_second = time_run*time_scale_from_ms/1000;
+const time_in_second = 1;
+
+this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+function some() { // p�riode en ms (100ms = 10 Hz)
+    publisher.publish({
+        header: {
+            stamp: Date.now(),
+            frame_id: "teleop_twist_joy"
+        }, 
+        twist: {
+            linear: {x: speed, y: 0.0, z: 0.0},
+            angular: {x: 0.0, y: 0.0, z: rot}
+        }
+    });
+}
+
+const timer = node.createTimer(hz_bigint, some);
+
+const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+    timer.cancel();          // stoppe le timer ROS  
+    timer2.cancel();          // stoppe le timer ROS
+    //node.destroy();          // d�truit le node
+    //rclnodejs.shutdown();    // ferme le contexte ROS 2
+    next();
+});
+this.environment.variables.nextTimerDuration = "PT1S";
+</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0zcyc0w" sourceRef="Event_1t9d9el" targetRef="Activity_00jigd3" />
+    <bpmn:intermediateCatchEvent id="Event_1tahmvy">
+      <bpmn:incoming>Flow_1w08rrk</bpmn:incoming>
+      <bpmn:outgoing>Flow_1pv2r4z</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0s0r630">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1w08rrk" sourceRef="Activity_00jigd3" targetRef="Event_1tahmvy" />
+    <bpmn:scriptTask id="Activity_0ls6ij7" name="going front" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_1pv2r4z</bpmn:incoming>
+      <bpmn:outgoing>Flow_089yk1l</bpmn:outgoing>
+      <bpmn:script>
+var node = this.environment.variables.ros_node;
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+const speed = 0.0; // scale of the speed of the command
+const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+const duration_s = 0.5;
+// const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+// const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+// const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+const hz = 200;
+const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+const period_ms = Math.round(1000 / hz);
+const ticks_total = Math.round(duration_s * hz);
+
+// const time_in_second = time_run*time_scale_from_ms/1000;
+const time_in_second = 1;
+
+this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+function some() { // p�riode en ms (100ms = 10 Hz)
+    publisher.publish({
+        header: {
+            stamp: Date.now(),
+            frame_id: "teleop_twist_joy"
+        }, 
+        twist: {
+            linear: {x: speed, y: 0.0, z: 0.0},
+            angular: {x: 0.0, y: 0.0, z: rot}
+        }
+    });
+}
+
+const timer = node.createTimer(hz_bigint, some);
+
+const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+    timer.cancel();          // stoppe le timer ROS  
+    timer2.cancel();          // stoppe le timer ROS
+    //node.destroy();          // d�truit le node
+    //rclnodejs.shutdown();    // ferme le contexte ROS 2
+    next();
+});
+this.environment.variables.nextTimerDuration = "PT1S";
+</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_1pv2r4z" sourceRef="Event_1tahmvy" targetRef="Activity_0ls6ij7" />
+    <bpmn:scriptTask id="Activity_0uxzexx" name="going back" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_089yk1l</bpmn:incoming>
+      <bpmn:script>
+var node = this.environment.variables.ros_node;
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+const speed = 0.0; // scale of the speed of the command
+const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+const duration_s = 0.5;
+// const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+// const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+// const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+const hz = 200;
+const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+const period_ms = Math.round(1000 / hz);
+const ticks_total = Math.round(duration_s * hz);
+
+// const time_in_second = time_run*time_scale_from_ms/1000;
+const time_in_second = 1;
+
+this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+function some() { // p�riode en ms (100ms = 10 Hz)
+    publisher.publish({
+        header: {
+            stamp: Date.now(),
+            frame_id: "teleop_twist_joy"
+        }, 
+        twist: {
+            linear: {x: speed, y: 0.0, z: 0.0},
+            angular: {x: 0.0, y: 0.0, z: rot}
+        }
+    });
+}
+
+const timer = node.createTimer(hz_bigint, some);
+
+const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+    timer.cancel();          // stoppe le timer ROS  
+    timer2.cancel();          // stoppe le timer ROS
+    //node.destroy();          // d�truit le node
+    //rclnodejs.shutdown();    // ferme le contexte ROS 2
+    next();
+});
+this.environment.variables.nextTimerDuration = "PT1S";
+</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_089yk1l" sourceRef="Activity_0ls6ij7" targetRef="Activity_0uxzexx" />
+  </bpmn:process>
+  <bpmn:bpmndi:BPMNDiagram id="BpmnDiagram_1">
+    <bpmn:bpmndi:BPMNPlane id="BpmnPlane_1" bpmnElement="Process_1">
+      <bpmn:bpmndi:BPMNShape id="StartEvent_1y45yut_di" bpmnElement="StartEvent_1y45yut">
+        <bpmn:omgdc:Bounds x="152" y="102" width="36" height="36" />
+        <bpmn:bpmndi:BPMNLabel>
+          <bpmn:omgdc:Bounds x="134" y="145" width="73" height="14" />
+        </bpmn:bpmndi:BPMNLabel>
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNShape id="Activity_0q0spcq_di" bpmnElement="Activity_0q0spcq">
+        <bpmn:omgdc:Bounds x="240" y="80" width="100" height="80" />
+        <bpmn:bpmndi:BPMNLabel />
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNShape id="Event_1t9d9el_di" bpmnElement="Event_1t9d9el">
+        <bpmn:omgdc:Bounds x="392" y="102" width="36" height="36" />
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNShape id="Activity_00jigd3_di" bpmnElement="Activity_00jigd3">
+        <bpmn:omgdc:Bounds x="480" y="80" width="100" height="80" />
+        <bpmn:bpmndi:BPMNLabel />
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNShape id="BPMNShape_0gcac7a" bpmnElement="Event_1tahmvy">
+        <bpmn:omgdc:Bounds x="652" y="102" width="36" height="36" />
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNShape id="BPMNShape_0j08n62" bpmnElement="Activity_0ls6ij7">
+        <bpmn:omgdc:Bounds x="730" y="80" width="100" height="80" />
+        <bpmn:bpmndi:BPMNLabel />
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNShape id="BPMNShape_0y36kd9" bpmnElement="Activity_0uxzexx">
+        <bpmn:omgdc:Bounds x="880" y="80" width="100" height="80" />
+        <bpmn:bpmndi:BPMNLabel />
+      </bpmn:bpmndi:BPMNShape>
+      <bpmn:bpmndi:BPMNEdge id="Flow_14zl0yu_di" bpmnElement="Flow_14zl0yu">
+        <bpmn:omgdi:waypoint x="188" y="120" />
+        <bpmn:omgdi:waypoint x="240" y="120" />
+      </bpmn:bpmndi:BPMNEdge>
+      <bpmn:bpmndi:BPMNEdge id="Flow_1913056_di" bpmnElement="Flow_1913056">
+        <bpmn:omgdi:waypoint x="340" y="120" />
+        <bpmn:omgdi:waypoint x="392" y="120" />
+      </bpmn:bpmndi:BPMNEdge>
+      <bpmn:bpmndi:BPMNEdge id="Flow_0zcyc0w_di" bpmnElement="Flow_0zcyc0w">
+        <bpmn:omgdi:waypoint x="428" y="120" />
+        <bpmn:omgdi:waypoint x="480" y="120" />
+      </bpmn:bpmndi:BPMNEdge>
+      <bpmn:bpmndi:BPMNEdge id="Flow_1w08rrk_di" bpmnElement="Flow_1w08rrk">
+        <bpmn:omgdi:waypoint x="580" y="120" />
+        <bpmn:omgdi:waypoint x="652" y="120" />
+      </bpmn:bpmndi:BPMNEdge>
+      <bpmn:bpmndi:BPMNEdge id="Flow_1pv2r4z_di" bpmnElement="Flow_1pv2r4z">
+        <bpmn:omgdi:waypoint x="688" y="120" />
+        <bpmn:omgdi:waypoint x="730" y="120" />
+      </bpmn:bpmndi:BPMNEdge>
+      <bpmn:bpmndi:BPMNEdge id="Flow_089yk1l_di" bpmnElement="Flow_089yk1l">
+        <bpmn:omgdi:waypoint x="830" y="120" />
+        <bpmn:omgdi:waypoint x="880" y="120" />
+      </bpmn:bpmndi:BPMNEdge>
+    </bpmn:bpmndi:BPMNPlane>
+  </bpmn:bpmndi:BPMNDiagram>
+</bpmn:definitions>
