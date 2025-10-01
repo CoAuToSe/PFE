@@ -145,6 +145,5 @@ GitHubDesktop-linux-2.9.6-linux1.deb*
 !/tello_msgs
 !**/buildings.obj
 /Code/User/History
-/my_FaMe/fame-modeler
-/my_FaMe/.gitignore
+/my_FaMe/fame-modeler/**
 /my_FaMe/Makefile
