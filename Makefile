@@ -9,6 +9,45 @@ SHELL := /bin/bash
 %:
 	@:
 
+
+# /====================================\
+# |          Paths & Variables         |
+# \====================================/
+
+HOME_DIR := $(PWD)
+ROS2_SHARED := $(HOME_DIR)/ros2_shared
+TELLO_MSGS := $(HOME_DIR)/tello_msgs
+FAME := /home/dell/Documents/GitHub/my_FaMe
+# FAME := $(HOME_DIR)/fame
+FAME_AGRI := $(FAME)/fame_agricultural
+FAME_ENGINE := $(FAME)/fame_engine
+FAME_SIMU := $(FAME)/fame_simulation
+GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
+MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
+HUSKY_WS := $(HOME)/husky_ws
+HUSKY := $(HUSKY_WS)/husky
+SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
+
+
+MBROS_DIR      := /home/ubuntu/mbros/fame_engine
+NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
+NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
+NPM_VERSION := 16
+
+DELAY ?= 20
+
+PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
+PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
+PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
+
+PATH_PFE:=$(HOME)/PFE
+PFE:=$(HOME)/PFE
+
+
+# /====================================\
+# |            Random Macro            |
+# \====================================/
+
 # Default target
 all: min_install_2004
 
@@ -38,6 +77,20 @@ setup_2404:						\
 	install_software_2404		\
 	install_software
 	@echo "After clonning you need to execute 'make copy_from_github'"
+
+setup_deps:
+	echo "WIP"
+
+setup_deps_24_04:
+	${update}
+	${install} \
+		ros-$$ROS_DISTRO-rclcpp-components \
+		ros-$$ROS_DISTRO-cv-bridge \
+		ros-$$ROS_DISTRO-image-transport \
+		ros-$$ROS_DISTRO-camera-info-manager \
+		libopencv-dev \
+		libasio-dev
+
 
 # /====================================\
 # |           Macro  install           |
@@ -546,38 +599,6 @@ print_supported_version:
 	fi
 
 # /====================================\
-# |          Paths & Variables         |
-# \====================================/
-
-HOME_DIR := $(PWD)
-ROS2_SHARED := $(HOME_DIR)/ros2_shared
-TELLO_MSGS := $(HOME_DIR)/tello_msgs
-FAME := $(HOME_DIR)/fame
-FAME_AGRI := $(FAME)/fame_agricultural
-FAME_ENGINE := $(FAME)/fame_engine
-FAME_SIMU := $(FAME)/fame_simulation
-GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(HOME_DIR)
-MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
-HUSKY_WS := $(HOME)/husky_ws
-HUSKY := $(HUSKY_WS)/husky
-SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
-
-
-MBROS_DIR      := /home/ubuntu/mbros/fame_engine
-NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
-NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
-NPM_VERSION := 16
-
-DELAY ?= 20
-
-PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
-PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
-PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
-
-PATH_PFE:=$(HOME)/PFE
-PFE:=$(HOME)/PFE
-
-# /====================================\
 # |            package  deps           |
 # \====================================/
 
@@ -586,7 +607,7 @@ define from_git_clean
 clone_$1:
 	@-if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
 	@-if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
-clean_$1:
+clean_$1: check_with_user
 	sudo rm -r $2
 endef
 
