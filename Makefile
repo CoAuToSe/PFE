@@ -1105,10 +1105,18 @@ copy_$(1)_to_github:
 		mkdir -p "$$$$dst"; \
 		echo "rsync -a --delete $$$$src/ $$$$dst/"; \
 		sudo rsync -a --delete "$$$$src"/ "$$$$dst"/; \
+		if [ -d "$$$$dst/.git" ]; then \
+			echo "rm -r $$$$dst/.git"; \
+			sudo rm -r $$$$dst/.git; \
+		fi; \
 	else \
 		mkdir -p "$$$$(dirname "$$$$dst")"; \
 		echo "install -m 0644 $$$$src $$$$dst"; \
 		sudo install -m 0644 "$$$$src" "$$$$dst"; \
+		if [ -d "$$$$dst/.git" ]; then \
+			echo "rm -r $$$$dst/.git"; \
+			sudo rm -r $$$$dst/.git; \
+		fi; \
 	fi
 
 copy_$(1)_from_github: check_with_user
@@ -1149,6 +1157,7 @@ $(eval $(call github,FaMe,$(FAME)/,${PATH_PFE}/fame))
 $(eval $(call github,husky,$(HOME)/husky_ws/,${PATH_PFE}/husky_ws))
 $(eval $(call github,clearpath,$(HOME)/clearpath/,${PATH_PFE}/clearpath))
 $(eval $(call github,clearpath_ws,$(HOME)/clearpath_ws/,${PATH_PFE}/clearpath_ws))
+$(eval $(call github,tello_msgs,$(TELLO_MSGS)/,${PATH_PFE}/tello_msgs))
 # $(eval $(call github,,,))
 
 
