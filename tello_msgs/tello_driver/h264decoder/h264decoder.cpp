@@ -167,3 +167,14 @@ ssize_t H264Decoder::parse(const unsigned char* in_data, ssize_t in_size) {
 bool H264Decoder::is_frame_available() const {
   return true;
 }
+
+ConverterRGB24::ConverterRGB24() = default;
+
+ConverterRGB24::~ConverterRGB24() {
+  if (framergb) av_frame_free(&framergb);
+  if (sws)      sws_freeContext(sws);
+}
+
+int ConverterRGB24::predict_size(int w, int h) {
+  return w * h * 3;   // BGR24 = 3 octets/pixel
+}

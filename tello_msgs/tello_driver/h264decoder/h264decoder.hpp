@@ -65,7 +65,7 @@ class H264Decoder
   /* Persistent things here, using RAII for cleanup. */
   AVCodecContext        *context;
   AVFrame               *frame;
-  AVCodec               *codec;
+  const AVCodec               *codec;
   // AVCodecParserContext  *parser;
 #if USE_OLD_FFMPEG
   // rien
@@ -98,8 +98,6 @@ bytes at frame boundaries.
 // TODO: Rename to OutputStage or so?!
 class ConverterRGB24
 {
-  SwsContext *sws;
-  AVFrame *framergb;
 
 public:
   ConverterRGB24();
@@ -112,9 +110,11 @@ public:
 out_rgb with the result. Returns a AVFrame structure holding
 additional information about the RGB frame, such as the number of
 bytes in a row and so on. */
-  const AVFrame& convert(const AVFrame &frame, unsigned char* out_rgb);
+  const AVFrame& convert(const AVFrame& in, unsigned char* out_rgb);
 
 private:
+  SwsContext *sws;
+  AVFrame *framergb;
   int last_w = 0, last_h = 0;
 };
 
