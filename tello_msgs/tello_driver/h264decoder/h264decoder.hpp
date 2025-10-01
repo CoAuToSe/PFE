@@ -18,7 +18,20 @@ mechanisms of boost::python.
 
 // for ssize_t (signed int type as large as pointer type)
 #include <cstdlib>
+#include <sys/types.h>  // ssize_t
 #include <stdexcept>
+
+extern "C" {
+  #include <libavcodec/avcodec.h>
+  #include <libswscale/swscale.h>
+  #include <libavutil/imgutils.h>
+}
+
+#ifndef LIBAVCODEC_VERSION_MAJOR
+  #error "LIBAVCODEC_VERSION_MAJOR not defined"
+#endif
+#define USE_OLD_FFMPEG (LIBAVCODEC_VERSION_MAJOR < 59)
+
 
 struct AVCodecContext;
 struct AVFrame;
@@ -53,13 +66,20 @@ class H264Decoder
   AVCodecContext        *context;
   AVFrame               *frame;
   AVCodec               *codec;
-  AVCodecParserContext  *parser;
+  // AVCodecParserContext  *parser;
+#if USE_OLD_FFMPEG
+  // rien
+#else
+  AVCodecParserContext *parser = nullptr;
+#endif
+
   /* In the documentation example on the github master branch, the
 packet is put on the heap. This is done here to store the pointers
 to the encoded data, which must be kept around  between calls to
 parse- and decode frame. In release 11 it is put on the stack, too.
   */
   AVPacket              *pkt;
+
 public:
   H264Decoder();
   ~H264Decoder();
@@ -69,6 +89,7 @@ the data and return the frame. parse returns the number
 of consumed bytes of the input stream. It stops consuming
 bytes at frame boundaries.
   */
+
   ssize_t parse(const unsigned char* in_data, ssize_t in_size);
   bool is_frame_available() const;
   const AVFrame& decode_frame();
@@ -77,7 +98,7 @@ bytes at frame boundaries.
 // TODO: Rename to OutputStage or so?!
 class ConverterRGB24
 {
-  SwsContext *context;
+  SwsContext *sws;
   AVFrame *framergb;
 
 public:
@@ -92,6 +113,9 @@ out_rgb with the result. Returns a AVFrame structure holding
 additional information about the RGB frame, such as the number of
 bytes in a row and so on. */
   const AVFrame& convert(const AVFrame &frame, unsigned char* out_rgb);
+
+private:
+  int last_w = 0, last_h = 0;
 };
 
 void disable_logging();

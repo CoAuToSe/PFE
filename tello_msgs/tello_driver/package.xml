@@ -19,13 +19,29 @@
 
     <depend>camera_calibration_parsers</depend>
     <depend>class_loader</depend>
-    <depend>cv_bridge</depend>
-    <depend>rclcpp</depend>
+    <!-- <depend>cv_bridge</depend> -->
+    <!-- <depend>rclcpp</depend> -->
     <depend>geometry_msgs</depend>
     <depend>ros2_shared</depend>
-    <depend>sensor_msgs</depend>
+    <!-- <depend>sensor_msgs</depend> -->
     <depend>std_msgs</depend>
     <depend>tello_msgs</depend>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
+    <build_depend>rclcpp</build_depend>
+    <build_depend>rclcpp_components</build_depend>
+    <build_depend>cv_bridge</build_depend>
+    <build_depend>image_transport</build_depend>
+    <build_depend>sensor_msgs</build_depend>
+    <build_depend>opencv</build_depend>
+
+    <exec_depend>rclcpp</exec_depend>
+    <exec_depend>rclcpp_components</exec_depend>
+    <exec_depend>cv_bridge</exec_depend>
+    <exec_depend>image_transport</exec_depend>
+    <exec_depend>sensor_msgs</exec_depend>
+    <exec_depend>opencv</exec_depend>
 
     <export>
         <build_type>ament_cmake</build_type>
