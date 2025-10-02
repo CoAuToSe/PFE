@@ -29,57 +29,77 @@ find_package(tello_msgs REQUIRED)
 
 #====== LAUNCH FILES ======#
 
-##===== Install raw launch files =====#
+# ##===== Install raw launch files =====#
+# install(
+#     DIRECTORY launch/
+#     DESTINATION share/${PROJECT_NAME}/launch
+# )
+
+##===== Install autocomplete launch files =====#
+# --- Collect raw launch sources in launch/ (4 formats) ---
+file(GLOB _RAW_LAUNCH_PY   "${CMAKE_CURRENT_SOURCE_DIR}/launch/*.py")
+file(GLOB _RAW_LAUNCH_XML  "${CMAKE_CURRENT_SOURCE_DIR}/launch/*.xml")
+file(GLOB _RAW_LAUNCH_YAML "${CMAKE_CURRENT_SOURCE_DIR}/launch/*.yaml" "${CMAKE_CURRENT_SOURCE_DIR}/launch/*.yml")
+set(_RAW_LAUNCH ${_RAW_LAUNCH_PY} ${_RAW_LAUNCH_XML} ${_RAW_LAUNCH_YAML})
+
+# Where we produce properly-suffixed launch files
+set(_GEN_LAUNCH_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated_launch")
+file(MAKE_DIRECTORY "${_GEN_LAUNCH_DIR}")
+
+set(_GEN_LAUNCH_OUTS)
+
+foreach(_src IN LISTS _RAW_LAUNCH)
+    get_filename_component(_name "${_src}" NAME)
+
+    # If it's already a canonical launch filename, keep it
+    if(_name MATCHES "\\.launch\\.(py|xml|ya?ml)$")
+        set(_dst_name "${_name}")
+    else()
+        if(_name MATCHES "\\.py$")
+            string(REGEX REPLACE "\\.py$" ".launch.py" _dst_name "${_name}")
+        elseif(_name MATCHES "\\.xml$")
+            string(REGEX REPLACE "\\.xml$" ".launch.xml" _dst_name "${_name}")
+        elseif(_name MATCHES "\\.ya?ml$")
+            # normalize .yaml/.yml -> .launch.yaml
+            string(REGEX REPLACE "\\.ya?ml$" ".launch.yaml" _dst_name "${_name}")
+        else()
+            # Skip anything unexpected
+            message(WARNING "Skipping non-launch file: ${_name}")
+            continue()
+        endif()
+    endif()
+
+    set(_dst "${_GEN_LAUNCH_DIR}/${_dst_name}")
+
+    # Generate real files (portable; avoids nested symlink issues)
+    add_custom_command(
+        OUTPUT  "${_dst}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_src}" "${_dst}"
+        DEPENDS "${_src}"
+        COMMENT "Generating ${_dst_name}"
+        VERBATIM
+    )
+    list(APPEND _GEN_LAUNCH_OUTS "${_dst}")
+endforeach()
+
+# Ensure generation happens during the build
+add_custom_target(gen_launch ALL DEPENDS ${_GEN_LAUNCH_OUTS})
+
+# Install only the generated, canonical launch files
 install(
-    DIRECTORY launch/
+    FILES ${_GEN_LAUNCH_OUTS}
     DESTINATION share/${PROJECT_NAME}/launch
 )
 
-##===== Install autocomplete launch files =====#
-
-set(LAUNCH_FILES_EXTENSION "py" "xml" "yaml" "yml")
-
-foreach(_ext LAUNCH_FILES_EXTENSION)
-    # Collect source launch .${_ext} files
-    file(GLOB _RAW_LAUNCH "${CMAKE_CURRENT_SOURCE_DIR}/launch/*.${_ext}")
-
-    # Where we generate properly-suffixed files
-    set(_GEN_LAUNCH_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated_launch")
-    file(MAKE_DIRECTORY "${_GEN_LAUNCH_DIR}")
-
-    set(_GEN_LAUNCH_OUTS)
-
-    # IMPORTANT: iterate as a LIST
-    foreach(_src IN LISTS _RAW_LAUNCH)
-        get_filename_component(_name "${_src}" NAME)
-
-        if(_name MATCHES "\\.launch\\.${_ext}$")
-            set(_dst "${_GEN_LAUNCH_DIR}/${_name}")
-        else()
-            string(REGEX REPLACE "\\.${_ext}$" ".launch.${_ext}" _dst_name "${_name}")
-            set(_dst "${_GEN_LAUNCH_DIR}/${_dst_name}")
-        endif()
-
-        # Generate real files (not symlinks) so install is robust
-        add_custom_command(
-            OUTPUT "${_dst}"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_src}" "${_dst}"
-            DEPENDS "${_src}"
-            COMMENT "Generating ${_dst}"
-            VERBATIM
-        )
-        list(APPEND _GEN_LAUNCH_OUTS "${_dst}")
-    endforeach()
-
-    # Ensure generation runs at build time
-    add_custom_target(gen_launch ALL DEPENDS ${_GEN_LAUNCH_OUTS})
-
-    # Install only the generated .launch.py files
-    install(
-        FILES ${_GEN_LAUNCH_OUTS}
-        DESTINATION share/${PROJECT_NAME}/launch
-    )
-endforeach()
+# (Optional) Also install the rest of launch/ but avoid double-installing
+# the generated launch files themselves.
+install(
+    DIRECTORY launch/
+    DESTINATION share/${PROJECT_NAME}/launch
+    PATTERN "*.launch.py"   EXCLUDE
+    PATTERN "*.launch.xml"  EXCLUDE
+    PATTERN "*.launch.yaml" EXCLUDE
+)
 
 #====== END LAUNCH FILES ======#
 
