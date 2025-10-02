@@ -689,7 +689,10 @@ endef
 
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),$(ROS2_SETUP),nvm,))
+
 $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,,))
+
+$(eval $(call setup_pkg,tello,$(PATH_TELLO_WS),,,nvm,))
 
 setup_FaMe_link:
 	-sudo mkdir /home/ubuntu
@@ -848,6 +851,9 @@ endef
 # TODO add : ros2 launch tello_gazebo tello_synchro_launch_cats_3.py # and similar
 
 $(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
+$(eval $(call launch_pkg,FaMe_husky,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
+
+$(eval $(call launch_pkg,FaMe_tello,fame_engine tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
 
 
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
@@ -1154,7 +1160,7 @@ clean_$(1): check_with_user
 endef
 
 # Don't forget to let a folder of space while copying a folder
-$(eval $(call github,simu_gazebo,$(HOME)/Simulation_Gazebo/tello_ros_ws/,${PATH_PFE}/Simulation_Gazebo_new/))
+$(eval $(call github,simu_gazebo,$(PATH_TELLO_WS)/,${PATH_PFE}/Simulation_Gazebo_new/))
 $(eval $(call github,makefile,$(HOME)/Makefile,${PATH_PFE}/Makefile))
 $(eval $(call github,bashrc,$(HOME)/.bashrc,${PATH_PFE}/.bashrc))
 $(eval $(call github,code_setup,$(HOME)/.config/Code/User/,${PATH_PFE}/Code/User))
