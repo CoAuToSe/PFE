@@ -4,7 +4,7 @@ const fs = require('fs');
 
 
 var source = '';
-var process_path = '/home/ubuntu/mbros/fame_engine/process/';
+var process_path = '../fame_engine/process/';
 var process_dict = {};
 
 fs.readFile(process_path + 'simple_scenario.bpmn', 'utf8', (err, data) => {

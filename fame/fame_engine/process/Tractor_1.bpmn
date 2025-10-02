@@ -104,15 +104,16 @@
       <bpmn:incoming>Flow_1ax91m9</bpmn:incoming>
       <bpmn:outgoing>Flow_11eqadz</bpmn:outgoing>
       <bpmn:script>const node_env = this.environment.variables;
-var node = node_env.ros_node;
-const subscriber = node.createSubscription("nav_msgs/msg/Odometry", "odom", (msg) =&gt; {
-    this.environment.variables.my_x = msg.pose.pose.position.x;
-    this.environment.variables.my_y = msg.pose.pose.position.y;
-    this.environment.variables.my_z = msg.pose.pose.position.z;
-    node.destroySubscription(subscriber);
-});
+      var node = node_env.ros_node;
+      const subscriber = node.createSubscription("nav_msgs/msg/Odometry", "odom", (msg) =&gt; {
+          this.environment.variables.my_x = msg.pose.pose.position.x;
+          this.environment.variables.my_y = msg.pose.pose.position.y;
+          this.environment.variables.my_z = msg.pose.pose.position.z;
+          node.destroySubscription(subscriber);
+      });
 
-next();</bpmn:script>
+      next();
+      </bpmn:script>
     </bpmn:scriptTask>
     <bpmn:startEvent id="Event_weed1" name="weed_position">
       <bpmn:extensionElements>
@@ -130,12 +131,13 @@ next();</bpmn:script>
       <bpmn:incoming>Flow_1449dnp</bpmn:incoming>
       <bpmn:outgoing>Flow_0fzikdo</bpmn:outgoing>
       <bpmn:script>const node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/Wrench", "blade_force");
-publisher.publish({
-force: {x: 0.0, y: 0.0, z: 0.0},
-torque: {x: 0.0, y: 0.0, z: 1.0}
-});
-next();</bpmn:script>
+      const publisher = node.createPublisher("geometry_msgs/msg/Wrench", "blade_force");
+      publisher.publish({
+      force: {x: 0.0, y: 0.0, z: 0.0},
+      torque: {x: 0.0, y: 0.0, z: 1.0}
+      });
+      next();
+      </bpmn:script>
     </bpmn:scriptTask>
   </bpmn:process>
   <bpmn:signal id="Signal_0h8bxp7" name="weed_position" />

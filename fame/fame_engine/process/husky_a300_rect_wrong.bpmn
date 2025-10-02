@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://bpmn.io/bpmn" exporter="bpmn-js-token-simulation" exporterVersion="0.1.5">
+  <bpmn:process id="Process_1" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1y45yut" name="start">
+      <bpmn:outgoing>Flow_14zl0yu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_0q0spcq" name="go front" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_14zl0yu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1913056</bpmn:outgoing>
+      <bpmn:script>
+      var node = this.environment.variables.ros_node;
+      const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+      const speed = 1.5; // scale of the speed of the command
+      const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+      const duration_s = 20/1.5;
+      // const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+      // const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+      // const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+      const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+      const hz = 200;
+      const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+      const period_ms = Math.round(1000 / hz);
+      const ticks_total = Math.round(duration_s * hz);
+
+      // const time_in_second = time_run*time_scale_from_ms/1000;
+      const time_in_second = 1;
+
+      this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+      function some() { // p�riode en ms (100ms = 10 Hz)
+          publisher.publish({
+              header: {
+                  stamp: Date.now(),
+                  frame_id: "teleop_twist_joy"
+              }, 
+              twist: {
+                  linear: {x: speed, y: 0.0, z: 0.0},
+                  angular: {x: 0.0, y: 0.0, z: rot}
+              }
+          });
+      }
+
+      const timer = node.createTimer(hz_bigint, some);
+
+      const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+          timer.cancel();          // stoppe le timer ROS  
+          timer2.cancel();          // stoppe le timer ROS
+          //node.destroy();          // d�truit le node
+          //rclnodejs.shutdown();    // ferme le contexte ROS 2
+          next();
+      });
+      this.environment.variables.nextTimerDuration = "PT1S";
+      </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_14zl0yu" sourceRef="StartEvent_1y45yut" targetRef="Activity_0q0spcq" />
+    <bpmn:intermediateCatchEvent id="Event_1t9d9el">
+      <bpmn:incoming>Flow_1913056</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zcyc0w</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0z0agyt">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1913056" sourceRef="Activity_0q0spcq" targetRef="Event_1t9d9el" />
+    <bpmn:scriptTask id="Activity_00jigd3" name="turn" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_0zcyc0w</bpmn:incoming>
+      <bpmn:outgoing>Flow_1co5fx0</bpmn:outgoing>
+      <bpmn:script>
+      var node = this.environment.variables.ros_node;
+      const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+      const speed = 0.0; // scale of the speed of the command
+      const rot = -1; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+      const duration_s = 1;
+      // const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+      // const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+      // const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+      const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+      const hz = 200;
+      const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+      const period_ms = Math.round(1000 / hz);
+      const ticks_total = Math.round(duration_s * hz);
+
+      // const time_in_second = time_run*time_scale_from_ms/1000;
+      const time_in_second = 1;
+
+      this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+      function some() { // p�riode en ms (100ms = 10 Hz)
+          publisher.publish({
+              header: {
+                  stamp: Date.now(),
+                  frame_id: "teleop_twist_joy"
+              }, 
+              twist: {
+                  linear: {x: speed, y: 0.0, z: 0.0},
+                  angular: {x: 0.0, y: 0.0, z: rot}
+              }
+          });
+      }
+
+      const timer = node.createTimer(hz_bigint, some);
+
+      const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+          timer.cancel();          // stoppe le timer ROS  
+          timer2.cancel();          // stoppe le timer ROS
+          //node.destroy();          // d�truit le node
+          //rclnodejs.shutdown();    // ferme le contexte ROS 2
+          next();
+      });
+      this.environment.variables.nextTimerDuration = "PT1S";
+      </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0zcyc0w" sourceRef="Event_1t9d9el" targetRef="Activity_00jigd3" />
+    <bpmn:intermediateCatchEvent id="Event_18t9iku">
+      <bpmn:incoming>Flow_1co5fx0</bpmn:incoming>
+      <bpmn:outgoing>Flow_06rd3zt</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_18qa8xu">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:scriptTask id="Activity_1w4r55x" name="turn" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_0oljbs1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0u9xpb5</bpmn:outgoing>
+      <bpmn:script>
+      var node = this.environment.variables.ros_node;
+      const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+      const speed = 0.0; // scale of the speed of the command
+      const rot = -1; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+      const duration_s = 1;
+      // const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+      // const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+      // const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+      const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+      const hz = 200;
+      const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+      const period_ms = Math.round(1000 / hz);
+      const ticks_total = Math.round(duration_s * hz);
+
+      // const time_in_second = time_run*time_scale_from_ms/1000;
+      const time_in_second = 1;
+
+      this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+      function some() { // p�riode en ms (100ms = 10 Hz)
+          publisher.publish({
+              header: {
+                  stamp: Date.now(),
+                  frame_id: "teleop_twist_joy"
+              }, 
+              twist: {
+                  linear: {x: speed, y: 0.0, z: 0.0},
+                  angular: {x: 0.0, y: 0.0, z: rot}
+              }
+          });
+      }
+
+      const timer = node.createTimer(hz_bigint, some);
+
+      const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+          timer.cancel();          // stoppe le timer ROS  
+          timer2.cancel();          // stoppe le timer ROS
+          //node.destroy();          // d�truit le node
+          //rclnodejs.shutdown();    // ferme le contexte ROS 2
+          next();
+      });
+      this.environment.variables.nextTimerDuration = "PT1S";
+      </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="Activity_06cyzn9" name="go front" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_06rd3zt</bpmn:incoming>
+      <bpmn:outgoing>Flow_0c3ghnt</bpmn:outgoing>
+      <bpmn:script>
+      var node = this.environment.variables.ros_node;
+      const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+      const speed = 1; // scale of the speed of the command
+      const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+      const duration_s = 1;
+      // const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+      // const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+      // const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+      const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+      const hz = 200;
+      const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+      const period_ms = Math.round(1000 / hz);
+      const ticks_total = Math.round(duration_s * hz);
+
+      // const time_in_second = time_run*time_scale_from_ms/1000;
+      const time_in_second = 1;
+
+      this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+      function some() { // p�riode en ms (100ms = 10 Hz)
+          publisher.publish({
+              header: {
+                  stamp: Date.now(),
+                  frame_id: "teleop_twist_joy"
+              }, 
+              twist: {
+                  linear: {x: speed, y: 0.0, z: 0.0},
+                  angular: {x: 0.0, y: 0.0, z: rot}
+              }
+          });
+      }
+
+      const timer = node.createTimer(hz_bigint, some);
+
+      const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+          timer.cancel();          // stoppe le timer ROS  
+          timer2.cancel();          // stoppe le timer ROS
+          //node.destroy();          // d�truit le node
+          //rclnodejs.shutdown();    // ferme le contexte ROS 2
+          next();
+      });
+      this.environment.variables.nextTimerDuration = "PT1S";
+      </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="Activity_0iqjbnz" name="go back" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_0yocrqr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0iwxnz5</bpmn:outgoing>
+      <bpmn:script>
+      var node = this.environment.variables.ros_node;
+      const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+      const speed = 1; // scale of the speed of the command
+      const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+      const duration_s = 1;
+      // const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+      // const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+      // const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+      const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+      const hz = 200;
+      const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+      const period_ms = Math.round(1000 / hz);
+      const ticks_total = Math.round(duration_s * hz);
+
+      // const time_in_second = time_run*time_scale_from_ms/1000;
+      const time_in_second = 1;
+
+      this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+      function some() { // p�riode en ms (100ms = 10 Hz)
+          publisher.publish({
+              header: {
+                  stamp: Date.now(),
+                  frame_id: "teleop_twist_joy"
+              }, 
+              twist: {
+                  linear: {x: speed, y: 0.0, z: 0.0},
+                  angular: {x: 0.0, y: 0.0, z: rot}
+              }
+          });
+      }
+
+      const timer = node.createTimer(hz_bigint, some);
+
+      const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+          timer.cancel();          // stoppe le timer ROS  
+          timer2.cancel();          // stoppe le timer ROS
+          //node.destroy();          // d�truit le node
+          //rclnodejs.shutdown();    // ferme le contexte ROS 2
+          next();
+      });
+      this.environment.variables.nextTimerDuration = "PT1S";
+      </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="Activity_01t5aey" name="go back" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_1da0mqy</bpmn:incoming>
+      <bpmn:outgoing>Flow_1x70npo</bpmn:outgoing>
+      <bpmn:script>
+      var node = this.environment.variables.ros_node;
+      const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
+
+      const speed = 1.5; // scale of the speed of the command
+      const rot = 0.0; // scale of the rotation of the command // 45� = 0.5 ; 90� = 0.7 ; 180� = 1
+      const duration_s = 20/1.5;
+      // const time_run = 31; // number of time this action will be performed // 45� = 31 ; 90� = 31 ; 180� = 31
+      // const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+      // const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+      const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+      const hz = 200;
+      const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+      const period_ms = Math.round(1000 / hz);
+      const ticks_total = Math.round(duration_s * hz);
+
+      // const time_in_second = time_run*time_scale_from_ms/1000;
+      const time_in_second = 1;
+
+      this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+      function some() { // p�riode en ms (100ms = 10 Hz)
+          publisher.publish({
+              header: {
+                  stamp: Date.now(),
+                  frame_id: "teleop_twist_joy"
+              }, 
+              twist: {
+                  linear: {x: speed, y: 0.0, z: 0.0},
+                  angular: {x: 0.0, y: 0.0, z: rot}
+              }
+          });
+      }
+
+      const timer = node.createTimer(hz_bigint, some);
+
+      const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+          timer.cancel();          // stoppe le timer ROS  
+          timer2.cancel();          // stoppe le timer ROS
+          //node.destroy();          // d�truit le node
+          //rclnodejs.shutdown();    // ferme le contexte ROS 2
+          next();
+      });
+      this.environment.variables.nextTimerDuration = "PT1S";
+      </bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:intermediateCatchEvent id="Event_0d4new9">
+      <bpmn:incoming>Flow_0c3ghnt</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yocrqr</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0pz0cdk">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+          ${environment.variables.nextTimerDuration}
+        </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_0n9er7e">
+      <bpmn:incoming>Flow_0iwxnz5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0oljbs1</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0bnu8ou">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_0a70ldn">
+      <bpmn:incoming>Flow_0u9xpb5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1da0mqy</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1nfd7wu">
+        <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_0zm5f5d">
+      <bpmn:incoming>Flow_1x70npo</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1x70npo" sourceRef="Activity_01t5aey" targetRef="Event_0zm5f5d" />
+    <bpmn:sequenceFlow id="Flow_1da0mqy" sourceRef="Event_0a70ldn" targetRef="Activity_01t5aey" />
+    <bpmn:sequenceFlow id="Flow_0u9xpb5" sourceRef="Activity_1w4r55x" targetRef="Event_0a70ldn" />
+    <bpmn:sequenceFlow id="Flow_0oljbs1" sourceRef="Event_0n9er7e" targetRef="Activity_1w4r55x" />
+    <bpmn:sequenceFlow id="Flow_0iwxnz5" sourceRef="Activity_0iqjbnz" targetRef="Event_0n9er7e" />
+    <bpmn:sequenceFlow id="Flow_0yocrqr" sourceRef="Event_0d4new9" targetRef="Activity_0iqjbnz" />
+    <bpmn:sequenceFlow id="Flow_0c3ghnt" sourceRef="Activity_06cyzn9" targetRef="Event_0d4new9" />
+    <bpmn:sequenceFlow id="Flow_06rd3zt" sourceRef="Event_18t9iku" targetRef="Activity_06cyzn9" />
+    <bpmn:sequenceFlow id="Flow_1co5fx0" sourceRef="Activity_00jigd3" targetRef="Event_18t9iku" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BpmnDiagram_1">
+    <bpmndi:BPMNPlane id="BpmnPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="StartEvent_1y45yut_di" bpmnElement="StartEvent_1y45yut">
+        <omgdc:Bounds x="152" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="134" y="145" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0q0spcq_di" bpmnElement="Activity_0q0spcq">
+        <omgdc:Bounds x="240" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1t9d9el_di" bpmnElement="Event_1t9d9el">
+        <omgdc:Bounds x="392" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00jigd3_di" bpmnElement="Activity_00jigd3">
+        <omgdc:Bounds x="480" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_05rc213" bpmnElement="Event_18t9iku">
+        <omgdc:Bounds x="622" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0oqoobj" bpmnElement="Activity_06cyzn9">
+        <omgdc:Bounds x="750" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_042h2fn" bpmnElement="Activity_0iqjbnz">
+        <omgdc:Bounds x="950" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0abgpci" bpmnElement="Activity_1w4r55x">
+        <omgdc:Bounds x="1160" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1s6mzff" bpmnElement="Event_0d4new9">
+        <omgdc:Bounds x="892" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0q9p6qg" bpmnElement="Event_0n9er7e">
+        <omgdc:Bounds x="1092" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1680056" bpmnElement="Event_0a70ldn">
+        <omgdc:Bounds x="1292" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_194qblj" bpmnElement="Activity_01t5aey">
+        <omgdc:Bounds x="1360" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0zm5f5d_di" bpmnElement="Event_0zm5f5d">
+        <omgdc:Bounds x="1512" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_14zl0yu_di" bpmnElement="Flow_14zl0yu">
+        <bpmn:omgdi:waypoint x="188" y="120" />
+        <bpmn:omgdi:waypoint x="240" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1913056_di" bpmnElement="Flow_1913056">
+        <bpmn:omgdi:waypoint x="340" y="120" />
+        <bpmn:omgdi:waypoint x="392" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zcyc0w_di" bpmnElement="Flow_0zcyc0w">
+        <bpmn:omgdi:waypoint x="428" y="120" />
+        <bpmn:omgdi:waypoint x="480" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x70npo_di" bpmnElement="Flow_1x70npo">
+        <bpmn:omgdi:waypoint x="1460" y="120" />
+        <bpmn:omgdi:waypoint x="1512" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1da0mqy_di" bpmnElement="Flow_1da0mqy">
+        <bpmn:omgdi:waypoint x="1328" y="120" />
+        <bpmn:omgdi:waypoint x="1360" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0u9xpb5_di" bpmnElement="Flow_0u9xpb5">
+        <bpmn:omgdi:waypoint x="1260" y="120" />
+        <bpmn:omgdi:waypoint x="1292" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0oljbs1_di" bpmnElement="Flow_0oljbs1">
+        <bpmn:omgdi:waypoint x="1128" y="120" />
+        <bpmn:omgdi:waypoint x="1160" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0iwxnz5_di" bpmnElement="Flow_0iwxnz5">
+        <bpmn:omgdi:waypoint x="1050" y="120" />
+        <bpmn:omgdi:waypoint x="1092" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yocrqr_di" bpmnElement="Flow_0yocrqr">
+        <bpmn:omgdi:waypoint x="928" y="120" />
+        <bpmn:omgdi:waypoint x="950" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0c3ghnt_di" bpmnElement="Flow_0c3ghnt">
+        <bpmn:omgdi:waypoint x="850" y="120" />
+        <bpmn:omgdi:waypoint x="892" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06rd3zt_di" bpmnElement="Flow_06rd3zt">
+        <bpmn:omgdi:waypoint x="658" y="120" />
+        <bpmn:omgdi:waypoint x="750" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1co5fx0_di" bpmnElement="Flow_1co5fx0">
+        <bpmn:omgdi:waypoint x="580" y="120" />
+        <bpmn:omgdi:waypoint x="622" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

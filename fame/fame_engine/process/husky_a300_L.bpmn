@@ -9,32 +9,56 @@
             <bpmn:outgoing>Flow_1913056</bpmn:outgoing>
             <bpmn:script>
 var node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "/a300_00041/platform/cmd_vel");
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
 
-// will probably skip the first one
-for( let izaeaz = 0; izaeaz &lt; 20; izaeaz++){
+const speed = 0.0; // scale of the speed of the command
+const rot = 0.7; // scale of the rotation of the command // 45° = 0.5 ; 90° = 0.7 ; 180° = 1
+const time_run = 31; // number of time this action will be performed // 45° = 31 ; 90° = 31 ; 180° = 31
+const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+const factor = 4; // depends on the time needed to transmit the information // assure running
+
+const time_in_second = time_run*time_scale_from_ms/1000;
+
+this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+time_in_second+" second.");
+
+for( let ind = 0; ind &lt; time_run *factor; ind++){
     setTimeout(() =&gt; {
-            publisher.publish({
+        publisher.publish({
             header: {
                 frame_id: "teleop_twist_joy"
             }, twist: {
-                linear: {x: 0.3, y: 0.0, z: 0.0},
-                angular: {x: 0.0, y: 0.0, z: 0.0}
+                linear: {x: speed, y: 0.0, z: 0.0},
+                angular: {x: 0.0, y: 0.0, z: rot}
             }
         });
-    }, 100*izaeaz);
+    }, time_scale_from_ms*ind /factor);
 }
 
+//maybe useless
+setTimeout(() =&gt; {
+        publisher.publish({
+        header: {
+            frame_id: "teleop_twist_joy"
+        }, twist: {
+            linear: {x: 0.0, y: 0.0, z: 0.0},
+            angular: {x: 0.0, y: 0.0, z: 0.0}
+        }
+    });
+}, time_scale_from_ms*time_run);
 
-this.environment.services.console.log("one lights yellow");
-next();</bpmn:script>
+this.environment.variables.nextTimerDuration = "PT"+time_in_second+"S";
+
+next();
+            </bpmn:script>
         </bpmn:scriptTask>
         <bpmn:sequenceFlow id="Flow_14zl0yu" sourceRef="StartEvent_1y45yut" targetRef="Activity_0q0spcq" />
         <bpmn:intermediateCatchEvent id="Event_1t9d9el">
             <bpmn:incoming>Flow_1913056</bpmn:incoming>
             <bpmn:outgoing>Flow_0zcyc0w</bpmn:outgoing>
             <bpmn:timerEventDefinition id="TimerEventDefinition_0z0agyt">
-                <bpmn:timeDuration xsi:type="tFormalExpression">PT1S</bpmn:timeDuration>
+                <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
             </bpmn:timerEventDefinition>
         </bpmn:intermediateCatchEvent>
         <bpmn:sequenceFlow id="Flow_1913056" sourceRef="Activity_0q0spcq" targetRef="Event_1t9d9el" />
@@ -43,13 +67,13 @@ next();</bpmn:script>
             <bpmn:outgoing>Flow_17duhnu</bpmn:outgoing>
             <bpmn:script>
 var node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "/a300_00041/platform/cmd_vel");
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
 
 publisher.publish({
     header: {
         frame_id: "teleop_twist_joy"
     }, twist: {
-        linear: {x: 0.3, y: 0.0, z: 0.0},
+        linear: {x: 0.0, y: 0.0, z: 0.0},
         angular: {x: 0.0, y: 0.0, z: 0.0}
     }
 });

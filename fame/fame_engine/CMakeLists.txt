@@ -69,15 +69,17 @@ install(DIRECTORY
 # find_package(ament_cmake REQUIRED)
 
 add_custom_target(${PROJECT_NAME}_npm ALL
-  COMMAND bash -lc "npm install --no-progress --silent rclnodejs@latest"
+  COMMAND bash -lc 'export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && npm install --no-progress --silent rclnodejs@latest'
   # COMMAND bash -lc "npm install rclnodejs@latest"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Installez les artefacts nécessaires à l’exécution
 install(DIRECTORY process/ DESTINATION share/${PROJECT_NAME}/process)
-install(FILES package.json package-lock.json DESTINATION share/${PROJECT_NAME})
-# Option A: embarquer node_modules (simple, volumineux)
+if(EXISTS "${CMAKE_SOURCE_DIR}/package-lock.json")
+  install(FILES package.json package-lock.json DESTINATION share/${PROJECT_NAME})
+endif()
+  # Option A: embarquer node_modules (simple, volumineux)
 install(DIRECTORY node_modules/ DESTINATION share/${PROJECT_NAME}/node_modules)
 
 # ament_package()

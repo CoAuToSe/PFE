@@ -14,10 +14,6 @@ def generate_launch_description():
 
     share_directory = get_package_share_directory('fame_engine')
 
-    launch_args = [
-        DeclareLaunchArgument('namespace', default_value='/a300_00041/platform'),
-        DeclareLaunchArgument('bpmn', default_value='husky_a300_rect_odom_5')
-    ]
     # revise path to your nodejs start file
     start_js_file = os.path.join(
         share_directory,
@@ -25,24 +21,19 @@ def generate_launch_description():
         'controller.js')
 
     start_rex_node = Node(
-        name = 'engine_node',
-        executable = 'node',
-        output = 'screen',
-        namespace = LaunchConfiguration('namespace'),
-        parameters = [{
-            'use_sim_time': use_sim_time,
-        }],
-        arguments = [
-            start_js_file,
-            '--bpmn', LaunchConfiguration('bpmn')
+        name='engine_node',
+        executable='node',
+        output='screen',
+        namespace='husky_a300',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=[
+            start_js_file
         ],
-        cwd = share_directory
-    )
+        cwd=share_directory)
+
 
 
     ld = LaunchDescription()
-    for e in launch_args:
-        ld.add_action(e)
     ld.add_action(start_rex_node)
 
 

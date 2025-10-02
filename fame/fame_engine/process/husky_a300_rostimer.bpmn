@@ -9,32 +9,126 @@
             <bpmn:outgoing>Flow_1913056</bpmn:outgoing>
             <bpmn:script>
 var node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "/a300_00041/platform/cmd_vel");
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
 
-// will probably skip the first one
-for( let izaeaz = 0; izaeaz &lt; 20; izaeaz++){
-    setTimeout(() =&gt; {
-            publisher.publish({
+const speed = 0.0; // scale of the speed of the command
+const rot = 0.2; // scale of the rotation of the command // 45° = 0.5 ; 90° = 0.7 ; 180° = 1
+const duration_s = 10*(1-5/90)*(1-5/90);
+// const time_run = 31; // number of time this action will be performed // 45° = 31 ; 90° = 31 ; 180° = 31
+// const time_scale_from_ms = 100; // time between each ticking of the scan of this topic
+// const factor = 4; // depends on the time needed to transmit the information // assure running
+
+
+const duration_bigint = BigInt(String(Math.round(duration_s*1_000_000_000)));
+const hz = 200;
+const hz_bigint = BigInt(String(Math.round(1_000_000_000/hz)));
+const period_ms = Math.round(1000 / hz);
+const ticks_total = Math.round(duration_s * hz);
+
+// const time_in_second = time_run*time_scale_from_ms/1000;
+const time_in_second = 1;
+
+this.environment.services.console.log("going at "+speed+" m/s and turning at "+rot+" \"&omega;\"/s for "+duration_s+" second.");
+
+function some() { // période en ms (100ms = 10 Hz)
+    publisher.publish({
+        header: {
+            stamp: Date.now(),
+            frame_id: "teleop_twist_joy"
+        }, 
+        twist: {
+            linear: {x: speed, y: 0.0, z: 0.0},
+            angular: {x: 0.0, y: 0.0, z: rot}
+        }
+    });
+}
+
+const timer = node.createTimer(hz_bigint, some);
+/*
+const timer = node.createTimer(500_000_000n, () =&gt; {
+    this.environment.services.console.log("tick every 0,5s");
+});
+*/
+/*
+// Arrêter proprement après 5 secondes (exemple)
+setTimeout(() =&gt; {
+    timer.cancel();          // stoppe le timer ROS
+    //node.destroy();          // détruit le node
+    //rclnodejs.shutdown();    // ferme le contexte ROS 2
+    next();
+}, 5_000);
+*/
+
+const timer2 = node.createTimer(duration_bigint, () =&gt; {    
+    timer.cancel();          // stoppe le timer ROS  
+    timer2.cancel();          // stoppe le timer ROS
+    //node.destroy();          // détruit le node
+    //rclnodejs.shutdown();    // ferme le contexte ROS 2
+    next();
+});
+
+/*
+const start = Date.now();
+let lastTick = start - period_ms;
+let sent = 0;
+
+// boucle bloquante courte, publie a environ 20 Hz pendant 3.1 s
+while (Date.now() - start &lt; duration_s * 1000) {
+    const now = Date.now();
+    if (now - lastTick &gt;= period_ms) {
+        publisher.publish({
             header: {
                 frame_id: "teleop_twist_joy"
             }, twist: {
-                linear: {x: 0.3, y: 0.0, z: 0.0},
-                angular: {x: 0.0, y: 0.0, z: 0.0}
+                linear: {x: speed, y: 0.0, z: 0.0},
+                angular: {x: 0.0, y: 0.0, z: rot}
+            }
+        })
+        lastTick += period_ms;
+        sent += 1;
+        if (sent &gt;= ticks_total) break;
+    }
+    // micro pause active pour laisser le moteur respirer sans timers
+    // 100 micro iterations environ
+    for (let i = 0; i &lt; 100; i++) {}
+}
+for( let ind = 0; ind &lt; time_run *factor; ind++){
+    setTimeout(() =&gt; {
+        publisher.publish({
+            header: {
+                frame_id: "teleop_twist_joy"
+            }, twist: {
+                linear: {x: speed, y: 0.0, z: 0.0},
+                angular: {x: 0.0, y: 0.0, z: rot}
             }
         });
-    }, 100*izaeaz);
+    }, time_scale_from_ms*ind /factor);
 }
 
-
-this.environment.services.console.log("one lights yellow");
-next();</bpmn:script>
+//maybe useless
+setTimeout(() =&gt; {
+        publisher.publish({
+        header: {
+            frame_id: "teleop_twist_joy"
+        }, twist: {
+            linear: {x: 0.0, y: 0.0, z: 0.0},
+            angular: {x: 0.0, y: 0.0, z: 0.0}
+        }
+    });
+}, time_scale_from_ms*time_run);
+*/
+//this.environment.variables.nextTimerDuration = "PT"+time_in_second+"S";
+this.environment.variables.nextTimerDuration = "PT1S";
+            </bpmn:script>
         </bpmn:scriptTask>
         <bpmn:sequenceFlow id="Flow_14zl0yu" sourceRef="StartEvent_1y45yut" targetRef="Activity_0q0spcq" />
         <bpmn:intermediateCatchEvent id="Event_1t9d9el">
             <bpmn:incoming>Flow_1913056</bpmn:incoming>
             <bpmn:outgoing>Flow_0zcyc0w</bpmn:outgoing>
             <bpmn:timerEventDefinition id="TimerEventDefinition_0z0agyt">
-                <bpmn:timeDuration xsi:type="tFormalExpression">PT1S</bpmn:timeDuration>
+                <bpmn:timeDuration xsi:type="tFormalExpression">
+                    ${environment.variables.nextTimerDuration}
+                </bpmn:timeDuration>
             </bpmn:timerEventDefinition>
         </bpmn:intermediateCatchEvent>
         <bpmn:sequenceFlow id="Flow_1913056" sourceRef="Activity_0q0spcq" targetRef="Event_1t9d9el" />
@@ -43,13 +137,13 @@ next();</bpmn:script>
             <bpmn:outgoing>Flow_17duhnu</bpmn:outgoing>
             <bpmn:script>
 var node = this.environment.variables.ros_node;
-const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "/a300_00041/platform/cmd_vel");
+const publisher = node.createPublisher("geometry_msgs/msg/TwistStamped", "cmd_vel");
 
 publisher.publish({
     header: {
         frame_id: "teleop_twist_joy"
     }, twist: {
-        linear: {x: 0.3, y: 0.0, z: 0.0},
+        linear: {x: 0.0, y: 0.0, z: 0.0},
         angular: {x: 0.0, y: 0.0, z: 0.0}
     }
 });
