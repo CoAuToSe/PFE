@@ -10,7 +10,6 @@
       <bpmn:script>
 var node = this.environment.variables.ros_node;
 
-
 const client = node.createClient("tello_msgs/srv/TelloAction", "tello_action");
 const request = new Object();
 request["cmd"] = "takeoff";

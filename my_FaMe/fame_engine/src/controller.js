@@ -255,11 +255,11 @@ rclnodejs.init().then(() => {
         }
     }, { noAck: true });
 
-
+    function loadInterface(something){return rclnodejs.require(something);}
     engine.execute({
         listener,
         variables: {
-            ros_node: node
+            ros_node: node,
         },
         services: {
             get: bent('json'),
@@ -273,6 +273,7 @@ rclnodejs.init().then(() => {
             clearTimeout,
             setInterval,
             clearInterval,
+            loadInterface,
 
         },
         moddleOptions: {
