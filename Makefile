@@ -831,19 +831,19 @@ launch_$(1):
 	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
 	fi; 
 	for d in $(5); do 
-	  if [ -f "$$$$d/install/setup.bash" ]; then 
-	    echo "source \"$$$$d/install/setup.bash\""; . "$$$$d/install/setup.bash"; 
-	  fi; 
+		if [ -f "$$$$d/install/setup.bash" ]; then 
+			echo "source \"$$$$d/install/setup.bash\""; . "$$$$d/install/setup.bash"; 
+		fi; 
 	done; 
 	for rf in $(6); do 
-	  if [ -f "$$$$rf" ]; then 
-	    echo "source \"$$$$rf\""; . "$$$$rf"; 
-	  fi; 
+		if [ -f "$$$$rf" ]; then 
+			echo "source \"$$$$rf\""; . "$$$$rf"; 
+		fi; 
 	done; 
 	for var in $(7); do 
-	  if [ -f "$$$$var" ]; then 
-	    echo "export \"$$$$var\""; export "$$$$var"; 
-	  fi; 
+		if [ -f "$$$$var" ]; then 
+			echo "export \"$$$$var\""; export "$$$$var"; 
+		fi; 
 	done; 
 	echo "ros2 launch $(2)" ; ros2 launch $(2) 
 endef
@@ -853,8 +853,11 @@ endef
 $(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
 $(eval $(call launch_pkg,FaMe_husky,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
 
+$(eval $(call launch_pkg,tello_controller,tello_nodes tello_control_node.launch.py,nvm,,$(PATH_TELLO_WS),,))
 $(eval $(call launch_pkg,FaMe_tello,fame_engine tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
 
+FaMe_correct_env:
+	echo "rm -rf $(FAME_ENGINE)/node_modules/rclnodejs/generated" ; rm -rf $(FAME_ENGINE)/node_modules/rclnodejs/generated ;
 
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 $(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
