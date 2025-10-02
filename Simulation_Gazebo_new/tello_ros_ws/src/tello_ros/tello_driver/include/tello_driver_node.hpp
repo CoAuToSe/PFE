@@ -1,7 +1,13 @@
 #include <asio.hpp>
 
 #include "rclcpp/rclcpp.hpp"
-#include "cv_bridge/cv_bridge.h"
+// cv_bridge: Foxy => <cv_bridge/cv_bridge.h>, Jazzy => <cv_bridge/cv_bridge.hpp>
+#if __has_include(<cv_bridge/cv_bridge.hpp>)
+  #include <cv_bridge/cv_bridge.hpp>
+#else
+  #include <cv_bridge/cv_bridge.h>
+#endif
+
 #include "geometry_msgs/msg/twist.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "tello_msgs/msg/flight_data.hpp"
