@@ -47,6 +47,77 @@ PFE:=$(HOME)/PFE
 
 
 # /====================================\
+# |            Useful Macro            |
+# \====================================/
+
+## clone and clean for git packages
+$(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
+$(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
+$(eval $(call from_git_clean,FaMe_bitbucket,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
+$(eval $(call from_git_clean,husky_2004,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
+
+
+## colcon build with dependencies & clear
+$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
+$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),$(ROS2_SETUP),nvm,))
+
+$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,,))
+
+$(eval $(call setup_pkg,tello,$(PATH_TELLO_WS),,,nvm,))
+
+
+# symlink -> might not be working for some reasons, need to clear before setup # to be checked as it might be rectified
+$(eval $(call setup_pkg,FaMe,$(FAME),,,nvm,build))
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),$(ROS2_SETUP),nvm,npm))
+$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),,nvm,build)) # symlink -> not working
+$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),,nvm,build)) # to check
+
+setup_FaMe_link:
+	-sudo mkdir /home/ubuntu
+	-sudo mkdir /home/ubuntu/mbros
+	sudo ln -sf $(FAME_ENGINE) $(MBROS_DIR)
+	@echo "Link succesfully created"
+
+# why not do it inside the CMakeList.txt file ?
+setup_husky_launch:
+	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
+
+
+
+## only clear macro # deprecated/old
+# $(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
+# $(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
+# $(eval $(call clear_package_ros,FaMe,$(FAME)))
+# $(eval $(call clear_package_ros,FaMe_agri,$(FAME_AGRI)))
+# $(eval $(call clear_package_ros,FaMe_engine,$(FAME_ENGINE)))
+# $(eval $(call clear_package_ros,FaMe_simu,$(FAME_SIMU)))
+
+# $(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
+$(eval $(call clear_package_ros,simulation_gazebo,$(PATH_TELLO_WS)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
+$(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
+
+
+# launch cmd for ros package (cmd_name, shell cmd, nvm?, kill_all?, dependencies*, raw_source*, raw_set*)
+
+# TODO add : ros2 launch tello_gazebo tello_synchro_launch_cats_3.py # and similar
+
+$(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
+$(eval $(call launch_pkg,FaMe_husky,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
+
+$(eval $(call launch_pkg,tello_controller,tello_nodes tello_control_node.launch.py,nvm,,$(PATH_TELLO_WS),,))
+$(eval $(call launch_pkg,FaMe_tello,fame_engine tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
+$(eval $(call launch_pkg,FaMe_husky_tello,fame_engine husky_tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
+
+$(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+$(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+
+FaMe_engine_correct_env:
+	@echo "rm -rf $(FAME_ENGINE)/node_modules" ; rm -rf $(FAME_ENGINE)/node_modules ;
+
+
+
+# /====================================\
 # |            Random Macro            |
 # \====================================/
 
@@ -614,11 +685,6 @@ clean_$1: check_with_user
 	sudo rm -r $2
 endef
 
-# clone and clean for git packages
-$(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
-$(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
-$(eval $(call from_git_clean,FaMe_bitbucket,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
-$(eval $(call from_git_clean,husky_2004,$(HUSKY),https://github.com/husky/husky.git,foxy-devel))
 
 setup_with_git:				\
 	clone_ros2_shared		\
@@ -695,32 +761,6 @@ clear_$(1):
 
 endef
 
-# colcon build with dependencies & clear
-$(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
-$(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),$(ROS2_SETUP),nvm,))
-
-$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,,))
-
-$(eval $(call setup_pkg,tello,$(PATH_TELLO_WS),,,nvm,))
-
-
-# symlink -> might not be working for some reasons, need to clear before setup # to be checked as it might be rectified
-$(eval $(call setup_pkg,FaMe,$(FAME),,,nvm,build))
-$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),$(ROS2_SETUP),nvm,npm))
-$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),,nvm,build)) # symlink -> not working
-$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),,nvm,build)) # to check
-
-
-setup_FaMe_link:
-	-sudo mkdir /home/ubuntu
-	-sudo mkdir /home/ubuntu/mbros
-	sudo ln -sf $(FAME_ENGINE) $(MBROS_DIR)
-	@echo "Link succesfully created"
-
-# LOL why not do it inside the CMakeList.txt file ?
-setup_husky_launch:
-	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
-
 
 define clear_package_ros
 .PHONY: clear_$1
@@ -728,18 +768,6 @@ clear_$1:
 	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
 endef
 
-## only clear macro # deprecated/old
-# $(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
-# $(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
-# $(eval $(call clear_package_ros,FaMe,$(FAME)))
-# $(eval $(call clear_package_ros,FaMe_agri,$(FAME_AGRI)))
-# $(eval $(call clear_package_ros,FaMe_engine,$(FAME_ENGINE)))
-# $(eval $(call clear_package_ros,FaMe_simu,$(FAME_SIMU)))
-
-# $(eval $(call clear_package_ros,pfe_simulation_gazebo,$(PATH_TELLO_WS)))
-$(eval $(call clear_package_ros,simulation_gazebo,$(PATH_TELLO_WS)))
-$(eval $(call clear_package_ros,pfe_simulation_gazebo_old,$(PATH_TELLO_WS_OLD)))
-$(eval $(call clear_package_ros,pfe_simulation_gazebo_SW,$(PATH_TELLO_WS_SW)))
 
 
 # /====================================\
@@ -808,23 +836,6 @@ launch_$(1):
 	done; 
 	echo "ros2 launch $(2)" ; ros2 launch $(2) 
 endef
-
-# launch cmd for ros package (cmd_name, shell cmd, nvm?, kill_all?, dependencies*, raw_source*, raw_set*)
-
-# TODO add : ros2 launch tello_gazebo tello_synchro_launch_cats_3.py # and similar
-
-$(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
-$(eval $(call launch_pkg,FaMe_husky,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
-
-$(eval $(call launch_pkg,tello_controller,tello_nodes tello_control_node.launch.py,nvm,,$(PATH_TELLO_WS),,))
-$(eval $(call launch_pkg,FaMe_tello,fame_engine tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
-$(eval $(call launch_pkg,FaMe_husky_tello,fame_engine husky_tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
-
-$(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
-$(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
-
-FaMe_engine_correct_env:
-	@echo "rm -rf $(FAME_ENGINE)/node_modules" ; rm -rf $(FAME_ENGINE)/node_modules ;
 
 
 # Takes the first target as command
