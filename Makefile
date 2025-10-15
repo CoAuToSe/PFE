@@ -1185,4 +1185,8 @@ $(eval $(call github,tello_msgs_own,$(TELLO_MSGS)/,${PATH_PFE}/tello_msgs))
 $(eval $(call github,my_FaMe,/home/dell/Documents/GitHub/my_FaMe/,${PATH_PFE}/my_FaMe))
 # $(eval $(call github,,,))
 
+copy_to_my_FaMe_makefile:
+	sudo install -m 0644 "$(PFE)/Makefile" "$(FAME)/Makefile";
+
+
 
