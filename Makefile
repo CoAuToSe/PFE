@@ -614,6 +614,7 @@ clean_$1: check_with_user
 	sudo rm -r $2
 endef
 
+# clone and clean for git packages
 $(eval $(call from_git_clean,ros2_shared,$(ROS2_SHARED),https://github.com/ptrmu/ros2_shared.git,master))
 $(eval $(call from_git_clean,tello_msgs,$(TELLO_MSGS),https://github.com/clydemcqueen/tello_ros.git,master))
 $(eval $(call from_git_clean,FaMe_bitbucket,$(FAME),https://bitbucket.org/proslabteam/fame.git,master))
@@ -694,6 +695,7 @@ clear_$(1):
 
 endef
 
+# colcon build with dependencies & clear
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),$(ROS2_SETUP),nvm,))
 
@@ -701,11 +703,6 @@ $(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,,))
 
 $(eval $(call setup_pkg,tello,$(PATH_TELLO_WS),,,nvm,))
 
-setup_FaMe_link:
-	-sudo mkdir /home/ubuntu
-	-sudo mkdir /home/ubuntu/mbros
-	sudo ln -sf $(FAME_ENGINE) $(MBROS_DIR)
-	@echo "Link succesfully created"
 
 # symlink -> might not be working for some reasons, need to clear before setup # to be checked as it might be rectified
 $(eval $(call setup_pkg,FaMe,$(FAME),,,nvm,build))
@@ -713,17 +710,14 @@ $(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),
 $(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),,nvm,build)) # symlink -> not working
 $(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),,nvm,build)) # to check
 
-# setup_FaMe_simulation:
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && colcon build
 
+setup_FaMe_link:
+	-sudo mkdir /home/ubuntu
+	-sudo mkdir /home/ubuntu/mbros
+	sudo ln -sf $(FAME_ENGINE) $(MBROS_DIR)
+	@echo "Link succesfully created"
+
+# LOL why not do it inside the CMakeList.txt file ?
 setup_husky_launch:
 	cp $(PFE)/husky_ws/gazebo_cats.launch.py ~/husky_ws/husky/husky_gazebo/launch
 
@@ -734,6 +728,7 @@ clear_$1:
 	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
 endef
 
+## only clear macro # deprecated/old
 # $(eval $(call clear_package_ros,ros2_shared,$(ROS2_SHARED)))
 # $(eval $(call clear_package_ros,tello_msgs,$(TELLO_MSGS)))
 # $(eval $(call clear_package_ros,FaMe,$(FAME)))
@@ -779,48 +774,6 @@ setup_models_FaMe_agri:
 	mkdir -p $(GZ_MODEL_DIR)
 	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
 
-# install_FaMe_engine:
-# # 	sudo apt update
-# # 	sudo apt install ros-foxy-rmw-cyclonedds-cpp -y
-# 	sudo mkdir -p $(MBROS_DIR)
-# 	sudo ln -sf $(FAME_ENGINE)/process $(MBROS_DIR)
-# # 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# # 		cd $(FAME_ENGINE) && nvm install 12 && nvm use 12
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16
-# 	cd $(FAME_ENGINE) && rm -rf node_modules package-lock.json
-
-# # 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# # 		cd $(FAME_ENGINE) && nvm install 12 && nvm use 12 && \
-# # 		cd $(FAME_ENGINE) && npm install
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16 && \
-# 		cd $(FAME_ENGINE) && npm install
-
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-# 		cd $(FAME_ENGINE) && colcon build
-	
-
-# 	cd $(FAME_ENGINE) && rm -rf node_modules package-lock.json
-
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-# 		cd $(FAME_ENGINE) && npm pkg set "dependencies.rclnodejs=^0.21.0"
-
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-# 		cd $(FAME_ENGINE) && npm install
-
-# 	cd $(FAME_ENGINE)/install/fame_engine/share/fame_engine && rm -rf node_modules/rclnodejs
-# 	cd $(FAME_ENGINE)/install/fame_engine/share/fame_engine && npm install rclnodejs@^0.21.0  
-
-# # 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-# # 		cd $(FAME_ENGINE) && npm i rclnodejs@^0.21.0  
-
-# 	@export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && nvm use 16 && \
-# 		cd $(FAME_ENGINE) && colcon build
-
-# # 	export NODE_OPTIONS="--unhandled-rejections=strict"
-# # 	ros2 launch fame_engine agri_engine.launch.py
-
 
 define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
 .PHONY: launch_$(1)
@@ -856,6 +809,8 @@ launch_$(1):
 	echo "ros2 launch $(2)" ; ros2 launch $(2) 
 endef
 
+# launch cmd for ros package (cmd_name, shell cmd, nvm?, kill_all?, dependencies*, raw_source*, raw_set*)
+
 # TODO add : ros2 launch tello_gazebo tello_synchro_launch_cats_3.py # and similar
 
 $(eval $(call launch_pkg,FaMe_CATS,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,))
@@ -865,11 +820,11 @@ $(eval $(call launch_pkg,tello_controller,tello_nodes tello_control_node.launch.
 $(eval $(call launch_pkg,FaMe_tello,fame_engine tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
 $(eval $(call launch_pkg,FaMe_husky_tello,fame_engine husky_tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
 
-FaMe_engine_correct_env:
-	@echo "rm -rf $(FAME_ENGINE)/node_modules" ; rm -rf $(FAME_ENGINE)/node_modules ;
-
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 $(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
+
+FaMe_engine_correct_env:
+	@echo "rm -rf $(FAME_ENGINE)/node_modules" ; rm -rf $(FAME_ENGINE)/node_modules ;
 
 
 # Takes the first target as command
@@ -912,21 +867,6 @@ launch_FaMe:
 
 
 
-
-# #deprecated
-# launch_comportement:
-# 	@echo "be sure to have use 'make install_FaMe_engine' before using this command"
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm install --lts=gallium && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		ros2 launch fame_engine agri_engine.launch.py
-
-
 $(eval $(call launch_pkg,FaMe_simulation_multi,fame_simulation multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 # $(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 .ONESHELL: launch_comportement_agri
@@ -942,49 +882,7 @@ launch_comportement_agri:
 	wait $$PID_SIM $$PID_ENG
 	@echo "========== agri and engine DONE =========="
 
-# .ONESHELL: launch_comportement_agri
-# launch_comportement_agri:
-# 	make -i kill_all
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && source install/setup.bash && \
-# 		ros2 launch fame_agricultural multi_launch.py &
-# 	PID_SIM=$$!
-# 	sleep $(DELAY)
 
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && source install/setup.bash && \
-# 		ros2 launch fame_engine agri_engine.launch.py
-# 	PID_ENG=$$!
-# 	wait $$PID_SIM $$PID_ENG
-# 	@echo "======= agri and engine done ======="
-
-
-
-# launch_example_alone:
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		ros2 launch fame_engine example.launch.py 
-	
 setup_example: setup_tello_msgs setup_FaMe_engine setup_FaMe_simulation setup_FaMe_agricultural
 
 # $(eval $(call launch_pkg,FaMe_simulation_multi,fame_simulation multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
@@ -1001,79 +899,14 @@ launch_example:
 	@echo "======== simu and engine LAUNCHED ========"
 	wait $$PID_SIM $$PID_ENG
 	@echo "========== simu and engine DONE =========="
-# launch_example:
-# 	( make launch_FaMe_simulation_multi & ) ; \
-# 	sleep $(DELAY) ; \
-# 	@echo "============== END OF SLEEP ==============" ; \
-# 	( make launch_FaMe_engine_example & ) ; \
-# 	wait || true
-# 	@echo "======== simu and engine launched ========"
 
 
-
-# .ONESHELL: launch_example
-# launch_example:
-# 	make -i kill_all
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && source install/setup.bash && \
-# 		ros2 launch fame_simulation multi_launch.py &
-# 	PID_SIM=$$!
-# 	sleep $(DELAY)
-
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && source install/setup.bash && \
-# 		ros2 launch fame_engine example.launch.py
-# 	PID_ENG=$$!
-# 	wait $$PID_SIM $$PID_ENG
-# 	@echo "======= simu and engine done ======="
-
-launch_fame_modeler:
-	cd ./fame-modeler && npm start
+# launch_fame_modeler:
+# 	cd ./fame-modeler && npm start
 
 $(eval $(call setup_pkg,pfe_simulation_gazebo,$(PATH_TELLO_WS),$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_SIMU),nvm,)) # to check
 
-# setup_pfe_simulation_gazebo:
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && source install/setup.bash && \
-# 		cd $(PATH_TELLO_WS) && \
-# 		colcon build
-
 $(eval $(call launch_pkg,pfe_simulation_gazebo,tello_gazebo someaze.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU) $(PATH_TELLO_WS),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
-
-# launch_pfe_simulation_gazebo:
-# 	make -i kill_all
-# 	cd $(ROS2_SHARED) && source install/setup.bash && \
-# 		cd $(TELLO_MSGS) && source install/setup.bash && \
-# 		source /usr/share/gazebo/setup.bash && \
-# 		export NVM_DIR="$$HOME/.nvm" && . $$NVM_DIR/nvm.sh && \
-# 		cd $(FAME_ENGINE) && nvm use 16 && \
-# 		export NODE_OPTIONS="--unhandled-rejections=strict" && \
-# 		cd $(FAME_AGRI) && source install/setup.bash && \
-# 		cd $(FAME_ENGINE) && source install/setup.bash && \
-# 		cd $(FAME_SIMU) && source install/setup.bash && \
-# 		cd $(PATH_TELLO_WS) && source install/setup.bash && \
-# 		ros2 launch tello_gazebo someaze.py
 
 
 # /====================================\
