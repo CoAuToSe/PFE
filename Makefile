@@ -19,6 +19,7 @@ ROS2_SETUP=/opt/ros/$$ROS_DISTRO/setup.bash
 ROS2_SHARED := $(HOME_DIR)/ros2_shared
 TELLO_MSGS := $(HOME_DIR)/tello_msgs
 FAME := /home/dell/Documents/GitHub/my_FaMe
+FAME_MODELER := $(FAME)/fame-modeler
 # FAME := $(HOME_DIR)/fame
 FAME_AGRI := $(FAME)/fame_agricultural
 FAME_ENGINE := $(FAME)/fame_engine
@@ -278,6 +279,7 @@ install_discord_snap: install_snap
 	@sudo snap install discord
 	@echo "Discord installé avec Snap."
 
+#deprecated
 install_FaMe_modeler: update_source
 	@if [ ! -d "fame-modeler" ]; then 										\
 		git clone https://github.com/SaraPettinari/fame-modeler.git; 		\
@@ -685,6 +687,11 @@ setup_$(1):
 
 clear_$(1):
 	@cd $(2) && echo -n "[$(2)] " && $(call _clear_ros)
+	@if [ "$(6)" == "npm" ]; then 
+		echo "rm -rf $(2)/node_modules" ; rm -rf $(2)/node_modules;
+		echo "rm $(2)/package-lock.json" ; rm $(2)/package-lock.json;
+	fi;
+
 endef
 
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
@@ -701,10 +708,10 @@ setup_FaMe_link:
 	@echo "Link succesfully created"
 
 # symlink -> might not be working for some reasons, need to clear before setup # to be checked as it might be rectified
-$(eval $(call setup_pkg,FaMe,$(FAME),,nvm,build))
-$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),,nvm,))
-$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),nvm,build)) # symlink -> not working
-$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),nvm,build)) # to check
+$(eval $(call setup_pkg,FaMe,$(FAME),,,nvm,build))
+$(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),$(ROS2_SETUP),nvm,npm))
+$(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),,nvm,build)) # symlink -> not working
+$(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),,nvm,build)) # to check
 
 # setup_FaMe_simulation:
 # 	cd $(ROS2_SHARED) && source install/setup.bash && \
@@ -760,7 +767,7 @@ launch_gazebo_2004:
 # \====================================/
 
 launch_FaMe_modeler:
-	cd fame-modeler && . $$HOME/.nvm/nvm.sh && npm run start &
+	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && npm run start &
 
 clone_FaMe_deps:	  \
 	clone_ros2_shared \
@@ -855,9 +862,10 @@ $(eval $(call launch_pkg,FaMe_husky,fame_engine my_CATS.py,nvm,,$(FAME_ENGINE),,
 
 $(eval $(call launch_pkg,tello_controller,tello_nodes tello_control_node.launch.py,nvm,,$(PATH_TELLO_WS),,))
 $(eval $(call launch_pkg,FaMe_tello,fame_engine tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
+$(eval $(call launch_pkg,FaMe_husky_tello,fame_engine husky_tello.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE),,))
 
-FaMe_correct_env:
-	echo "rm -rf $(FAME_ENGINE)/node_modules/rclnodejs/generated" ; rm -rf $(FAME_ENGINE)/node_modules/rclnodejs/generated ;
+FaMe_engine_correct_env:
+	@echo "rm -rf $(FAME_ENGINE)/node_modules" ; rm -rf $(FAME_ENGINE)/node_modules ;
 
 $(eval $(call launch_pkg,FaMe_agricultural_multi,fame_agricultural multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 $(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
