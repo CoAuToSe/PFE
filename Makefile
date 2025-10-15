@@ -767,6 +767,7 @@ launch_gazebo_2004:
 # \====================================/
 
 launch_FaMe_modeler:
+	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && npm install
 	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && npm run start &
 
 clone_FaMe_deps:	  \
