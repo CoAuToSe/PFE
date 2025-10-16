@@ -47,6 +47,118 @@ PFE:=$(HOME)/PFE
 
 
 # /====================================\
+# |           Useful  Define           |
+# \====================================/
+
+
+define _clear_ros
+	if [ -d "build" ] && [ -d "install" ] && [ -d "log" ]; then 					\
+		echo "Tous les dossiers sont présents. Suppression..."; 					\
+		rm -rf "build" "install" "log"; 											\
+	else 																			\
+		echo "Un ou plusieurs dossiers sont manquants. Aucun dossier supprimé."; 	\
+	fi;	
+endef
+
+
+define from_git_clean
+.PHONY: clone_$1 clean_$1
+clone_$1:
+	@-if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
+	@-if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
+clean_$1: check_with_user
+	sudo rm -r $2
+endef
+
+
+define setup_pkg
+.PHONY: setup_$(1) clear_$(1)
+setup_$(1):
+	@if [ -n "$(5)" ]; then 
+		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
+		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
+			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
+		else 
+			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
+			exit 127; 
+		fi; 
+	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
+	fi; 
+	for rf in $(4); do 
+	  if [ -f "$$$$rf" ]; then 
+	    echo "source \"$$$$rf\""; . "$$$$rf"; 
+	  fi; 
+	done; 
+	for d in $(3); do 
+		if [ -f "$$$$d/install/setup.bash" ]; then 
+			echo "source \"$$$$d/install/setup.bash\"" ; . "$$$$d/install/setup.bash"; 
+		fi; 
+	done; 
+	echo "cd $(2)" ; cd $(2);
+
+	@if [ "$(6)" == "build" ]; then 
+		echo "colcon build" ; colcon build ;
+# 	elif [[ "$(6)" == "npm" ]]; then
+# 		echo "npm install" ; npm install ;
+# 		echo "colcon build" ; colcon build ;
+	else 
+		echo "colcon build --symlink-install" ; colcon build --symlink-install ;
+	fi;
+
+clear_$(1):
+	@cd $(2) && echo -n "[$(2)] " && $(call _clear_ros)
+	@if [ "$(6)" == "npm" ]; then 
+		echo "rm -rf $(2)/node_modules" ; rm -rf $(2)/node_modules;
+		echo "rm $(2)/package-lock.json" ; rm $(2)/package-lock.json;
+	fi;
+
+endef
+
+
+define clear_package_ros
+.PHONY: clear_$1
+clear_$1:
+	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
+endef
+
+
+
+define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
+.PHONY: launch_$(1)
+launch_$(1):
+	@if [ -n "$(4)" ]; then 
+		echo "make --ignore-errors kill_all"; make --ignore-errors kill_all;
+	fi;
+	if [ -n "$(3)" ]; then
+		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
+		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
+			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
+		else 
+			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
+			exit 127; 
+		fi;
+	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
+	fi; 
+	for d in $(5); do 
+		if [ -f "$$$$d/install/setup.bash" ]; then 
+			echo "source \"$$$$d/install/setup.bash\""; . "$$$$d/install/setup.bash"; 
+		fi; 
+	done; 
+	for rf in $(6); do 
+		if [ -f "$$$$rf" ]; then 
+			echo "source \"$$$$rf\""; . "$$$$rf"; 
+		fi; 
+	done; 
+	for var in $(7); do 
+		if [ -f "$$$$var" ]; then 
+			echo "export \"$$$$var\""; export "$$$$var"; 
+		fi; 
+	done; 
+	echo "ros2 launch $(2)" ; ros2 launch $(2) 
+endef
+
+
+# /====================================\
 # |            Useful Macro            |
 # \====================================/
 
@@ -285,14 +397,6 @@ sudg: sudo_update sudo_upgrade
 # |            Define Macro            |
 # \====================================/
 
-define _clear_ros
-	if [ -d "build" ] && [ -d "install" ] && [ -d "log" ]; then 					\
-		echo "Tous les dossiers sont présents. Suppression..."; 					\
-		rm -rf "build" "install" "log"; 											\
-	else 																			\
-		echo "Un ou plusieurs dossiers sont manquants. Aucun dossier supprimé."; 	\
-	fi;	
-endef
 
 define pip 
 	python3.10 -m pip 
@@ -676,15 +780,6 @@ print_supported_version:
 # |            package  deps           |
 # \====================================/
 
-define from_git_clean
-.PHONY: clone_$1 clean_$1
-clone_$1:
-	@-if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
-	@-if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
-clean_$1: check_with_user
-	sudo rm -r $2
-endef
-
 
 setup_with_git:				\
 	clone_ros2_shared		\
@@ -718,55 +813,6 @@ correct_git_clone:
 		echo "unsuported version : \"$(shell lsb_release -a)\"" 
 	fi
 
-define setup_pkg
-.PHONY: setup_$(1) clear_$(1)
-setup_$(1):
-	@if [ -n "$(5)" ]; then 
-		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
-		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
-			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
-		else 
-			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
-			exit 127; 
-		fi; 
-	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
-	fi; 
-	for rf in $(4); do 
-	  if [ -f "$$$$rf" ]; then 
-	    echo "source \"$$$$rf\""; . "$$$$rf"; 
-	  fi; 
-	done; 
-	for d in $(3); do 
-		if [ -f "$$$$d/install/setup.bash" ]; then 
-			echo "source \"$$$$d/install/setup.bash\"" ; . "$$$$d/install/setup.bash"; 
-		fi; 
-	done; 
-	echo "cd $(2)" ; cd $(2);
-
-	@if [ "$(6)" == "build" ]; then 
-		echo "colcon build" ; colcon build ;
-# 	elif [[ "$(6)" == "npm" ]]; then
-# 		echo "npm install" ; npm install ;
-# 		echo "colcon build" ; colcon build ;
-	else 
-		echo "colcon build --symlink-install" ; colcon build --symlink-install ;
-	fi;
-
-clear_$(1):
-	@cd $(2) && echo -n "[$(2)] " && $(call _clear_ros)
-	@if [ "$(6)" == "npm" ]; then 
-		echo "rm -rf $(2)/node_modules" ; rm -rf $(2)/node_modules;
-		echo "rm $(2)/package-lock.json" ; rm $(2)/package-lock.json;
-	fi;
-
-endef
-
-
-define clear_package_ros
-.PHONY: clear_$1
-clear_$1:
-	@cd $2 && echo -n "[$2] " && $(call _clear_ros)
-endef
 
 
 
@@ -801,41 +847,6 @@ clone_FaMe_deps:	  \
 setup_models_FaMe_agri:
 	mkdir -p $(GZ_MODEL_DIR)
 	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
-
-
-define launch_pkg # name_fn [param_launch_ros] [ros_packages] [literals_deps] bool bool
-.PHONY: launch_$(1)
-launch_$(1):
-	@if [ -n "$(4)" ]; then 
-		echo "make --ignore-errors kill_all"; make --ignore-errors kill_all;
-	fi;
-	if [ -n "$(3)" ]; then
-		echo "export NVM_DIR=\"$$$$HOME/.nvm\"" ; export NVM_DIR="$$$$HOME/.nvm"; 
-		if [ -f "$$$$HOME/.nvm/nvm.sh" ]; then 
-			echo "source \"$$$$HOME/.nvm/nvm.sh\"" ; . "$$$$HOME/.nvm/nvm.sh"; 
-		else 
-			echo "NVM introuvable (cherché: $$$$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
-			exit 127; 
-		fi;
-	  	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
-	fi; 
-	for d in $(5); do 
-		if [ -f "$$$$d/install/setup.bash" ]; then 
-			echo "source \"$$$$d/install/setup.bash\""; . "$$$$d/install/setup.bash"; 
-		fi; 
-	done; 
-	for rf in $(6); do 
-		if [ -f "$$$$rf" ]; then 
-			echo "source \"$$$$rf\""; . "$$$$rf"; 
-		fi; 
-	done; 
-	for var in $(7); do 
-		if [ -f "$$$$var" ]; then 
-			echo "export \"$$$$var\""; export "$$$$var"; 
-		fi; 
-	done; 
-	echo "ros2 launch $(2)" ; ros2 launch $(2) 
-endef
 
 
 # Takes the first target as command
