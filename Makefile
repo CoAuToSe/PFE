@@ -18,6 +18,8 @@ HOME_DIR := $(PWD)
 ROS2_SETUP=/opt/ros/$$ROS_DISTRO/setup.bash
 ROS2_SHARED := $(HOME_DIR)/ros2_shared
 TELLO_MSGS := $(HOME_DIR)/tello_msgs
+PATH_PFE:=$(HOME)/PFE
+PFE:=$(HOME)/PFE
 FAME := $(PFE)/my_FaMe
 FAME_MODELER := $(FAME)/fame-modeler
 # FAME := $(HOME_DIR)/fame
@@ -42,8 +44,6 @@ PATH_TELLO_WS=$(HOME)/Simulation_Gazebo/tello_ros_ws
 PATH_TELLO_WS_OLD=$(PFE)/Simulation_Gazebo_old/tello_ros_ws
 PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
 
-PATH_PFE:=$(HOME)/PFE
-PFE:=$(HOME)/PFE
 
 
 # /====================================\
