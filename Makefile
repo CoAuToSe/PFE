@@ -1026,7 +1026,7 @@ $(eval $(call github,husky,$(HOME)/husky_ws/,${PATH_PFE}/husky_ws))
 $(eval $(call github,clearpath,$(HOME)/clearpath/,${PATH_PFE}/clearpath))
 $(eval $(call github,clearpath_ws,$(HOME)/clearpath_ws/,${PATH_PFE}/clearpath_ws))
 $(eval $(call github,tello_msgs_own,$(TELLO_MSGS)/,${PATH_PFE}/tello_msgs))
-$(eval $(call github,my_FaMe,/home/dell/Documents/GitHub/my_FaMe/,${PATH_PFE}/my_FaMe))
+$(eval $(call github,my_FaMe,$(FAME),${PATH_PFE}/my_FaMe))
 # $(eval $(call github,,,))
 
 copy_to_my_FaMe_makefile:
