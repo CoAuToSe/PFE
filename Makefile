@@ -1,4 +1,7 @@
 SHELL := /bin/bash
+.DEFAULT_GOAL := git_init_PFE
+.PHONY: default
+default: git_init_PFE ;
 
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
@@ -13,7 +16,7 @@ SHELL := /bin/bash
 PFE:=$(HOME)/PFE
 PATH_PFE:=$(PFE)
 
-.PHONY: git_init_PFE
+.PHONY: git_init_PFE clean_PFE
 git_init_PFE:
 	@-if [ -d $(PFE) ] ; then \
 		echo "git clone https://github.com/CoAuToSe/PFE $(PFE)" && \
