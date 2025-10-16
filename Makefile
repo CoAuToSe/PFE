@@ -47,7 +47,7 @@ PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
 
 
 # /====================================\
-# |           Useful  Define           |
+# |           Useful Defines           |
 # \====================================/
 
 
@@ -65,7 +65,8 @@ define from_git_clean
 .PHONY: clone_$1 clean_$1
 clone_$1:
 	@-if [ ! -f $2 ] ; then echo "mkdir -p $2";  mkdir -p $2 ; fi
-	@-if [ -d $2 ] ; then echo -n "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
+	@-if [ -d $2 ] ; then echo "git clone $3 $2 -b $4" && git clone $3 $2 -b $4 ; fi
+	cd $(PFE) && git submodule update --init --recursive
 clean_$1: check_with_user
 	sudo rm -r $2
 endef
@@ -1043,5 +1044,11 @@ $(eval $(call github,my_FaMe,$(FAME),${PATH_PFE}/my_FaMe))
 copy_to_my_FaMe_makefile:
 	sudo install -m 0644 "$(PFE)/Makefile" "$(FAME)/Makefile";
 
+.PHONY: git_init_PFE
+git_init_PFE:
+	@-if [ -d $(PFE) ] ; then echo "git clone https://github.com/CoAuToSe/PFE $(PFE)" && git clone https://github.com/CoAuToSe/PFE $(PFE) ; fi
+	@echo "cd $(PFE) && git submodule update --init --recursive" && \
+		cd $(PFE) && git submodule update --init --recursive
 
-
+clean_PFE: check_with_user
+	sudo rm -r $(PFE)
