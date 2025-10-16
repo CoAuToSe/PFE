@@ -10,6 +10,20 @@ SHELL := /bin/bash
 	@echo "command unknown"
 	@:
 
+PFE:=$(HOME)/PFE
+PATH_PFE:=$(PFE)
+
+.PHONY: git_init_PFE
+git_init_PFE:
+	@-if [ -d $(PFE) ] ; then \
+		echo "git clone https://github.com/CoAuToSe/PFE $(PFE)" && \
+		git clone https://github.com/CoAuToSe/PFE $(PFE) ; 
+	fi;
+	@echo "cd $(PFE) && git submodule update --init --recursive" && \
+		cd $(PFE) && git submodule update --init --recursive
+
+clean_PFE: check_with_user
+	sudo rm -r $(PFE)
 
 # /====================================\
 # |          Paths & Variables         |
@@ -19,8 +33,6 @@ HOME_DIR := $(PWD)
 ROS2_SETUP=/opt/ros/$$ROS_DISTRO/setup.bash
 ROS2_SHARED := $(HOME_DIR)/ros2_shared
 TELLO_MSGS := $(HOME_DIR)/tello_msgs
-PATH_PFE:=$(HOME)/PFE
-PFE:=$(HOME)/PFE
 FAME := $(PFE)/my_FaMe
 FAME_MODELER := $(FAME)/fame-modeler
 # FAME := $(HOME_DIR)/fame
@@ -1049,12 +1061,3 @@ $(eval $(call github,my_FaMe,$(FAME),${PATH_PFE}/my_FaMe))
 
 copy_to_my_FaMe_makefile:
 	sudo install -m 0644 "$(PFE)/Makefile" "$(FAME)/Makefile";
-
-.PHONY: git_init_PFE
-git_init_PFE:
-	@-if [ -d $(PFE) ] ; then echo "git clone https://github.com/CoAuToSe/PFE $(PFE)" && git clone https://github.com/CoAuToSe/PFE $(PFE) ; fi
-	@echo "cd $(PFE) && git submodule update --init --recursive" && \
-		cd $(PFE) && git submodule update --init --recursive
-
-clean_PFE: check_with_user
-	sudo rm -r $(PFE)
