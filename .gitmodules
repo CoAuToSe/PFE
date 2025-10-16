@@ -1,0 +1,3 @@
+[submodule "my_FaMe"]
+	path = my_FaMe
+	url = https://github.com/CoAuToSe/my_FaMe
