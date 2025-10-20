@@ -9,11 +9,7 @@
                 "folderUri": "file:///home/dell"
             }
         ],
-        "emptyWindows": [
-            {
-                "backupFolder": "1757938796783"
-            }
-        ]
+        "emptyWindows": []
     },
     "windowControlHeight": 35,
     "profileAssociations": {
@@ -23,9 +19,7 @@
             "file:///home/dell/PFE": "__default__profile__",
             "file:///home/dell/Downloads/model": "__default__profile__"
         },
-        "emptyWindows": {
-            "1757938796783": "__default__profile__"
-        }
+        "emptyWindows": {}
     },
     "theme": "vs-dark",
     "themeBackground": "#1e1e1e",
@@ -61,7 +55,7 @@
                 "mode": 0,
                 "x": 66,
                 "y": 32,
-                "width": 1854,
+                "width": 927,
                 "height": 1048
             }
         },

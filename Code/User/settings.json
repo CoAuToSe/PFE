@@ -10,5 +10,12 @@
     "files.autoSave": "onFocusChange",
     "python.defaultInterpreterPath": "/bin/python3",
     "editor.multiCursorModifier": "ctrlCmd",
-    "editor.largeFileOptimizations": false
+    "editor.largeFileOptimizations": false,
+    "redhat.telemetry.enabled": false,
+    "[xml]": {
+        "editor.defaultFormatter": "mikeburgh.xml-format"
+    },
+    "editor.fontFamily": "'Cascadia Code', 'Cascadia Mono'",
+    "terminal.integrated.fontLigatures.enabled": true,
+    "editor.fontLigatures": true
 }
