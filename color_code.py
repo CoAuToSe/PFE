@@ -25,7 +25,7 @@ publisher.publish({
 });"""
 
 # Settings
-style_name = "default"     # Pygments style
+style_name = "vs"     # Pygments style ("default" possible)
 font_name = "Cascadia code"     # Monospace font name (PowerPoint side)
 font_size_pt = 17          # Font size
 dark_bg = False             # Dark background for slide
