@@ -49,10 +49,10 @@ HUSKY := $(HUSKY_WS)/husky
 SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
 
 
-MBROS_DIR      := /home/ubuntu/mbros/fame_engine
-NVM_SCRIPT     := $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
-NODE_VERSION   := 16                          # LTS Gallium (ABI 93)
-NPM_VERSION := 16
+MBROS_DIR		:= /home/ubuntu/mbros/fame_engine
+NVM_SCRIPT		:= $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
+NODE_VERSION	:= 16                          # LTS Gallium (ABI 93)
+NPM_VERSION 	:= 16
 
 DELAY ?= 20
 
@@ -858,8 +858,50 @@ launch_gazebo_2004:
 # \====================================/
 
 launch_FaMe_modeler:
-	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && npm install
-	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && npm run start &
+	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && nvm use && npm install
+	cd $(FAME_MODELER) && . $$HOME/.nvm/nvm.sh && nvm use && npm run start &
+
+upgrade_linux_for_FaMe-modeler:
+	# Dans le dossier du projet
+	cd /home/dell/PFE/my_FaMe/fame-modeler
+
+	# Charger nvm
+	. $$HOME/.nvm/nvm.sh
+
+	# Installer et utiliser Node 20 (suffit pour toutes les dépendances qui demandent >=18.12)
+	nvm install 20
+	nvm use 20
+
+	# (facultatif) fige le projet sur Node 20 via .nvmrc
+	echo "20" > .nvmrc
+
+	# Nettoyer et réinstaller les dépendances avec le bon Node
+	rm -rf node_modules package-lock.json
+	npm install
+
+
+#	 Vérifier les valeurs actuelles (juste pour info)
+	cat /proc/sys/fs/inotify/max_user_watches
+	cat /proc/sys/fs/inotify/max_user_instances
+	cat /proc/sys/fs/inotify/max_queued_events
+
+#	 Monter les limites de manière persistante
+	echo fs.inotify.max_user_watches=1048576 | sudo tee -a /etc/sysctl.conf
+	echo fs.inotify.max_user_instances=2048   | sudo tee -a /etc/sysctl.conf
+	echo fs.inotify.max_queued_events=32768   | sudo tee -a /etc/sysctl.conf
+
+#	 Appliquer
+	sudo sysctl -p
+
+# 	sudo docker run -d --name mongo -p 27017:27017 -v $$HOME/mongo-data:/data/db mongo:7 &
+
+#	 link pour lib
+	cd /home/dell/PFE/my_FaMe/fame-modeler && \
+	[ -e lib ] || ln -s ./fame-modeler/src lib && \
+	npm run start
+
+
+
 
 clone_FaMe_deps:	  \
 	clone_ros2_shared \
