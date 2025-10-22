@@ -51,8 +51,8 @@ SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
 
 MBROS_DIR		:= /home/ubuntu/mbros/fame_engine
 NVM_SCRIPT		:= $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
-NODE_VERSION	:= 16                          # LTS Gallium (ABI 93)
-NPM_VERSION 	:= 16
+NODE_VERSION	:= 20                          # LTS Gallium (ABI 93)
+NPM_VERSION 	:= 20
 
 DELAY ?= 20
 
