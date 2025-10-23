@@ -46,7 +46,7 @@ GZ_MODEL_DIR := $(HOME_DIR)/.gazebo/models # might need to be $(HOME) and not $(
 MBROS_DIR := /home/ubuntu/mbros/fame_engine/process
 HUSKY_WS := $(HOME)/husky_ws
 HUSKY := $(HUSKY_WS)/husky
-SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws
+SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws # deprecated
 
 
 MBROS_DIR		:= /home/ubuntu/mbros/fame_engine
@@ -190,7 +190,7 @@ $(eval $(call from_git_clean,husky_2004,$(HUSKY),https://github.com/husky/husky.
 $(eval $(call setup_pkg,ros2_shared,$(ROS2_SHARED),,,,))
 $(eval $(call setup_pkg,tello_msgs,$(TELLO_MSGS),$(ROS2_SHARED),$(ROS2_SETUP),nvm,))
 
-$(eval $(call setup_pkg,husky,$(HUSKY),$(SIMU_GAZEBO),,,))
+$(eval $(call setup_pkg,husky,$(HUSKY),$(PATH_TELLO_WS),,,))
 
 $(eval $(call setup_pkg,tello,$(PATH_TELLO_WS),,,nvm,))
 
@@ -706,6 +706,7 @@ setup_bashrc:
 # Add some custom information into ~/.bashrc
 	grep -qxF "# Custom commands" $$HOME/.bashrc || ( 																					\
 		echo "" >> $$HOME/.bashrc && 																									\
+		echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> $$HOME/.bashrc && 														\
 		echo "# Custom commands" >> $$HOME/.bashrc && 																					\
 		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && 										\
 		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && 				\
@@ -810,6 +811,7 @@ setup_with_git:				\
 	clone_husky_2004		\
 	correct_git_clone
 
+#TODO : install parkages during ros setup
 correct_git_clone:
 	@if [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "24.04" ] ; then
 # 		echo "curent version is Ubuntu 24.04" 
