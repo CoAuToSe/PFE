@@ -24,6 +24,7 @@ git_init_PFE:
 	fi;
 	@echo "cd $(PFE) && git submodule update --init --recursive" && \
 		cd $(PFE) && git submodule update --init --recursive
+	make apt_install
 
 clean_PFE: check_with_user
 	sudo rm -r $(PFE)
@@ -66,6 +67,22 @@ PATH_TELLO_WS_SW=$(PFE)/Simulation_Gazebo_SW/tello_ros_ws
 # |           Useful Defines           |
 # \====================================/
 
+.PHONY: sudo_update sud sudo_upgrade sug sudg
+
+define install
+	sudo apt install -y
+endef
+define update
+	sudo apt update
+endef
+define upgrade
+	sudo apt upgrade -y
+endef
+
+define update_upgrade
+	sudo apt update
+	sudo apt upgrade -y
+endef
 
 define _clear_ros
 	if [ -d "build" ] && [ -d "install" ] && [ -d "log" ]; then 					\
@@ -254,6 +271,48 @@ $(eval $(call setup_pkg,pfe_simulation_gazebo,$(PATH_TELLO_WS),$(ROS2_SHARED) $(
 $(eval $(call launch_pkg,pfe_simulation_gazebo,tello_gazebo someaze.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU) $(PATH_TELLO_WS),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 
 # /====================================\
+# |           bashrc & params          |
+# \====================================/
+
+
+.PHONY: setup_bashrc
+.ONESHELL:setup_bashrc
+setup_bashrc:
+	@set -e
+	BRC="$$HOME/.bashrc"
+#	 Sauvegarde une fois
+	[ -f "$$BRC.bak" ] || cp "$$BRC" "$$BRC.bak"
+#	 Retire l'ancien bloc (s'il existe)
+	sed -i '/^# >>> CATS Custom commands >>>/,/^# <<< CATS Custom commands <<</d' "$$BRC"
+#	 Ajoute le nouveau bloc
+	cat >> "$$BRC" <<'EOF'
+
+	# >>> CATS Custom commands >>>
+
+	# ROS 2 Jazzy
+	source /opt/ros/$$ROS_DISTRO/setup.bash
+
+	# Custom commands
+	alias ros-build="colcon build && source install/setup.bash"
+	alias ros-build-sym="colcon build --symlink-install && source install/setup.bash"
+	alias ros-build-sym-ver='colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash'
+	alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select "$$1" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -f temp; }; temp'
+	alias ros-sc="source install/setup.bash"
+	alias sc-ros="source install/setup.bash"
+	alias bash-sc="source ~/.bashrc"
+	alias my-sc="source ${TELLO_MSGS}/install/setup.bash && source ${ROS2_SHARED}/install/setup.bash"
+
+	this-sc() {
+	    cd "$$1" && source install/setup.bash && cd - >/dev/null 2>&1
+	}
+
+	# <<< CATS Custom commands <<<
+	EOF
+	@echo "✔ Bloc 'Custom commands' mis à jour dans $$HOME/.bashrc"
+
+
+
+# /====================================\
 # |            Random Macro            |
 # \====================================/
 
@@ -287,18 +346,133 @@ setup_2404:						\
 	install_software
 	@echo "After clonning you need to execute 'make copy_from_github'"
 
-setup_deps:
-	echo "WIP"
 
-setup_deps_24_04:
+apt_install: 
+	@if [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "24.04" ] ; then
+		$(MAKE) apt_install_24.04
+	elif [ "$(shell lsb_release -is)" = "Ubuntu" ] & [ "$(shell lsb_release -rs)" = "20.04" ] ; then
+		$(MAKE) apt_install_20.04
+	else 
+		echo "Unsuported OS version : \"$(shell lsb_release -a)\"" 
+		echo "You may try to install the packages yourself or adapt the Makefile" 
+	fi
+
+apt_install_20.04: 
 	${update}
+	${upgrade}
+
+#	 add sources
+	${install} curl
+#	 Gazebo Classic
+	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+#	 ROS2 Foxy
+	sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $$(. /etc/os-release && echo $$UBUNTU_CODENAME) main" | \
+		sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
 	${install} \
-		ros-$$ROS_DISTRO-rclcpp-components \
-		ros-$$ROS_DISTRO-cv-bridge \
-		ros-$$ROS_DISTRO-image-transport \
-		ros-$$ROS_DISTRO-camera-info-manager \
 		libopencv-dev \
-		libasio-dev
+		libasio-dev \
+		snapd \
+		code \
+		libasio-dev \
+		lsb-release \
+		gnupg \
+		gz-harmonic \
+		gdebi-core \
+		locales \
+		python3-argcomplete \
+		software-properties-common \
+		ros-foxy-desktop \
+		ros-foxy-rclcpp-components \
+		ros-foxy-cv-bridge \
+		ros-foxy-image-transport \
+		ros-foxy-camera-info-manager \
+		ros-foxy-camera-calibration-parsers \
+		ros-foxy-camera-info-manager \
+		ros-foxy-image-transport \
+		ros-foxy-rclcpp-components \
+		ros-foxy-joy \
+		ros-foxy-rclcpp-components \
+		ros-foxy-cv-bridge \
+		ros-foxy-image-transport \
+		ros-foxy-gazebo-ros-pkgs \
+		ros-foxy-camera-info-manager \
+		ros-foxy-sensor-msgs \
+		ros-foxy-geometry-msgs \
+		ros-foxy-ros-gz \
+		ros-foxy-robot-localization \
+		ros-foxy-ros2-control \
+		ros-foxy-ros2-controllers \
+		ros-foxy-controller-interface \
+		ros-foxy-ros2-control \
+		ros-foxy-xacro \
+		ros-foxy-nav2-bringup \
+		ros-foxy-twist-mux \
+		ros-foxy-interactive-marker-twist-server \
+		ros-foxy-interactive-markers \
+		ros-dev-tools
+	make setup_bashrc
+
+
+apt_install_24.04: 
+	${update}
+	${upgrade}
+
+#	 add sources
+	${install} curl
+#	 Gazebo Harmonic
+	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+#	 ROS2 Jazzy
+	export ROS_APT_SOURCE_VERSION=$$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}') && \
+	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/$${ROS_APT_SOURCE_VERSION}/ros2-apt-source_$${ROS_APT_SOURCE_VERSION}.$$(. /etc/os-release && echo $$VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $$UBUNTU_CODENAME
+#	 Husky A300
+	sudo echo "deb https://packages.clearpathrobotics.com/stable/ubuntu $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/clearpath-latest.list > /dev/null
+
+	${install} \
+		libopencv-dev \
+		libasio-dev \
+		snapd \
+		code \
+		libasio-dev \
+		lsb-release \
+		gnupg \
+		gz-harmonic \
+		gdebi-core \
+		locales \
+		python3-argcomplete \
+		software-properties-common \
+		ros-jazzy-desktop \
+		ros-jazzy-rclcpp-components \
+		ros-jazzy-cv-bridge \
+		ros-jazzy-image-transport \
+		ros-jazzy-camera-info-manager \
+		ros-jazzy-camera-calibration-parsers \
+		ros-jazzy-camera-info-manager \
+		ros-jazzy-image-transport \
+		ros-jazzy-rclcpp-components \
+		ros-jazzy-joy \
+		ros-jazzy-rclcpp-components \
+		ros-jazzy-cv-bridge \
+		ros-jazzy-image-transport \
+		ros-jazzy-camera-info-manager \
+		ros-jazzy-sensor-msgs \
+		ros-jazzy-geometry-msgs \
+		ros-jazzy-ros-gz \
+		ros-jazzy-robot-localization \
+		ros-jazzy-ros2-control \
+		ros-jazzy-ros2-controllers \
+		ros-jazzy-controller-interface \
+		ros-jazzy-ros2-control \
+		ros-jazzy-xacro \
+		ros-jazzy-nav2-bringup \
+		ros-jazzy-twist-mux \
+		ros-jazzy-interactive-marker-twist-server \
+		ros-jazzy-interactive-markers \
+		ros-dev-tools
+	make setup_bashrc
 
 
 # /====================================\
@@ -379,23 +553,6 @@ install_dependencies:	\
 # /====================================\
 # |           Install macros           |
 # \====================================/
-
-.PHONY: sudo_update sud sudo_upgrade sug sudg
-
-define install
-	sudo apt install -y
-endef
-define update
-	sudo apt update
-endef
-define upgrade
-	sudo apt upgrade -y
-endef
-
-define update_upgrade
-	sudo apt update
-	sudo apt upgrade -y
-endef
 
 update_upgrade:
 	$(update_upgrade)
@@ -654,30 +811,6 @@ install_gazebo_2404:
 	$(update)
 	$(install) gz-harmonic ros-jazzy-ros-gz
 
-.PHONY: install_gazebo_2404_bis
-install_gazebo_2404_bis: i_curl i_lsb-release i_gnupg i_gz-harmonic i_ros-jazzy-ros-gz
-	sudo apt-get update
-# 	sudo apt-get install curl lsb-release gnupg
-
-	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-	sudo apt-get update
-# 	sudo apt-get install gz-harmonic
-
-# 	sudo apt-get install ros-jazzy-ros-gz
-
-.PHONY: install_gazebo_2404_ter
-install_gazebo_2404_ter: 
-	sudo apt-get update
-	sudo apt-get install curl lsb-release gnupg
-
-	sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-	echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-	sudo apt-get update
-	sudo apt-get install gz-harmonic
-
-	sudo apt-get install ros-jazzy-ros-gz
-
 install_github_desktop_2404:
 	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
 		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
@@ -686,77 +819,10 @@ install_github_desktop_2404:
 	$(install) gdebi-core -y
 	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
 	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
-	$(install) -f
-# 	sudo apt-mark hold github-desktop
-
-install_github_desktop_2404_bis: i_gdebi-core
-	if [ ! -f "$(PWD)/GitHubDesktop-linux-3.1.1-linux1.deb" ]; then \
-		wget https://github.com/shiftkey/desktop/releases/download/release-3.1.1-linux1/GitHubDesktop-linux-3.1.1-linux1.deb;
-	fi
-	sudo apt-get update
-# 	sudo apt-get install gdebi-core -y
-	sudo gdebi GitHubDesktop-linux-3.1.1-linux1.deb -y
-	sudo dpkg -i GitHubDesktop-linux-3.1.1-linux1.deb 
+#	 what is that supposed to do ?
 	sudo apt-get install -f -y
+# 	$(install) -f
 # 	sudo apt-mark hold github-desktop
-
-# /====================================\
-# |           bashrc & params          |
-# \====================================/
-
-setup_bashrc:
-# Add some custom information into ~/.bashrc
-	grep -qxF "# Custom commands" $$HOME/.bashrc || ( 																					\
-		echo "" >> $$HOME/.bashrc && 																									\
-		echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> $$HOME/.bashrc && 														\
-		echo "# Custom commands" >> $$HOME/.bashrc && 																					\
-		echo "alias ros-build=\"colcon build && source install/setup.bash\"" >> $$HOME/.bashrc && 										\
-		echo "alias ros-build-sym=\"colcon build --symlink-install && source install/setup.bash\"" >> $$HOME/.bashrc && 				\
-		echo "alias ros-build-sym-ver="colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash\"" >> $$HOME/.bashrc && \
-		echo "alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select \"\$1\" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -temp temp; }; temp'\"" >> $$HOME/.bashrc && \
-		echo "alias ros-sc=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
-		echo "alias sc-ros=\"source install/setup.bash\"" >> $$HOME/.bashrc && 															\
-		echo "alias bash-sc=\"source ~/.bashrc\"" >> $$HOME/.bashrc && 																	\
-		echo "alias my-sc=\"source $(TELLO_MSGS)/install/setup.bash && source $(ROS2_SHARED)/install/setup.bash\"" >> $$HOME/.bashrc && \
-		echo "" >> $$HOME/.bashrc && 																									\
-		echo "this-sc\(\) {" >> $$HOME/.bashrc && 																						\
-		echo "    cd \"$1\" && source install/setup.bash && cd -> /dev/null 2>&1 " >> $$HOME/.bashrc && 								\
-		echo "}" >> $$HOME/.bashrc && 																									\
-		echo "" >> $$HOME/.bashrc 																										
-	)
-
-.PHONY: setup_bashrc_GPT
-.ONESHELL:setup_bashrc_GPT
-setup_bashrc_GPT:
-	set -e
-	BRC="$$HOME/.bashrc"
-	# Sauvegarde une fois
-	[ -f "$$BRC.bak" ] || cp "$$BRC" "$$BRC.bak"
-	# Retire l'ancien bloc (s'il existe)
-	sed -i '/^# >>> CATS Custom commands >>>/,/^# <<< CATS Custom commands <<</d' "$$BRC"
-	# Ajoute le nouveau bloc
-	cat >> "$$BRC" <<'EOF'
-
-	# >>> CATS Custom commands >>>
-
-	# Custom commands
-	alias ros-build="colcon build && source install/setup.bash"
-	alias ros-build-sym="colcon build --symlink-install && source install/setup.bash"
-	alias ros-build-sym-ver='colcon build --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash'
-	alias ros-build-sym-pac-ver='temp(){ colcon build --packages-select "$1" --symlink-install --event-handlers console_cohesion+ --cmake-args -DCMAKE_VERBOSE_MAKEFILE=ON && source install/setup.bash; unset -f temp; }; temp'
-	alias ros-sc="source install/setup.bash"
-	alias sc-ros="source install/setup.bash"
-	alias bash-sc="source ~/.bashrc"
-	alias my-sc="source ${TELLO_MSGS}/install/setup.bash && source ${ROS2_SHARED}/install/setup.bash"
-
-	this-sc() {
-	    cd "$1" && source install/setup.bash && cd - >/dev/null 2>&1
-	}
-
-	# <<< CATS Custom commands <<<
-	EOF
-	@echo "✔ Bloc 'Custom commands' mis à jour dans $$HOME/.bashrc"
-
 
 
 # /====================================\
@@ -915,47 +981,6 @@ clone_FaMe_deps:	  \
 setup_models_FaMe_agri:
 	mkdir -p $(GZ_MODEL_DIR)
 	cp -R $(FAME_AGRI)/models/* $(GZ_MODEL_DIR)
-
-
-# Takes the first target as command
-Command := $(firstword $(MAKECMDGOALS))
-# Skips the first word
-Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-
-# hello:
-# 	@echo "Hello, ${Arguments}!"
-arg_command := fame_engine my_CATS.py ${Arguments}
-arg_deps := $(FAME_ENGINE) $(FAME_AGRI)
-arg_deps2 := /usr/share/gazebo/setup.bash
-arg_export := NODE_OPTIONS="--unhandled-rejections=strict"
-launch_FaMe:
-# 	$(eval $(call launch_pkg,FaMe_macro,fame_engine my_CATS.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
-	echo "export NVM_DIR=\"$$HOME/.nvm\"" ; export NVM_DIR="$$HOME/.nvm"; 
-	if [ -f "$$HOME/.nvm/nvm.sh" ]; then 
-		echo "source \"$$HOME/.nvm/nvm.sh\"" ; . "$$HOME/.nvm/nvm.sh"; 
-	else 
-		echo "NVM introuvable (cherché: $$HOME/.nvm/nvm.sh). Installe NVM puis relance." >&2; 
-		exit 127; 
-	fi;
-	echo "nvm use $(NODE_VERSION)" ; nvm use $(NODE_VERSION); 
-	for d in ${arg_deps}; do 
-	  if [ -f "$$d/install/setup.bash" ]; then 
-	    echo "source \"$$d/install/setup.bash\""; . "$$d/install/setup.bash"; 
-	  fi; 
-	done; 
-	for rf in ${arg_deps2}; do 
-	  if [ -f "$$rf" ]; then 
-	    echo "source \"$$rf\""; . "$$rf"; 
-	  fi; 
-	done; 
-	for var in ${arg_export}; do 
-	  if [ -f "$$var" ]; then 
-	    echo "export \"$$var\""; export "$$var"; 
-	  fi; 
-	done; 
-	echo "ros2 launch ${arg_command}" ; ros2 launch ${arg_command} 
-
-
 
 # $(eval $(call launch_pkg,FaMe_simulation_multi,fame_simulation multi_launch.py,nvm,kill,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
 # # $(eval $(call launch_pkg,FaMe_engine_agri,fame_engine agri_engine.launch.py,nvm,,$(ROS2_SHARED) $(TELLO_MSGS) $(FAME_ENGINE) $(FAME_AGRI) $(FAME_SIMU),/usr/share/gazebo/setup.bash,NODE_OPTIONS="--unhandled-rejections=strict"))
