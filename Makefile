@@ -34,8 +34,8 @@ clean_PFE: check_with_user
 
 HOME_DIR := $(PWD)
 ROS2_SETUP=/opt/ros/$$ROS_DISTRO/setup.bash
-ROS2_SHARED := $(HOME_DIR)/ros2_shared
-TELLO_MSGS := $(HOME_DIR)/tello_msgs
+ROS2_SHARED := $(PFE)/ros2_shared
+TELLO_MSGS := $(PFE)/tello_msgs
 FAME := $(PFE)/my_FaMe
 FAME_MODELER := $(FAME)/fame-modeler
 # FAME := $(HOME_DIR)/fame
@@ -51,8 +51,8 @@ SIMU_GAZEBO := ~/Simulation_Gazebo/tello_ros_ws # deprecated
 
 MBROS_DIR		:= /home/ubuntu/mbros/fame_engine
 NVM_SCRIPT		:= $$HOME/.nvm/nvm.sh          # ≠ variable d’env. de nvm
-NODE_VERSION	:= 20                          # LTS Gallium (ABI 93)
-NPM_VERSION 	:= 20
+NODE_VERSION	:= 16                          # LTS Gallium (ABI 93)
+NPM_VERSION 	:= 16
 
 DELAY ?= 20
 
@@ -197,7 +197,9 @@ $(eval $(call setup_pkg,tello,$(PATH_TELLO_WS),,,nvm,))
 
 # symlink -> might not be working for some reasons, need to clear before setup # to be checked as it might be rectified
 $(eval $(call setup_pkg,FaMe,$(FAME),,,nvm,build))
+
 $(eval $(call setup_pkg,FaMe_engine,$(FAME_ENGINE),$(ROS2_SHARED) $(TELLO_MSGS),$(ROS2_SETUP),nvm,npm))
+
 $(eval $(call setup_pkg,FaMe_agricultural,$(FAME_AGRI),$(FAME_ENGINE),,nvm,build)) # symlink -> not working
 $(eval $(call setup_pkg,FaMe_simulation,$(FAME_SIMU),$(FAME_ENGINE),,nvm,build)) # to check
 

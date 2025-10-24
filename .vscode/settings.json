@@ -74,5 +74,6 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/dell/PFE/ros2_shared"
 }

@@ -2,7 +2,7 @@ import socket
 import time
 
 # Adresse et port du drone (en mode Wi-Fi direct)
-TELLO_IP = "192.168.10.1"
+TELLO_IP = "192.168.50.103"
 TELLO_PORT = 8889
 
 # SSID et mot de passe de ton routeur
