@@ -2,6 +2,8 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := git_init_PFE
 .PHONY: default
 default: git_init_PFE ;
+all: git_init_PFE ;
+install: apt_install ;
 
 .PHONY: all install_all install_terminator install_vscode_2004 correct_vscode_2004 install_ros2_foxy install_gazebo_2004 install_python_3_10 \
         test_ros2 test_gazebo versions install_FaMe_modeler run_FaMe_modeler install_nvm install_node install_cmake \
@@ -316,8 +318,12 @@ setup_bashrc:
 # |            Random Macro            |
 # \====================================/
 
-# Default target
-all: min_install_2004
+.PHONY: list
+list:
+	@LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
+# IMPORTANT: The line above must be indented by (at least one) 
+#            *actual TAB character* - *spaces* do *not* work.
+
 
 # meh
 clean:
@@ -429,7 +435,7 @@ apt_install_24.04:
 	export ROS_APT_SOURCE_VERSION=$$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}') && \
 	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/$${ROS_APT_SOURCE_VERSION}/ros2-apt-source_$${ROS_APT_SOURCE_VERSION}.$$(. /etc/os-release && echo $$VERSION_CODENAME)_all.deb" # If using Ubuntu derivates use $$UBUNTU_CODENAME
 #	 Husky A300
-	sudo echo "deb https://packages.clearpathrobotics.com/stable/ubuntu $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/clearpath-latest.list > /dev/null
+	sudo echo "deb [arch=$$(dpkg --print-architecture)] https://packages.clearpathrobotics.com/stable/ubuntu $$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/clearpath-latest.list > /dev/null
 
 	${install} \
 		libopencv-dev \
