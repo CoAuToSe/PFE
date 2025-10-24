@@ -100,8 +100,12 @@ make setup_husky
 ### Launch example
 
 ```bash
-make FaMe_husky
+make launch_FaMe_husky
 ```
+
+### Reinstalling the OS for the Husky A300
+
+if there is any issue with the Husky A300 that need to reinstall the OS of the Husky, refer to this file [InstallHuskyA300.md](../PFE/InstallHuskyA300.md).
 
 ---
 

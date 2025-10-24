@@ -124,13 +124,13 @@ The Makefile auto-detects Ubuntu:
   * `make launch_FaMe_engine_example`
   * `make launch_FaMe_simulation_multi`
   * `make launch_comportement_agri` (runs simulation then engine after `DELAY`)
-  * Also: `make FaMe_CATS`, `make FaMe_agricultural_multi`, etc.
+  * Also: `make launch_FaMe_CATS`, `make launch_FaMe_agricultural_multi`, etc.
 * **Tello**:
 
   * `make launch_tello_controller` (ROS2 Tello)
 * **Husky**:
 
-  * `make FaMe_husky`, `make FaMe_husky_tello`
+  * `make launch_FaMe_husky`, `make launch_FaMe_husky_tello`
 
 ### Shell env configuration
 
@@ -300,6 +300,7 @@ Generic targets copy files/folders between your machine and `$(PFE)` (useful for
   ```bash
   make setup_bashrc
   source ~/.bashrc
+  sc-bash
   ```
 
 ---
@@ -345,5 +346,6 @@ Generic targets copy files/folders between your machine and `$(PFE)` (useful for
 
 ## Links
 
-* **FaMe**: [https://bitbucket.org/proslabteam/fame/src/master/](https://bitbucket.org/proslabteam/fame/src/master/)
-
+* **FaMe:** [https://bitbucket.org/proslabteam/fame/src/master/](https://bitbucket.org/proslabteam/fame/src/master/)
+* **Tello ROS messages:** [https://github.com/clydemcqueen/tello_ros](https://github.com/clydemcqueen/tello_ros)
+* **ROS2 Shared:** [https://github.com/ptrmu/ros2_shared](https://github.com/ptrmu/ros2_shared)
