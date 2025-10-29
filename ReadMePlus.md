@@ -44,3 +44,7 @@ ffmpeg -i http://192.168.50.254:8080/stream -vf format=yuv420p -f v4l2 /dev/vide
 ```bash
 ffplay /dev/video10
 ```
+
+## Sobel
+
+By asking ChatGPT you will get what you need, you just need to put this file in the prompt and he should be able to do the job.
