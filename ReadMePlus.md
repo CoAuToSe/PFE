@@ -4,6 +4,13 @@
 
 ### Husky A300
 
+#### Connect to the Husky A300
+
+```bash
+ssh robot@192.168.50.254
+clearpath
+```
+
 #### Setup
 
 ```bash
