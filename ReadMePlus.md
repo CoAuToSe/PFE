@@ -36,7 +36,7 @@ sudo modprobe v4l2loopback devices=1 video_nr=10 card_label="RemoteCam" exclusiv
 #### Create virtual camera
 
 ```bash
-ffmpeg -i http://SERVEUR_IP:8080/stream -vf format=yuv420p -f v4l2 /dev/video10
+ffmpeg -i http://192.168.50.254:8080/stream -vf format=yuv420p -f v4l2 /dev/video10
 ```
 
 #### See video stream
