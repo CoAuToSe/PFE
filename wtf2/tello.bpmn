@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1tvdujm" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js-token-simulation" exporterVersion="0.1.5">
+  <bpmn:signal id="Signal_3s4qp90" name="done" />
+  <bpmn:signal id="Signal_0lmf12i" name="target_found" />
+  <bpmn:signal id="Signal_12llsds" name="ciao" />
+  <bpmn:process id="Process_tello">
+    <bpmn:startEvent id="Event_start">
+      <bpmn:outgoing>Flow_step</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_step" sourceRef="Event_start" targetRef="Activity_1yftntr" />
+    <bpmn:endEvent id="Event_end">
+      <bpmn:incoming>Flow_12h27wn</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_12h27wn" sourceRef="Activity_1yftntr" targetRef="Event_end" />
+    <bpmn:scriptTask id="Activity_1yftntr" name="say_tello" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_step</bpmn:incoming>
+      <bpmn:outgoing>Flow_12h27wn</bpmn:outgoing>
+      <bpmn:script>this.environment.services.console.log("tello is talking");
+next();</bpmn:script>
+    </bpmn:scriptTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_17915fn">
+      <bpmndi:BPMNShape id="Event_start_di" bpmnElement="Event_start">
+        <dc:Bounds x="492" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_end_di" bpmnElement="Event_end">
+        <dc:Bounds x="732" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0qzwafe_di" bpmnElement="Activity_1yftntr">
+        <dc:Bounds x="580" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_step_di" bpmnElement="Flow_step">
+        <di:waypoint x="528" y="260" />
+        <di:waypoint x="580" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12h27wn_di" bpmnElement="Flow_12h27wn">
+        <di:waypoint x="680" y="260" />
+        <di:waypoint x="732" y="260" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

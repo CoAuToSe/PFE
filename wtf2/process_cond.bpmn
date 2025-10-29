@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Defs_cond"
+                  targetNamespace="http://example.bpmn">
+  <bpmn:process id="Process_cond" isExecutable="true">
+    <bpmn:startEvent id="Start_1">
+      <bpmn:outgoing>Flow_start_to_gateway</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:exclusiveGateway id="Gateway_decide" default="Flow_no">
+      <bpmn:incoming>Flow_start_to_gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_yes</bpmn:outgoing>
+      <bpmn:outgoing>Flow_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:scriptTask id="Task_yes" name="Yes path" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_yes</bpmn:incoming>
+      <bpmn:outgoing>Flow_end_yes</bpmn:outgoing>
+      <bpmn:script><![CDATA[
+        this.environment.services.console.log("✅ TRUE → YES");
+        next();
+      ]]></bpmn:script>
+    </bpmn:scriptTask>
+
+    <bpmn:scriptTask id="Task_no" name="No path" scriptFormat="JavaScript">
+      <bpmn:incoming>Flow_no</bpmn:incoming>
+      <bpmn:outgoing>Flow_end_no</bpmn:outgoing>
+      <bpmn:script><![CDATA[
+        this.environment.services.console.log("❌ FALSE → NO");
+        next();
+      ]]></bpmn:script>
+    </bpmn:scriptTask>
+
+    <bpmn:endEvent id="End_yes"><bpmn:incoming>Flow_end_yes</bpmn:incoming></bpmn:endEvent>
+    <bpmn:endEvent id="End_no"><bpmn:incoming>Flow_end_no</bpmn:incoming></bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_start_to_gateway" sourceRef="Start_1" targetRef="Gateway_decide"/>
+
+    <bpmn:sequenceFlow id="Flow_yes" sourceRef="Gateway_decide" targetRef="Task_yes">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JS">next(null, this.environment.variables.cond === true)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_no" sourceRef="Gateway_decide" targetRef="Task_no">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JS">next(null, this.environment.variables.cond === false)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_end_yes" sourceRef="Task_yes" targetRef="End_yes"/>
+    <bpmn:sequenceFlow id="Flow_end_no" sourceRef="Task_no" targetRef="End_no"/>
+  </bpmn:process>
+</bpmn:definitions>
