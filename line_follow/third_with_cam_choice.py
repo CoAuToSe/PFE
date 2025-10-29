@@ -164,8 +164,9 @@ def main():
         print("[ERR] Impossible d'ouvrir la caméra. Essaye --scan pour lister.")
         return
     cam_index = args.cam
+    print("cam_index", cam_index)
 
-    print("Touches : 'c' = Contours, 'h' = Hough, '[' = cam précédente, ']' = cam suivante, 'q'/Echap = quitter")
+    print("Touches : 'c' = Contours, 'h' = Hough, ')' = cam précédente, '=' = cam suivante, 'q'/Echap = quitter")
 
     prev_t = time.time()
     fps = 0.0
@@ -272,11 +273,11 @@ def main():
             mode = "contour"
         elif key == ord('h'):
             mode = "hough"
-        elif key == ord('['):  # caméra précédente
+        elif key == ord(')'):  # caméra précédente
             cap.release()
             cap, cam_index = cycle_camera(cam_index, -1, candidates, args.width, args.height, backend)
             if cap is None: break
-        elif key == ord(']'):  # caméra suivante
+        elif key == ord('='):  # caméra suivante
             cap.release()
             cap, cam_index = cycle_camera(cam_index, +1, candidates, args.width, args.height, backend)
             if cap is None: break
